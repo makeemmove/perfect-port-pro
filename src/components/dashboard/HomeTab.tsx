@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { MBTA_ROUTES, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
+import { MBTA_ROUTES, MBTA_STATIONS, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
+import type { TrainDeparture } from '@/data/transit';
 import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
 import { fetchWeather, WeatherData } from '@/data/weather';
@@ -12,8 +13,10 @@ const HomeTab = () => {
   const [clock, setClock] = useState('Loading…');
   const [weather, setWeather] = useState<WeatherData | null>(null);
 
-  /* Route selection state */
-  const [selectedTrainId, setSelectedTrainId] = useState(MBTA_ROUTES[0].id);
+  /* Route & station selection state */
+  const isWeekend = useMemo(() => [0, 6].includes(new Date().getDay()), []);
+  const [selectedTrainId, setSelectedTrainId] = useState(isWeekend ? 'weekend-inbound' : 'weekday-inbound');
+  const [selectedStation, setSelectedStation] = useState<string>(MBTA_STATIONS[0]);
   const [selectedBusId, setSelectedBusId] = useState(SRTA_ROUTES[0].id);
 
   const trainRoute = useMemo(() => MBTA_ROUTES.find(r => r.id === selectedTrainId) ?? MBTA_ROUTES[0], [selectedTrainId]);
@@ -52,17 +55,19 @@ const HomeTab = () => {
 
     const ns = nowSec();
 
-    /* Train */
+    /* Train — station-specific logic */
     const trainDeps = trainRoute.departures;
     let tn: { time: string; dir: string; ds: number } | null = null;
     let ta: { time: string; dir: string } | null = null;
     const remTrains: { time: string; dir: string }[] = [];
     for (const d of trainDeps) {
-      const ds = t2m(d.time) * 60;
+      const stationTime = d.stops[selectedStation];
+      if (!stationTime) continue;
+      const ds = t2m(stationTime) * 60;
       if (ds > ns) {
-        remTrains.push(d);
-        if (!tn) tn = { ...d, ds };
-        else if (!ta) ta = { ...d };
+        remTrains.push({ time: stationTime, dir: d.dir });
+        if (!tn) tn = { time: stationTime, dir: d.dir, ds };
+        else if (!ta) ta = { time: stationTime, dir: d.dir };
       }
     }
     setRemainingTrains(remTrains);
@@ -71,8 +76,8 @@ const HomeTab = () => {
       setTrainCountdown(fmtCD(diff) || '--:--');
       setTrainUrgent(diff < 300);
       setTrainDepTime(tn.time);
-      setTrainDir(tn.dir);
-      setTrainAfter(ta ? 'Next after: ' + ta.time + ' · ' + ta.dir : 'No more trains today');
+      setTrainDir(tn.dir + ' · ' + selectedStation);
+      setTrainAfter(ta ? 'Next after: ' + ta.time : 'No more trains today');
     } else {
       setTrainCountdown('Done');
       setTrainUrgent(false);
@@ -105,7 +110,7 @@ const HomeTab = () => {
       setBusDep('—');
       setBusAfter('Resumes tomorrow');
     }
-  }, [trainRoute, busRoute]);
+  }, [trainRoute, busRoute, selectedStation]);
 
   useEffect(() => {
     tick();
@@ -150,8 +155,12 @@ const HomeTab = () => {
           <span className="text-[9px] font-semibold tracking-widest uppercase px-2 py-1 rounded-full bg-primary/[0.08] text-primary border border-primary/15">
             MBTA Commuter Rail
           </span>
+        </div>
+
+        {/* Route + Station selectors */}
+        <div className="flex flex-wrap gap-2 mb-3">
           <Select value={selectedTrainId} onValueChange={setSelectedTrainId}>
-            <SelectTrigger className="h-7 w-auto min-w-[140px] text-[11px] border-border bg-muted/50 rounded-full px-3 gap-1.5">
+            <SelectTrigger className="h-7 w-auto min-w-[180px] text-[11px] border-border bg-muted/50 rounded-full px-3 gap-1.5">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -160,9 +169,42 @@ const HomeTab = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select value={selectedStation} onValueChange={setSelectedStation}>
+            <SelectTrigger className="h-7 w-auto min-w-[140px] text-[11px] border-border bg-muted/50 rounded-full px-3 gap-1.5">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {trainRoute.stations.map(s => (
+                <SelectItem key={s} value={s} className="text-[12px]">📍 {s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="text-sm font-bold text-foreground">{trainRoute.name}</div>
+
+        {/* Clickable route name */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="text-sm font-bold text-foreground hover:text-primary transition-colors cursor-pointer text-left">
+              {trainRoute.name} <span className="text-[10px] text-muted-foreground">▾</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 p-2" align="start">
+            <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2 px-2">Select Route</div>
+            {MBTA_ROUTES.map(r => (
+              <button
+                key={r.id}
+                onClick={() => setSelectedTrainId(r.id)}
+                className={`w-full text-left text-[12px] py-2 px-2 rounded-lg transition-colors ${
+                  r.id === selectedTrainId ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50 text-foreground'
+                }`}
+              >
+                {r.name}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
         <div className="text-[11px] text-muted-foreground">{trainDir}</div>
+
         <div className="flex justify-between items-center mt-3">
           <Popover>
             <PopoverTrigger asChild>
@@ -176,7 +218,7 @@ const HomeTab = () => {
             <PopoverContent className="w-72 p-0 max-h-72 overflow-auto" align="start">
               <div className="p-3 border-b border-border">
                 <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-                  Remaining Departures · {trainRoute.name}
+                  Remaining at {selectedStation} · {trainRoute.name}
                 </div>
               </div>
               <div className="p-2">
@@ -237,7 +279,7 @@ const HomeTab = () => {
           </svg>
           <span className="text-[10px] font-semibold tracking-widest uppercase text-primary">SRTA</span>
           <Select value={selectedBusId} onValueChange={setSelectedBusId}>
-            <SelectTrigger className="h-7 w-auto min-w-[160px] text-[11px] border-border bg-muted/50 rounded-full px-3 gap-1.5">
+            <SelectTrigger className="h-7 w-auto min-w-[180px] text-[11px] border-border bg-muted/50 rounded-full px-3 gap-1.5">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -247,6 +289,30 @@ const HomeTab = () => {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Clickable route name */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="text-[13px] font-bold text-foreground hover:text-primary transition-colors cursor-pointer text-left mb-1">
+              {busRoute.name} <span className="text-[10px] text-muted-foreground">▾</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-2 max-h-80 overflow-auto" align="start">
+            <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2 px-2">Select Route</div>
+            {SRTA_ROUTES.map(r => (
+              <button
+                key={r.id}
+                onClick={() => setSelectedBusId(r.id)}
+                className={`w-full text-left text-[12px] py-2 px-2 rounded-lg transition-colors ${
+                  r.id === selectedBusId ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50 text-foreground'
+                }`}
+              >
+                {r.name}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
+
         <div className="flex justify-between items-center">
           <div>
             <div className="text-[11px] text-muted-foreground">{busRoute.direction}</div>
