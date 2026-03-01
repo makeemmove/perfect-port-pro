@@ -14,9 +14,9 @@ const CATEGORIES = [
 ];
 
 function catCol(s: string) {
-  if (s.includes('Bakery') || s.includes('Coffee')) return '#FFD700';
-  if (s === 'Portuguese' || s === 'Seafood' || s === 'Italian') return '#f87171';
-  return '#007AFF';
+  if (s.includes('Bakery') || s.includes('Coffee')) return '#d97706';
+  if (s === 'Portuguese' || s === 'Seafood' || s === 'Italian') return '#dc2626';
+  return '#3b82f6';
 }
 
 function catIco(s: string) {
@@ -32,17 +32,17 @@ function catCC(s: string) {
 }
 
 const SVG_BAKERY = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5">
     <circle cx="12" cy="8" r="5" /><path d="M3 11h18M7 11v10M17 11v10M5 21h14" />
   </svg>
 );
 const SVG_STEAK = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5">
     <path d="M17 9c0-3.87-5-7-5-7S7 5.13 7 9a5 5 0 0 0 10 0z" /><path d="M7 21h10M12 14v7" />
   </svg>
 );
 const SVG_UTENSILS = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5">
     <path d="M3 2l1.5 14.5M7.5 2v6.5a3 3 0 0 0 6 0V2M21 2c0 7-3 10-3 10v9" />
   </svg>
 );
@@ -72,18 +72,18 @@ const EatsTab = () => {
       const col = catCol(r.sub);
       const ic = L.divIcon({
         className: '',
-        html: `<div style="width:12px;height:12px;border-radius:50%;background:${col};border:2px solid rgba(255,255,255,.5);box-shadow:0 0 8px ${col}88"></div>`,
+        html: `<div style="width:12px;height:12px;border-radius:50%;background:${col};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div>`,
         iconSize: [12, 12],
         iconAnchor: [6, 6],
       });
       markersRef.current[r.name] = L.marker(c as [number, number], { icon: ic })
         .addTo(map)
         .bindPopup(
-          `<div style="font-family:'Syne',sans-serif;min-width:180px">
-            <div style="font-weight:800;font-size:14px;margin-bottom:4px">${r.name}</div>
-            <div style="font-size:11px;color:#7a7f9a;margin-bottom:6px">${r.sub} · ${r.price}</div>
-            <div style="font-size:12px;line-height:1.4">${r.desc}</div>
-            <div style="font-size:11px;margin-top:8px;color:#007AFF">${r.hours}</div>
+          `<div style="font-family:'Inter',sans-serif;min-width:180px">
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px;color:#1a1a2e">${r.name}</div>
+            <div style="font-size:11px;color:#6b7280;margin-bottom:6px">${r.sub} · ${r.price}</div>
+            <div style="font-size:12px;line-height:1.5;color:#374151">${r.desc}</div>
+            <div style="font-size:11px;margin-top:8px;color:#3b82f6;font-weight:500">${r.hours}</div>
           </div>`
         );
     });
@@ -92,7 +92,7 @@ const EatsTab = () => {
   useEffect(() => {
     if (!mapRef.current || leafMapRef.current) return;
     const map = L.map(mapRef.current, { zoomControl: false }).setView([41.7015, -71.1551], 14);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '©OpenStreetMap ©CARTO',
       subdomains: 'abcd',
       maxZoom: 19,
@@ -117,63 +117,49 @@ const EatsTab = () => {
   };
 
   const borderColors: Record<string, string> = {
-    'c-bakery': '#FFD700',
-    'c-steak': '#B22222',
-    'c-default': 'hsl(var(--muted))',
+    'c-bakery': '#d97706',
+    'c-steak': '#dc2626',
+    'c-default': '#d1d5db',
   };
 
   const icoStyles: Record<string, React.CSSProperties> = {
-    gold: { background: 'rgba(255,215,0,0.12)', color: '#FFD700' },
-    crimson: { background: 'rgba(178,34,34,0.12)', color: '#f87171' },
-    def: { background: 'rgba(255,255,255,0.06)', color: 'hsl(var(--muted))' },
+    gold: { background: 'rgba(217,119,6,0.08)', color: '#d97706' },
+    crimson: { background: 'rgba(220,38,38,0.08)', color: '#dc2626' },
+    def: { background: 'rgba(107,114,128,0.06)', color: '#6b7280' },
   };
 
   return (
     <>
       <div ref={mapRef} className="flex-[0_0_40%] min-h-0 relative w-full" />
-      <div className="flex-[0_0_60%] overflow-y-auto" style={{ padding: '14px 16px 76px' }}>
+      <div className="flex-[0_0_60%] overflow-y-auto bg-background" style={{ padding: '14px 16px 76px' }}>
         <div className="flex gap-2 mb-3 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
-          {CATEGORIES.map(c => {
-            const isActive = activeCat === c.cat;
-            let activeStyle: React.CSSProperties = {};
-            if (isActive) {
-              if (c.cat === 'Bakery/Coffee') activeStyle = { borderColor: '#FFD700', background: 'rgba(255,215,0,0.12)', color: '#FFD700' };
-              else if (['Portuguese', 'Seafood', 'Italian'].includes(c.cat)) activeStyle = { borderColor: '#B22222', background: 'rgba(178,34,34,0.12)', color: '#f87171' };
-              else activeStyle = { color: '#fff', borderColor: 'rgba(255,255,255,0.30)', background: 'rgba(255,255,255,0.10)' };
-            }
-            return (
-              <button key={c.cat} onClick={() => setActiveCat(c.cat)}
-                className="flex-shrink-0 py-1.5 px-3.5 rounded-[20px] text-[11px] font-bold tracking-[0.08em] uppercase cursor-pointer transition-all duration-200 whitespace-nowrap border bg-transparent"
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  borderColor: 'rgba(255,255,255,0.10)',
-                  color: 'hsl(var(--muted))',
-                  ...activeStyle,
-                }}>
-                {c.label}
-              </button>
-            );
-          })}
+          {CATEGORIES.map(c => (
+            <button key={c.cat} onClick={() => setActiveCat(c.cat)}
+              className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-200 whitespace-nowrap border ${
+                activeCat === c.cat
+                  ? 'bg-foreground text-background border-foreground'
+                  : 'bg-card text-muted-foreground border-border hover:border-foreground/20'
+              }`}>
+              {c.label}
+            </button>
+          ))}
         </div>
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2">
           {filtered.map(r => {
             const cc = catCC(r.sub);
+            const isSelected = selected === r.name;
             return (
               <div key={r.name}
                 onClick={() => flyTo(r.name)}
-                className={`flex items-center gap-3.5 py-[13px] px-[15px] rounded-[18px] cursor-pointer transition-all duration-200 relative overflow-hidden ${
-                  selected === r.name ? 'bg-[rgba(255,255,255,0.09)]' : ''
-                }`}
-                style={{
-                  background: selected === r.name ? 'rgba(255,255,255,0.09)' : 'hsl(var(--glass))',
-                  border: selected === r.name ? '1px solid rgba(255,255,255,0.22)' : '1px solid hsl(var(--glass-border))',
-                }}>
-                <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: borderColors[cc] || 'hsl(var(--muted))' }} />
-                <div className="w-[42px] h-[42px] rounded-xl flex-shrink-0 flex items-center justify-center" style={icoStyles[catIco(r.sub)]}>
+                className={`flex items-center gap-3 py-3 px-3.5 rounded-xl cursor-pointer transition-all duration-200 relative overflow-hidden border ${
+                  isSelected ? 'bg-muted border-foreground/15 shadow-card-hover' : 'bg-card border-border shadow-card hover:shadow-card-hover'
+                }`}>
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: borderColors[cc] || '#d1d5db' }} />
+                <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center" style={icoStyles[catIco(r.sub)]}>
                   {getIcon(r.sub)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold whitespace-nowrap overflow-hidden text-ellipsis">{r.name}</div>
+                  <div className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis text-foreground">{r.name}</div>
                   <div className="text-[11px] text-muted-foreground mt-0.5">{r.sub} · {r.hours}</div>
                 </div>
                 <div className="mono text-xs text-muted-foreground flex-shrink-0">{r.price}</div>
