@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 import { RESTAURANTS, COORDS, Restaurant } from '@/data/restaurants';
+import QuickViewModal from './QuickViewModal';
 
 const CATEGORIES = [
   { label: 'All', cat: 'All' },
