@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fall River · City Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;600&display=swap');
+:root {
+  --gold:#FFD700; --crimson:#B22222; --blue:#007AFF; --purple:#A855F7;
+  --glass:rgba(255,255,255,0.05); --border:rgba(255,255,255,0.10);
+  --bg:#0a0c14; --text:#e8eaf0; --muted:#7a7f9a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Syne',system-ui,sans-serif}
+body{background-image:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(0,122,255,.08) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 80%,rgba(168,85,247,.06) 0%,transparent 60%)}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+#ticker-wrap{height:36px;overflow:hidden;background:linear-gradient(90deg,rgba(0,122,255,.15),rgba(168,85,247,.10));border-bottom:1px solid rgba(0,122,255,.25);display:flex;align-items:center;flex-shrink:0;position:relative}
+#ticker-wrap::before,#ticker-wrap::after{content:'';position:absolute;top:0;bottom:0;width:60px;z-index:2;pointer-events:none}
+#ticker-wrap::before{left:0;background:linear-gradient(to right,var(--bg),transparent)}
+#ticker-wrap::after{right:0;background:linear-gradient(to left,var(--bg),transparent)}
+#ticker-label{flex-shrink:0;padding:0 14px;font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;white-space:nowrap;z-index:3;border-right:1px solid rgba(0,122,255,.25)}
+#ticker-inner{flex:1;overflow:hidden}
+#ticker-track{display:flex;white-space:nowrap;animation:ticker 50s linear infinite;font-size:12px;color:var(--muted);padding:0 16px}
+#ticker-track span{margin-right:56px;color:var(--text)}
+#ticker-track span::before{content:'▸ ';color:var(--blue)}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+#tabs-content{flex:1;overflow:hidden;position:relative}
+.tab-panel{position:absolute;inset:0;overflow-y:auto;display:none;padding:18px 16px 76px}
+.tab-panel.active{display:block}
+#tab-eats{padding:0}
+
+#bottom-nav{height:62px;flex-shrink:0;display:flex;background:rgba(10,12,20,.97);border-top:1px solid var(--border);position:relative;z-index:50}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.nav-btn.active{color:var(--blue)}
+.nav-btn:hover{color:var(--text)}
+.nav-btn svg{width:22px;height:22px;stroke-width:1.8}
+
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.page-title{font-size:24px;font-weight:800;color:#fff}
+.page-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.live-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:#34d399}
+.live-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:#34d399;animation:live 2s ease infinite}
+@keyframes live{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}50%{box-shadow:0 0 0 6px rgba(52,211,153,0)}}
+
+#weather-card{padding:20px 22px;background:linear-gradient(135deg,rgba(0,122,255,.13),rgba(0,122,255,.03));border:1px solid rgba(0,122,255,.22);border-radius:20px;backdrop-filter:blur(12px)}
+.w-city{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--blue)}
+.w-temp{font-family:'IBM Plex Mono',monospace;font-size:52px;font-weight:300;line-height:1;color:#fff}
+.w-temp sup{font-size:20px;vertical-align:super}
+.w-desc{font-size:13px;color:var(--muted);margin-top:3px}
+.w-detail-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)}
+.w-detail{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.w-detail strong{color:var(--text);font-weight:600}
+.w-hour{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);min-width:52px}
+.w-hour.now{background:rgba(0,122,255,.12);border-color:rgba(0,122,255,.30)}
+.w-hour-time{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+.w-hour-icon{font-size:16px;line-height:1}
+.w-hour-temp{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#fff}
+.w-hour-rain{font-size:10px;color:var(--blue)}
+
+#transit-card{padding:18px 22px;background:linear-gradient(135deg,rgba(0,122,255,.09),rgba(0,50,120,.08));border:1px solid rgba(0,122,255,.20);border-radius:20px;backdrop-filter:blur(12px);margin-top:12px}
+.t-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.t-badge{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(0,122,255,.20);color:var(--blue);padding:3px 10px;border-radius:20px;border:1px solid rgba(0,122,255,.30)}
+.t-route{font-size:13px;font-weight:700;color:#fff}
+.t-sub{font-size:11px;color:var(--muted)}
+.t-time-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.countdown{font-family:'IBM Plex Mono',monospace;font-size:38px;font-weight:600;color:var(--blue);letter-spacing:.02em}
+.countdown.urgent{color:var(--gold);animation:pulse 1s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.t-departs-at{text-align:right}
+.t-dep-label{font-size:10px;color:var(--muted)}
+.t-dep-time{font-family:'IBM Plex Mono',monospace;font-size:17px;color:var(--text);font-weight:400}
+.t-after{font-size:11px;color:var(--muted);margin-top:8px}
+
+.quick-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.stat-card{padding:16px 18px;border-radius:20px;background:var(--glass);border:1px solid var(--border);backdrop-filter:blur(12px)}
+.stat-icon-wrap{margin-bottom:8px;opacity:.8}
+.stat-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.stat-val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:300;color:#fff}
+.stat-sub-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+
+.sec-hdr{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:16px 0 10px}
+.sec-hdr::before,.sec-hdr::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.mini-events{display:flex;flex-direction:column;gap:8px}
+.mini-event{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--border)}
+.mini-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--purple)}
+.mini-name{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);flex-shrink:0}
+
+#bus-card{padding:16px 20px;background:rgba(5,7,15,.65);border:1px solid var(--border);border-radius:20px;backdrop-filter:blur(12px);margin-top:12px}
+
+#tab-eats{display:none;flex-direction:column;height:100%}
+#tab-eats.active{display:flex}
+#map-wrap{flex:0 0 40%;min-height:0;position:relative}
+#leaflet-map{width:100%;height:100%}
+#food-list-wrap{flex:0 0 60%;overflow-y:auto;padding:14px 16px 76px}
+#filter-bar{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+#filter-bar::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);color:var(--muted);white-space:nowrap}
+.chip.active{color:#fff;border-color:rgba(255,255,255,.30);background:rgba(255,255,255,.10)}
+.chip.active[data-cat="Bakery/Coffee"]{border-color:var(--gold);background:rgba(255,215,0,.12);color:var(--gold)}
+.chip.active[data-cat="Portuguese"],.chip.active[data-cat="Seafood"],.chip.active[data-cat="Italian"]{border-color:var(--crimson);background:rgba(178,34,34,.12);color:#f87171}
+#food-list{display:flex;flex-direction:column;gap:10px}
+.food-card{display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:18px;cursor:pointer;background:var(--glass);border:1px solid var(--border);transition:all .2s;position:relative;overflow:hidden}
+.food-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.food-card.c-bakery::before{background:var(--gold)}
+.food-card.c-steak::before{background:var(--crimson)}
+.food-card.c-default::before{background:var(--muted)}
+.food-card:hover,.food-card.sel{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22)}
+.food-ico{width:42px;height:42px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.food-ico.gold{background:rgba(255,215,0,.12);color:var(--gold)}
+.food-ico.crimson{background:rgba(178,34,34,.12);color:#f87171}
+.food-ico.def{background:rgba(255,255,255,.06);color:var(--muted)}
+.food-ico svg{width:20px;height:20px;stroke-width:1.8}
+.food-info{flex:1;min-width:0}
+.food-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.food-sub2{font-size:11px;color:var(--muted);margin-top:2px}
+.food-price{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);flex-shrink:0}
+
+#ev-filter-bar{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+#ev-filter-bar::-webkit-scrollbar{display:none}
+.ev-chip{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);color:var(--muted)}
+.ev-chip.active{background:rgba(168,85,247,.15);border-color:var(--purple);color:var(--purple)}
+.ev-chip:hover{color:var(--text)}
+#ev-list{display:flex;flex-direction:column;gap:12px}
+.ev-card{display:flex;gap:14px;padding:15px;border-radius:18px;background:var(--glass);border:1px solid var(--border);position:relative;overflow:hidden}
+.ev-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.ev-card.lib::before{background:var(--purple)}
+.ev-card.museum::before{background:var(--gold)}
+.ev-card.comm::before{background:#34d399}
+.ev-card.park::before{background:#22c55e}
+.ev-card.arts::before{background:#f97316}
+.ev-date{flex-shrink:0;width:50px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border-radius:12px;padding:8px 4px}
+.ev-month{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.ev-day{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:300;color:#fff;line-height:1}
+.ev-time{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px}
+.ev-body{flex:1;min-width:0}
+.ev-title{font-size:14px;font-weight:700;margin-bottom:3px}
+.ev-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.ev-meta{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.ev-tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px}
+.ev-tag.purple{background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.30)}
+.ev-tag.gold{background:rgba(255,215,0,.12);color:var(--gold);border:1px solid rgba(255,215,0,.25)}
+.ev-tag.green{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.25)}
+.ev-tag.orange{background:rgba(249,115,22,.12);color:#f97316;border:1px solid rgba(249,115,22,.25)}
+.ev-cost{font-size:11px;color:var(--muted)}
+
+.leaflet-container{background:#0f1220!important}
+.leaflet-popup-content-wrapper{background:rgba(10,12,20,.95)!important;color:#e8eaf0!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:14px!important;box-shadow:0 8px 32px rgba(0,0,0,.5)!important}
+.leaflet-popup-tip{background:rgba(10,12,20,.95)!important}
+.leaflet-popup-close-button{color:#7a7f9a!important}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px}
+.loading{color:var(--muted);text-align:center;padding:30px;font-size:13px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="ticker-wrap">
+    <div id="ticker-label">⬤ Live</div>
+    <div id="ticker-inner">
+      <div id="ticker-track">
+        <span>Fall River Public Library — Spring 2026 programs now open</span>
+        <span>SRTA Bus 101/102/103 — $1.50 cash · $1.25 CharlieCard</span>
+        <span>MBTA Commuter Rail · Fall River/New Bedford Line · Zone 7 · $13.25 one-way</span>
+        <span>Read Across America Night — March 24 · 6 PM · Free</span>
+        <span>Voices Unheard Concert — March 26 · 8 PM · Free</span>
+        <span>Battleship Cove Homeschool Day — March 20 · $10-$15</span>
+        <span>AARP Free Tax Prep daily through April 15 · 9 AM–Noon at the Library</span>
+        <span>Heritage State Park Spring Programs begin March 15 — Free</span>
+        <span>Fall River Public Library — Spring 2026 programs now open</span>
+        <span>SRTA Bus 101/102/103 — $1.50 cash · $1.25 CharlieCard</span>
+        <span>MBTA Commuter Rail · Fall River/New Bedford Line · Zone 7 · $13.25 one-way</span>
+        <span>Read Across America Night — March 24 · 6 PM · Free</span>
+        <span>Voices Unheard Concert — March 26 · 8 PM · Free</span>
+        <span>Battleship Cove Homeschool Day — March 20 · $10-$15</span>
+        <span>AARP Free Tax Prep daily through April 15 · 9 AM–Noon at the Library</span>
+        <span>Heritage State Park Spring Programs begin March 15 — Free</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabs-content">
+
+    <!-- HOME -->
+    <div id="tab-home" class="tab-panel active">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Fall River</div>
+          <div class="page-sub mono" id="live-clock">Loading…</div>
+        </div>
+        <div class="live-badge">Live</div>
+      </div>
+
+      <div id="weather-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="w-city">📍 Fall River, MA</div>
+            <div class="w-temp mono" id="w-temp">--<sup>°F</sup></div>
+            <div class="w-desc" id="w-desc">Fetching weather…</div>
+          </div>
+          <div id="w-icon-wrap" style="flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:42px;line-height:1">🌤</div>
+        </div>
+        <!-- Row 1: precip + wind + rain chance -->
+        <div class="w-detail-row">
+          <div class="w-detail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:13px;height:13px"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            <span>Precip: <strong id="w-precip">--</strong></span>
+          </div>
+          <div class="w-detail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:13px;height:13px"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+            <span>Wind: <strong id="w-wind">--</strong></span>
+          </div>
+          <div class="w-detail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="width:13px;height:13px"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><path d="M8 16h.01M12 16h.01M16 16h.01M10 20h4"/></svg>
+            <span>Rain: <strong id="w-rain-prob">--%</strong></span>
+          </div>
+        </div>
+        <!-- Row 2: sunrise + sunset -->
+        <div class="w-detail-row" style="margin-top:8px;padding-top:8px">
+          <div class="w-detail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="width:13px;height:13px"><path d="M12 3v1M12 20v1M4.22 4.22l.7.7M19.07 4.22l-.7.7M1 12h1M22 12h1M4.92 19.07l.7-.7M18.36 19.07l-.7-.7"/><path d="M5 12a7 7 0 0 1 14 0"/><path d="M3 17h18"/></svg>
+            <span style="color:var(--gold)">Rise: <strong id="w-sunrise">--</strong></span>
+          </div>
+          <div class="w-detail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="width:13px;height:13px"><path d="M12 3v1M12 20v1M4.22 4.22l.7.7M19.07 4.22l-.7.7M1 12h1M22 12h1M4.92 19.07l.7-.7M18.36 19.07l-.7-.7"/><path d="M19 12a7 7 0 0 1-14 0"/><path d="M3 17h18"/></svg>
+            <span style="color:#f97316">Set: <strong id="w-sunset">--</strong></span>
+          </div>
+          <div class="w-detail" id="w-daylight-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="w-daylight" style="color:var(--muted)">--h daylight</span>
+          </div>
+        </div>
+        <!-- Hourly mini-forecast bar -->
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Next 6 Hours</div>
+          <div id="w-hourly" style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
+            <!-- filled by JS -->
+          </div>
+        </div>
+      </div>
+
+      <div id="transit-card">
+        <div class="t-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" style="width:18px;height:18px"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16M12 3v8"/><circle cx="8.5" cy="14.5" r="1"/><circle cx="15.5" cy="14.5" r="1"/><path d="M8 19l-2 2M16 19l2 2"/></svg>
+          <span class="t-badge">MBTA Commuter Rail · Next Departure</span>
+        </div>
+        <div class="t-route">Fall River / New Bedford Line</div>
+        <div class="t-sub" id="t-dir">Calculating…</div>
+        <div class="t-time-row">
+          <div class="countdown mono" id="t-countdown">--:--</div>
+          <div class="t-departs-at">
+            <div class="t-dep-label">Departs at</div>
+            <div class="t-dep-time" id="t-deptime">--</div>
+          </div>
+        </div>
+        <div class="t-after" id="t-after">Next: --</div>
+      </div>
+
+      <div class="quick-stats">
+        <div class="stat-card">
+          <div class="stat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8" style="width:22px;height:22px"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+          </div>
+          <div class="stat-lbl">Events This Week</div>
+          <div class="stat-val" id="stat-evcount">--</div>
+          <div class="stat-sub-lbl">Library &amp; Community</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" style="width:22px;height:22px"><path d="M3 2l1.5 14.5M7.5 2v6.5a3 3 0 0 0 6 0V2M21 2c0 7-3 10-3 10v9"/></svg>
+          </div>
+          <div class="stat-lbl">Local Eats</div>
+          <div class="stat-val" id="stat-eats">--</div>
+          <div class="stat-sub-lbl">Restaurants &amp; Cafés</div>
+        </div>
+      </div>
+
+      <div id="bus-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" style="width:16px;height:16px"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M6 20v1M18 20v1"/><circle cx="7" cy="13" r="1"/><circle cx="17" cy="13" r="1"/></svg>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">SRTA · Route 101 – South Main</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:12px;color:var(--muted)">Outbound</div>
+            <div class="mono" style="font-size:30px;font-weight:300;color:var(--blue)" id="bus-countdown">--:--</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:10px;color:var(--muted)">Departs</div>
+            <div class="mono" style="font-size:16px" id="bus-dep">--</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px" id="bus-after">Next: --</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-hdr">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" style="width:12px;height:12px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Coming Up
+      </div>
+      <div class="mini-events" id="mini-ev-list">
+        <div class="loading">Loading events…</div>
+      </div>
+    </div>
+
+    <!-- EATS -->
+    <div id="tab-eats" class="tab-panel">
+      <div id="map-wrap"><div id="leaflet-map"></div></div>
+      <div id="food-list-wrap">
+        <div id="filter-bar">
+          <div class="chip active" data-cat="All">All</div>
+          <div class="chip" data-cat="Portuguese">🇵🇹 Portuguese</div>
+          <div class="chip" data-cat="Bakery/Coffee">☕ Bakery</div>
+          <div class="chip" data-cat="Italian">🍝 Italian</div>
+          <div class="chip" data-cat="Seafood">🦞 Seafood</div>
+          <div class="chip" data-cat="Casual Dining">🍔 Casual</div>
+          <div class="chip" data-cat="Specialty">✨ Specialty</div>
+          <div class="chip" data-cat="Asian">🥢 Asian</div>
+        </div>
+        <div id="food-list"><div class="loading">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- EVENTS -->
+    <div id="tab-events" class="tab-panel">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Events</div>
+          <div class="page-sub">Library, Community &amp; City</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8" style="width:28px;height:28px"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01"/></svg>
+      </div>
+      <div id="ev-filter-bar">
+        <div class="ev-chip active" data-sub="All">All</div>
+        <div class="ev-chip" data-sub="Library">📚 Library</div>
+        <div class="ev-chip" data-sub="Museum/Attraction">⚓ Museum</div>
+        <div class="ev-chip" data-sub="Community">🏙 Community</div>
+        <div class="ev-chip" data-sub="Arts & Culture">🎨 Arts</div>
+        <div class="ev-chip" data-sub="Park/Nature">🌿 Parks</div>
+      </div>
+      <div id="ev-list"><div class="loading">Loading…</div></div>
+    </div>
+  </div>
+
+  <div id="bottom-nav">
+    <button class="nav-btn active" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      Home
+    </button>
+    <button class="nav-btn" data-tab="eats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 2l1.5 14.5M7.5 2v6.5a3 3 0 0 0 6 0V2M21 2c0 7-3 10-3 10v9"/></svg>
+      Eats
+    </button>
+    <button class="nav-btn" data-tab="events">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+      Events
+    </button>
+  </div>
+</div>
+<script>
+const RESTAURANTS=[
+  {name:"Sagres Restaurant",sub:"Portuguese",hours:"Lunch & Dinner",loc:"Fall River, MA",price:"$$$",desc:"Authentic Portuguese cuisine, reservations recommended"},
+  {name:"Caldeiras Restaurant",sub:"Portuguese",hours:"Lunch & Dinner",loc:"Fall River, MA",price:"$$$",desc:"Traditional Portuguese restaurant, spacious dining"},
+  {name:"Caravela Family Restaurant",sub:"Portuguese",hours:"Lunch & Dinner",loc:"637 S. Main St",price:"$$",desc:"Family-style Portuguese dining, casual atmosphere"},
+  {name:"Douro Steakhouse (Towne House)",sub:"Portuguese",hours:"Dinner (Wed-Sat)",loc:"37 Purchase St",price:"$$$$",desc:"Modern Portuguese steakhouse, premium cuts, craft cocktails"},
+  {name:"Barca Restaurant",sub:"Portuguese",hours:"Lunch & Dinner",loc:"85 Columbia St",price:"$$$",desc:"Authentic Portuguese cuisine, fresh seafood"},
+  {name:"Marisqueira Azores Restaurant",sub:"Portuguese",hours:"Lunch & Dinner",loc:"1445 South Main St",price:"$$$",desc:"Seafood-focused Portuguese restaurant"},
+  {name:"Estoril Restaurant",sub:"Portuguese",hours:"Dinner (Wed-Sat)",loc:"1577 Pleasant St",price:"$$",desc:"Portuguese cuisine, casual dining"},
+  {name:"Primo on Water Street",sub:"Italian",hours:"Lunch & Dinner",loc:"36 Water St",price:"$$$",desc:"Italian-American comfort food, locally sourced"},
+  {name:"Patti's Pierogis",sub:"Italian",hours:"Lunch & Dinner",loc:"1019 S. Main St",price:"$$",desc:"Polish-Italian pierogis, golabkis, kielbasa, family recipes"},
+  {name:"Marzilli's Bakery",sub:"Italian",hours:"Breakfast & Lunch",loc:"Fall River, MA",price:"$$",desc:"Italian bakery with fresh bread, grinders, soups"},
+  {name:"Candela Cucina",sub:"Italian",hours:"Dinner",loc:"Fall River, MA",price:"$$$$",desc:"Upscale Italian, Chef Josh Riazi, covered patio bar"},
+  {name:"The Cove Restaurant & Marina",sub:"Seafood",hours:"Lunch & Dinner",loc:"392 Davol St",price:"$$$",desc:"Raw bar, lobster, oysters, scallops, steaks, boat access"},
+  {name:"The Liberal Club Restaurant",sub:"Seafood",hours:"Lunch & Dinner",loc:"202 Pleasant St",price:"$$",desc:"Classic seafood, fried clams, grapenut pudding"},
+  {name:"Happy Garden",sub:"Asian",hours:"Lunch & Dinner",loc:"960 Pleasant St",price:"$$",desc:"Authentic Chinese cuisine, crab rangoon, lemon chicken"},
+  {name:"Scottie's Pub",sub:"Casual Dining",hours:"Lunch & Dinner",loc:"202 Pleasant St",price:"$$",desc:"Sports bar, lobster rolls, karaoke, seafood pasta"},
+  {name:"The Tipsy Toboggan",sub:"Casual Dining",hours:"Lunch & Dinner",loc:"75 Ferry St",price:"$$",desc:"Casual dining, burgers, sandwiches, local favorite"},
+  {name:"Bun Buds",sub:"Specialty",hours:"Lunch & Dinner",loc:"10 Purchase St",price:"$$",desc:"Elevated dumplings, hot dogs, bao, Asian fusion (opened 2024)"},
+  {name:"Atlas Pizza",sub:"Specialty",hours:"Lunch & Dinner",loc:"761 Eastern Ave",price:"$$",desc:"Family-owned pizza since 1975, local favorite"},
+  {name:"Barcelos Bakery",sub:"Bakery/Coffee",hours:"Breakfast & Lunch",loc:"Bedford St",price:"$$",desc:"Portuguese bakery, fresh bread, pastries, espresso, lattes"},
+  {name:"Leddy's Bakery & Coffee Shop",sub:"Bakery/Coffee",hours:"Breakfast & Lunch",loc:"Fall River, MA",price:"$$",desc:"Donuts, pastries, meat pies, chicken pies, coffee"},
+  {name:"Sam's Bakery",sub:"Bakery/Coffee",hours:"Breakfast & Lunch",loc:"256 Flint St",price:"$$",desc:"Local bakery, high ratings, variety of baked goods"},
+  {name:"New Boston Bakery",sub:"Bakery/Coffee",hours:"Breakfast & Lunch",loc:"Fall River, MA",price:"$$",desc:"Traditional bakery, pastries, breads, coffee"},
+  {name:"Miss Lizzie's Coffee",sub:"Bakery/Coffee",hours:"Breakfast & Lunch",loc:"242 Second St",price:"$$",desc:"Specialty coffee, tea, sandwiches, near Lizzie Borden House"},
+  {name:"Mission Cold Brew",sub:"Bakery/Coffee",hours:"Breakfast & Lunch",loc:"657 Quarry St",price:"$",desc:"Cold brew coffee, specialty drinks"},
+  {name:"Portugalia Marketplace",sub:"Market/Specialty",hours:"Shopping",loc:"Fall River, MA",price:"$$",desc:"Portuguese specialty food market, wines, pastries, groceries"},
+];
+const COORDS={
+  "Sagres Restaurant":[41.7012,-71.1580],"Caldeiras Restaurant":[41.6990,-71.1555],
+  "Caravela Family Restaurant":[41.6918,-71.1558],"Douro Steakhouse (Towne House)":[41.7028,-71.1547],
+  "Barca Restaurant":[41.7001,-71.1589],"Marisqueira Azores Restaurant":[41.6835,-71.1576],
+  "Estoril Restaurant":[41.6897,-71.1613],"Primo on Water Street":[41.7039,-71.1531],
+  "Patti's Pierogis":[41.6905,-71.1558],"Marzilli's Bakery":[41.7003,-71.1545],
+  "Candela Cucina":[41.7015,-71.1551],"The Cove Restaurant & Marina":[41.7054,-71.1614],
+  "The Liberal Club Restaurant":[41.7006,-71.1568],"Happy Garden":[41.6973,-71.1619],
+  "Scottie's Pub":[41.7005,-71.1566],"The Tipsy Toboggan":[41.7038,-71.1587],
+  "Bun Buds":[41.7027,-71.1548],"Atlas Pizza":[41.7105,-71.1488],
+  "Barcelos Bakery":[41.7011,-71.1571],"Leddy's Bakery & Coffee Shop":[41.6999,-71.1543],
+  "Sam's Bakery":[41.7018,-71.1540],"New Boston Bakery":[41.7020,-71.1558],
+  "Miss Lizzie's Coffee":[41.7012,-71.1538],"Mission Cold Brew":[41.6958,-71.1492],
+  "Portugalia Marketplace":[41.7025,-71.1562],
+};
+const EVENTS=[
+  {name:"Historical Fiction Book Club",date:"2026-03-02",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Adult book club focused on historical fiction"},
+  {name:"Preschool Storytime",date:"2026-03-03",time:"11:00 AM",sub:"Library",cost:"Free",desc:"Stories, literacy movie, craft for ages 3-5"},
+  {name:"Drawing the Figure (SoCo Art Labs)",date:"2026-03-01",time:"1:00 PM",sub:"Community",cost:"Free",desc:"Figure drawing with live model, adults only"},
+  {name:"Play & Learn",date:"2026-03-04",time:"10:00 AM",sub:"Library",cost:"Free",desc:"Early childhood play and learning program"},
+  {name:"English Conversation Group",date:"2026-03-04",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Practice English speaking and listening skills"},
+  {name:"Knitting Club",date:"2026-03-05",time:"1:00 PM",sub:"Library",cost:"Free",desc:"Knitting and crochet group, beginners welcome"},
+  {name:"Teen Game Night",date:"2026-03-05",time:"5:30 PM",sub:"Library",cost:"Free",desc:"Multiplayer video games for teens ages 13-18"},
+  {name:"Chess Club",date:"2026-03-07",time:"12:30 PM",sub:"Library",cost:"Free",desc:"Chess for all skill levels"},
+  {name:"Cadette Comic Artist Workshop",date:"2026-03-08",time:"1:30 PM",sub:"Museum/Attraction",cost:"Paid",desc:"Girl Scout merit badge workshop at Battleship Cove"},
+  {name:"Author Talk: Lida Perry – Aging with Joy",date:"2026-03-09",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Local author discusses her book on aging gracefully"},
+  {name:"The Great LEGO Leprechaun Trap Challenge",date:"2026-03-10",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Build a leprechaun trap with LEGOs, winner gets a prize"},
+  {name:"Magic: The Gathering Commander Club",date:"2026-03-11",time:"6:00 PM",sub:"Library",cost:"Free",desc:"MTG Commander for teens and adults 13+"},
+  {name:"Writing Group",date:"2026-03-11",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Creative writing community and feedback group"},
+  {name:"YA Comics Club",date:"2026-03-12",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Comics, manga, graphic novels for teens 13-18"},
+  {name:"Phelan Monsters Puppet Show",date:"2026-03-14",time:"11:00 AM",sub:"Library",cost:"Free",desc:"Children's puppet show"},
+  {name:"Safety Workshop – Scout Merit Badge",date:"2026-03-15",time:"1:00 PM",sub:"Museum/Attraction",cost:"Paid",desc:"Spring 2026 Scouting Merit Badge Workshop at Battleship Cove"},
+  {name:"Heritage State Park Spring Programs",date:"2026-03-15",time:"10:00 AM",sub:"Park/Nature",cost:"Free",desc:"Spring nature and history programs, free parking"},
+  {name:"Creative Arts Network Events",date:"2026-03-15",time:"6:00 PM",sub:"Arts & Culture",cost:"Varies",desc:"Arts events in the Fall River Waterfront Cultural District"},
+  {name:"The Great Leprechaun Hunt!",date:"2026-03-17",time:"4:00 PM",sub:"Library",cost:"Free",desc:"St. Patrick's Day leprechaun hunt for kids"},
+  {name:"Books & Tea Club",date:"2026-03-18",time:"2:00 PM",sub:"Library",cost:"Free",desc:"Adult book club with tea"},
+  {name:"Watercolor Workshop",date:"2026-03-18",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Adult watercolor painting workshop"},
+  {name:"Homeschool Day at Battleship Cove",date:"2026-03-20",time:"9:00 AM",sub:"Museum/Attraction",cost:"$10-$15",desc:"Special homeschool day with workshops at Battleship Cove"},
+  {name:"Read Across America Night",date:"2026-03-24",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Celebration of reading and literacy"},
+  {name:"Voices Unheard Concert",date:"2026-03-26",time:"8:00 PM",sub:"Library",cost:"Free",desc:"Concert featuring underrepresented voices"},
+  {name:"City Council Public Meeting",date:"2026-03-28",time:"5:55 PM",sub:"Community",cost:"Free",desc:"City Council public hearing on Capital Improvement Plan"},
+  {name:"Easter Scavenger Hunt",date:"2026-04-04",time:"9:00 AM",sub:"Museum/Attraction",cost:"Paid",desc:"Find 12 Easter eggs throughout the ships to win a prize"},
+  {name:"Muckraker-palooza 2026",date:"2026-04-19",time:"3:00 PM",sub:"Community",cost:"Paid",desc:"Annual community festival and music event"},
+  {name:"Little Theatre – Spring Production",date:"2026-04-25",time:"7:30 PM",sub:"Arts & Culture",cost:"Paid",desc:"Live theater production by Little Theatre of Fall River"},
+  {name:"Spring Craft, Vendor Fair & Food Trucks",date:"2026-05-01",time:"10:00 AM",sub:"Community",cost:"Free",desc:"Spring craft fair with vendors and food trucks"},
+  {name:"Battle of Fall River Reenactment Weekend",date:"2026-05-30",time:"10:00 AM",sub:"Community",cost:"Free",desc:"Historical reenactment of the Battle of Fall River"},
+  {name:"Summer Reading Program Kickoff",date:"2026-06-15",time:"10:00 AM",sub:"Library",cost:"Free",desc:"Annual summer reading program for all ages"},
+  {name:"Take Me to the River Music Festival",date:"2026-08-22",time:"4:00 PM",sub:"Community",cost:"Paid",desc:"Waterfront music festival with food trucks and live music"},
+].sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+const TRAIN_DEPS=[
+  {time:"6:10 AM",dir:"Inbound → South Station"},{time:"7:10 AM",dir:"Inbound → South Station"},
+  {time:"8:10 AM",dir:"Inbound → South Station"},{time:"9:05 AM",dir:"Inbound → South Station"},
+  {time:"12:10 PM",dir:"Inbound → South Station"},{time:"3:10 PM",dir:"Inbound → South Station"},
+  {time:"8:00 AM",dir:"Outbound → Fall River"},{time:"3:00 PM",dir:"Outbound → Fall River"},
+  {time:"4:00 PM",dir:"Outbound → Fall River"},{time:"5:00 PM",dir:"Outbound → Fall River"},
+  {time:"5:30 PM",dir:"Outbound → Fall River"},{time:"6:30 PM",dir:"Outbound → Fall River"},
+  {time:"7:30 PM",dir:"Outbound → Fall River"},{time:"9:30 PM",dir:"Outbound → Fall River"},
+  {time:"11:30 PM",dir:"Outbound → Fall River"},
+].sort((a,b)=>t2m(a.time)-t2m(b.time));
+
+const BUS_DEPS=["6:10 AM","6:40 AM","7:10 AM","7:40 AM","8:10 AM","8:40 AM","9:10 AM","9:40 AM","10:10 AM","10:40 AM","11:10 AM","11:40 AM","12:10 PM","12:40 PM","1:10 PM","1:40 PM","2:10 PM","2:40 PM","3:10 PM","3:40 PM","4:10 PM","4:40 PM","5:10 PM","5:40 PM","6:10 PM","6:40 PM","7:10 PM","7:40 PM","8:10 PM","8:40 PM"].sort((a,b)=>t2m(a)-t2m(b));
+
+function t2m(s){if(!s)return 9999;const m=s.match(/(\d+):(\d+)\s*(AM|PM)/i);if(!m)return 9999;let[,h,mn,ap]=m;h=+h;mn=+mn;if(ap.toUpperCase()==='PM'&&h!==12)h+=12;if(ap.toUpperCase()==='AM'&&h===12)h=0;return h*60+mn;}
+function nowSec(){const n=new Date();return n.getHours()*3600+n.getMinutes()*60+n.getSeconds();}
+function fmtCD(d){if(d<0)return null;const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;if(h>0)return h+'h '+String(m).padStart(2,'0')+'m';return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+
+// Weather code → [emoji, label]
+const WC={
+  0:['☀️','Clear'],1:['🌤','Mostly Clear'],2:['⛅','Partly Cloudy'],3:['☁️','Overcast'],
+  45:['🌫','Foggy'],48:['🌫','Freezing Fog'],
+  51:['🌦','Light Drizzle'],53:['🌦','Drizzle'],55:['🌧','Dense Drizzle'],
+  56:['🌨','Freezing Drizzle'],57:['🌨','Heavy Freezing Drizzle'],
+  61:['🌧','Light Rain'],63:['🌧','Rain'],65:['🌧','Heavy Rain'],
+  66:['🌨','Freezing Rain'],67:['🌨','Heavy Freezing Rain'],
+  71:['🌨','Light Snow'],73:['❄️','Snow'],75:['❄️','Heavy Snow'],77:['🌨','Snow Grains'],
+  80:['🌦','Light Showers'],81:['🌧','Showers'],82:['⛈','Heavy Showers'],
+  85:['🌨','Snow Showers'],86:['❄️','Heavy Snow Showers'],
+  95:['⛈','Thunderstorm'],96:['⛈','Thunderstorm w/Hail'],99:['⛈','Heavy Thunderstorm'],
+};
+function wcInfo(code){
+  const keys=Object.keys(WC).map(Number).sort((a,b)=>a-b);
+  const found=keys.filter(k=>k<=code).pop();
+  return WC[found]||['🌤','Variable'];
+}
+function fmtTime12(isoStr){
+  const d=new Date(isoStr);
+  return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+}
+
+async function fetchWeather(){
+  const WEATHER_URL='https://api.open-meteo.com/v1/forecast?latitude=41.7015&longitude=-71.1551&daily=sunrise,sunset&hourly=temperature_2m,wind_speed_10m,precipitation,precipitation_probability&current=temperature_2m,precipitation&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch';
+  try{
+    const res=await fetch(WEATHER_URL);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    const c=d.current;
+    const now=new Date();
+
+    document.getElementById('w-temp').innerHTML=Math.round(c.temperature_2m)+'<sup>°F</sup>';
+    document.getElementById('w-precip').textContent=c.precipitation+'"';
+
+    // Match current hour index in hourly arrays
+    const times=d.hourly.time;
+    const nowISO=now.toISOString().slice(0,13);
+    let hIdx=times.findIndex(t=>t.startsWith(nowISO));
+    if(hIdx<0) hIdx=0;
+
+    const windNow=d.hourly.wind_speed_10m[hIdx];
+    document.getElementById('w-wind').textContent=Math.round(windNow)+' mph';
+
+    const rainProb=d.hourly.precipitation_probability[hIdx]??0;
+    document.getElementById('w-rain-prob').textContent=rainProb+'%';
+
+    // Condition derived from precip + probability
+    let label,icon;
+    const precip=c.precipitation, prob=rainProb;
+    if(precip>0.1){[icon,label]=wcInfo(63);}
+    else if(precip>0){[icon,label]=wcInfo(51);}
+    else if(prob>70){[icon,label]=['🌦','Likely Rain'];}
+    else if(prob>40){[icon,label]=['⛅','Chance of Rain'];}
+    else{[icon,label]=['🌤','Mostly Clear'];}
+    document.getElementById('w-desc').textContent=label;
+    document.getElementById('w-icon-wrap').textContent=icon;
+
+    // Sunrise / Sunset
+    if(d.daily&&d.daily.sunrise&&d.daily.sunrise[0]){
+      document.getElementById('w-sunrise').textContent=fmtTime12(d.daily.sunrise[0]);
+      document.getElementById('w-sunset').textContent=fmtTime12(d.daily.sunset[0]);
+      const rise=new Date(d.daily.sunrise[0]), set=new Date(d.daily.sunset[0]);
+      document.getElementById('w-daylight').textContent=((set-rise)/3600000).toFixed(1)+'h daylight';
+    }
+
+    // Next 6 hourly pills
+    const hourlyHTML=[];
+    for(let i=0;i<6;i++){
+      const idx=hIdx+i;
+      if(idx>=times.length) break;
+      const localT=new Date(times[idx]);
+      const lbl=localT.toLocaleTimeString('en-US',{hour:'numeric',hour12:true});
+      const temp=Math.round(d.hourly.temperature_2m[idx]);
+      const rp=d.hourly.precipitation_probability[idx]??0;
+      const pr=d.hourly.precipitation[idx];
+      const hi=pr>0.05?'🌧':rp>60?'🌦':rp>30?'⛅':'☀️';
+      hourlyHTML.push(`<div class="w-hour${i===0?' now':''}"><div class="w-hour-time">${i===0?'Now':lbl}</div><div class="w-hour-icon">${hi}</div><div class="w-hour-temp">${temp}°</div><div class="w-hour-rain">${rp}%</div></div>`);
+    }
+    document.getElementById('w-hourly').innerHTML=hourlyHTML.join('');
+
+  }catch(e){
+    // Show a clean offline state — no mock data
+    document.getElementById('w-icon-wrap').textContent='📡';
+    document.getElementById('w-temp').innerHTML='--<sup>°F</sup>';
+    document.getElementById('w-desc').textContent='Awaiting connection…';
+    document.getElementById('w-precip').textContent='--';
+    document.getElementById('w-wind').textContent='--';
+    document.getElementById('w-rain-prob').textContent='--%';
+    document.getElementById('w-sunrise').textContent='--';
+    document.getElementById('w-sunset').textContent='--';
+    document.getElementById('w-daylight').textContent='-- daylight';
+    document.getElementById('w-hourly').innerHTML='<div style="font-size:11px;color:var(--muted);padding:8px 0">Live data loads when opened in a browser with internet access.</div>';
+    // Retry in 30s in case connection is temporarily unavailable
+    setTimeout(fetchWeather, 30000);
+  }
+}
+
+function tick(){
+  const n=new Date();
+  document.getElementById('live-clock').textContent=n.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const ns=nowSec();
+  let tn=null,ta=null;
+  for(const d of TRAIN_DEPS){const ds=t2m(d.time)*60;if(ds>ns){if(!tn)tn={...d,ds};else if(!ta){ta={...d};break;}}}
+  if(tn){const diff=tn.ds-ns;const el=document.getElementById('t-countdown');el.textContent=fmtCD(diff)||'--:--';el.className='countdown mono'+(diff<300?' urgent':'');document.getElementById('t-deptime').textContent=tn.time;document.getElementById('t-dir').textContent=tn.dir;document.getElementById('t-after').textContent=ta?'Next after: '+ta.time+' · '+ta.dir:'No more trains today';}
+  else{document.getElementById('t-countdown').textContent='Done';document.getElementById('t-deptime').textContent='—';document.getElementById('t-after').textContent='Service resumes tomorrow';}
+  let bn=null,ba=null;
+  for(const t of BUS_DEPS){const ds=t2m(t)*60;if(ds>ns){if(!bn)bn={time:t,ds};else if(!ba){ba={time:t};break;}}}
+  if(bn){const diff=bn.ds-ns;document.getElementById('bus-countdown').textContent=fmtCD(diff)||'--:--';document.getElementById('bus-dep').textContent=bn.time;document.getElementById('bus-after').textContent=ba?'Next: '+ba.time:'Last trip';}
+  else{document.getElementById('bus-countdown').textContent='Done';document.getElementById('bus-dep').textContent='—';document.getElementById('bus-after').textContent='Resumes 6:10 AM';}
+}
+
+function renderHome(){
+  document.getElementById('stat-eats').textContent=RESTAURANTS.length;
+  const now=new Date(),wk=new Date(now);wk.setDate(wk.getDate()+7);
+  document.getElementById('stat-evcount').textContent=EVENTS.filter(e=>{const d=new Date(e.date);return d>=now&&d<=wk;}).length;
+  const up=EVENTS.filter(e=>new Date(e.date)>=new Date()).slice(0,6);
+  document.getElementById('mini-ev-list').innerHTML=up.map(e=>{
+    const d=new Date(e.date);return`<div class="mini-event"><div class="mini-dot"></div><div class="mini-name">${e.name}</div><div class="mini-date">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div></div>`;
+  }).join('');
+}
+
+function catCol(s){if(!s)return'#007AFF';if(s.includes('Bakery')||s.includes('Coffee'))return'#FFD700';if(s==='Portuguese'||s==='Seafood'||s==='Italian')return'#f87171';return'#007AFF';}
+function catIco(s){if(!s)return'def';if(s.includes('Bakery')||s.includes('Coffee'))return'gold';if(s==='Portuguese'||s==='Seafood')return'crimson';return'def';}
+function catCC(s){if(!s)return'c-default';if(s.includes('Bakery')||s.includes('Coffee'))return'c-bakery';if(s==='Portuguese'||s==='Seafood')return'c-steak';return'c-default';}
+const SVG_BAKERY='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="5"/><path d="M3 11h18M7 11v10M17 11v10M5 21h14"/></svg>';
+const SVG_STEAK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 9c0-3.87-5-7-5-7S7 5.13 7 9a5 5 0 0 0 10 0z"/><path d="M7 21h10M12 14v7"/></svg>';
+const SVG_UTENSILS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 2l1.5 14.5M7.5 2v6.5a3 3 0 0 0 6 0V2M21 2c0 7-3 10-3 10v9"/></svg>';
+
+let leafMap=null,mks={};
+function initMap(){
+  leafMap=L.map('leaflet-map',{zoomControl:false}).setView([41.7015,-71.1551],14);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©OpenStreetMap ©CARTO',subdomains:'abcd',maxZoom:19}).addTo(leafMap);
+  L.control.zoom({position:'topright'}).addTo(leafMap);
+}
+
+function renderFood(cat='All'){
+  const list=cat==='All'?RESTAURANTS:RESTAURANTS.filter(r=>r.sub===cat);
+  document.getElementById('food-list').innerHTML=list.map(r=>{
+    const svg=r.sub&&(r.sub.includes('Bakery')||r.sub.includes('Coffee'))?SVG_BAKERY:(r.sub==='Portuguese'||r.sub==='Seafood')?SVG_STEAK:SVG_UTENSILS;
+    return`<div class="food-card ${catCC(r.sub)}" data-name="${r.name.replace(/"/g,'&quot;')}" onclick="flyTo(this)"><div class="food-ico ${catIco(r.sub)}">${svg}</div><div class="food-info"><div class="food-name">${r.name}</div><div class="food-sub2">${r.sub} · ${r.hours}</div></div><div class="food-price mono">${r.price}</div></div>`;
+  }).join('');
+  if(leafMap){Object.values(mks).forEach(m=>m.remove());mks={};list.forEach(r=>{const c=COORDS[r.name]||[41.7015,-71.1551];const col=catCol(r.sub);const ic=L.divIcon({className:'',html:`<div style="width:12px;height:12px;border-radius:50%;background:${col};border:2px solid rgba(255,255,255,.5);box-shadow:0 0 8px ${col}88"></div>`,iconSize:[12,12],iconAnchor:[6,6]});mks[r.name]=L.marker(c,{icon:ic}).addTo(leafMap).bindPopup(`<div style="font-family:'Syne',sans-serif;min-width:180px"><div style="font-weight:800;font-size:14px;margin-bottom:4px">${r.name}</div><div style="font-size:11px;color:#7a7f9a;margin-bottom:6px">${r.sub} · ${r.price}</div><div style="font-size:12px;line-height:1.4">${r.desc}</div><div style="font-size:11px;margin-top:8px;color:#007AFF">${r.hours}</div></div>`);});}
+}
+window.flyTo=function(el){
+  const n=el.dataset.name;const c=COORDS[n]||[41.7015,-71.1551];
+  if(leafMap){leafMap.flyTo(c,17,{duration:1.2});setTimeout(()=>mks[n]&&mks[n].openPopup(),1300);}
+  document.querySelectorAll('.food-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');
+};
+
+const evTagMap={'Library':['purple','📚 Library'],'Museum/Attraction':['gold','⚓ Museum'],'Community':['green','🏙 Community'],'Arts & Culture':['orange','🎨 Arts'],'Park/Nature':['green','🌿 Nature']};
+const evClassMap={'Library':'lib','Museum/Attraction':'museum','Community':'comm','Park/Nature':'park','Arts & Culture':'arts'};
+function renderEvents(f='All'){
+  const list=f==='All'?EVENTS:EVENTS.filter(e=>e.sub===f);
+  if(!list.length){document.getElementById('ev-list').innerHTML='<div class="loading">No events found</div>';return;}
+  document.getElementById('ev-list').innerHTML=list.map(e=>{
+    const d=new Date(e.date);const mo=d.toLocaleDateString('en-US',{month:'short'}).toUpperCase();const dy=d.getDate();
+    const[cls,lbl]=evTagMap[e.sub]||['purple',e.sub||'Event'];
+    const cc=evClassMap[e.sub]||'lib';
+    return`<div class="ev-card ${cc}"><div class="ev-date"><div class="ev-month">${mo}</div><div class="ev-day">${dy}</div><div class="ev-time">${e.time}</div></div><div class="ev-body"><div class="ev-title">${e.name}</div><div class="ev-desc">${e.desc.length>90?e.desc.slice(0,90)+'…':e.desc}</div><div class="ev-meta"><span class="ev-tag ${cls}">${lbl}</span><span class="ev-cost">${e.cost}</span></div></div></div>`;
+  }).join('');
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  const tab=btn.dataset.tab;
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');btn.classList.add('active');
+  if(tab==='eats'&&leafMap)setTimeout(()=>leafMap.invalidateSize(),120);
+}));
+document.querySelectorAll('#filter-bar .chip').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('#filter-bar .chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');renderFood(c.dataset.cat);
+}));
+document.querySelectorAll('#ev-filter-bar .ev-chip').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('#ev-filter-bar .ev-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');renderEvents(c.dataset.sub);
+}));
+
+renderHome();
+renderEvents();
+initMap();
+renderFood();
+fetchWeather();
+tick();
+setInterval(tick,1000);
+setInterval(fetchWeather,600000);
+</script>
+</body>
+</html>
