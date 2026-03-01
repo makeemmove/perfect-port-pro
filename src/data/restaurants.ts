@@ -5,6 +5,7 @@ export interface Restaurant {
   loc: string;
   price: string;
   desc: string;
+  url?: string;
 }
 
 export const RESTAURANTS: Restaurant[] = [

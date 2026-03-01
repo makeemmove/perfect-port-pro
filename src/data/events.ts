@@ -6,6 +6,7 @@ export interface CityEvent {
   cost: string;
   desc: string;
   location?: string;
+  url?: string;
 }
 
 export const EVENTS: CityEvent[] = [
