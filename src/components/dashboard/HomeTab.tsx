@@ -15,7 +15,7 @@ import StatsWidget from './widgets/StatsWidget';
 import ComingUpWidget from './widgets/ComingUpWidget';
 import QuickViewModal from './QuickViewModal';
 
-const DEFAULT_ORDER = ['stats', 'coming-up', 'srta', 'mbta', 'weather'];
+const DEFAULT_ORDER = ['stats', 'coming-up', 'weather', 'srta', 'mbta'];
 const STORAGE_KEY = 'fr-widget-order';
 
 function loadOrder(): string[] {
