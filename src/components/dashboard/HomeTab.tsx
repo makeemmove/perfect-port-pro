@@ -193,7 +193,7 @@ const HomeTab = () => {
         remainingBuses={remainingBuses}
       />
     ),
-    'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} />,
+    'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} onEventClick={setSelectedEvent} />,
   };
 
   return (
