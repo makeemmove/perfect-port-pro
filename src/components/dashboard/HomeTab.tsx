@@ -225,6 +225,17 @@ const HomeTab = () => {
           ))}
         </SortableContext>
       </DndContext>
+
+      <QuickViewModal
+        open={!!selectedEvent}
+        onOpenChange={(open) => { if (!open) setSelectedEvent(null); }}
+        title={selectedEvent?.name || ''}
+        description={selectedEvent?.desc}
+        location={selectedEvent?.location}
+        cost={selectedEvent?.cost}
+        url={selectedEvent?.url}
+        category={selectedEvent?.sub}
+      />
     </div>
   );
 };
