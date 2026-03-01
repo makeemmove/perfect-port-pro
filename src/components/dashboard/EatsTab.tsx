@@ -57,6 +57,7 @@ function getIcon(sub: string) {
 const EatsTab = () => {
   const [activeCat, setActiveCat] = useState('All');
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const leafMapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Record<string, L.Marker>>({});
