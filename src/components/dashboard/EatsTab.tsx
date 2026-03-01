@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 import { RESTAURANTS, COORDS, Restaurant } from '@/data/restaurants';
+import QuickViewModal from './QuickViewModal';
 
 const CATEGORIES = [
   { label: 'All', cat: 'All' },
@@ -56,6 +57,7 @@ function getIcon(sub: string) {
 const EatsTab = () => {
   const [activeCat, setActiveCat] = useState('All');
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const leafMapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Record<string, L.Marker>>({});
@@ -162,12 +164,29 @@ const EatsTab = () => {
                   <div className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis text-foreground">{r.name}</div>
                   <div className="text-[11px] text-muted-foreground mt-0.5">{r.sub} · {r.hours}</div>
                 </div>
+                <button
+                  onClick={(ev) => { ev.stopPropagation(); setSelectedRestaurant(r); }}
+                  className="text-[9px] font-semibold tracking-wide uppercase py-[2px] px-2 rounded-full bg-foreground/5 text-foreground border border-border hover:bg-foreground/10 transition-colors flex-shrink-0 mr-1"
+                >
+                  Info
+                </button>
                 <div className="mono text-xs text-muted-foreground flex-shrink-0">{r.price}</div>
               </div>
             );
           })}
         </div>
       </div>
+
+      <QuickViewModal
+        open={!!selectedRestaurant}
+        onOpenChange={(open) => { if (!open) setSelectedRestaurant(null); }}
+        title={selectedRestaurant?.name || ''}
+        description={selectedRestaurant?.desc}
+        location={selectedRestaurant?.loc}
+        cost={selectedRestaurant?.price}
+        url={selectedRestaurant?.url}
+        category={selectedRestaurant?.sub}
+      />
     </>
   );
 };

@@ -5,6 +5,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { MBTA_ROUTES, MBTA_STATIONS, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
 import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
+import type { CityEvent } from '@/data/events';
 import { fetchWeather, WeatherData } from '@/data/weather';
 import DraggableWidget from './DraggableWidget';
 import WeatherWidget from './widgets/WeatherWidget';
@@ -12,6 +13,7 @@ import MbtaWidget from './widgets/MbtaWidget';
 import SrtaWidget from './widgets/SrtaWidget';
 import StatsWidget from './widgets/StatsWidget';
 import ComingUpWidget from './widgets/ComingUpWidget';
+import QuickViewModal from './QuickViewModal';
 
 const DEFAULT_ORDER = ['stats', 'coming-up', 'srta', 'mbta', 'weather'];
 const STORAGE_KEY = 'fr-widget-order';
@@ -34,6 +36,7 @@ const HomeTab = () => {
   const [clock, setClock] = useState('Loading…');
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
+  const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
 
   /* Route & station selection state */
   const isWeekend = useMemo(() => [0, 6].includes(new Date().getDay()), []);
@@ -190,7 +193,7 @@ const HomeTab = () => {
         remainingBuses={remainingBuses}
       />
     ),
-    'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} />,
+    'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} onEventClick={setSelectedEvent} />,
   };
 
   return (
@@ -222,6 +225,17 @@ const HomeTab = () => {
           ))}
         </SortableContext>
       </DndContext>
+
+      <QuickViewModal
+        open={!!selectedEvent}
+        onOpenChange={(open) => { if (!open) setSelectedEvent(null); }}
+        title={selectedEvent?.name || ''}
+        description={selectedEvent?.desc}
+        location={selectedEvent?.location}
+        cost={selectedEvent?.cost}
+        url={selectedEvent?.url}
+        category={selectedEvent?.sub}
+      />
     </div>
   );
 };

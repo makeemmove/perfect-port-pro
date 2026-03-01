@@ -1,0 +1,94 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { MapPin, DollarSign, ExternalLink } from 'lucide-react';
+
+interface QuickViewModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description?: string;
+  location?: string;
+  cost?: string;
+  url?: string;
+  category?: string;
+}
+
+const tagColors: Record<string, string> = {
+  Library: 'bg-secondary/10 text-secondary border-secondary/20',
+  'Museum/Attraction': 'bg-amber-50 text-amber-600 border-amber-200',
+  Community: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  'Arts & Culture': 'bg-orange-50 text-orange-600 border-orange-200',
+  'Park/Nature': 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  Portuguese: 'bg-red-50 text-red-600 border-red-200',
+  Italian: 'bg-red-50 text-red-600 border-red-200',
+  Seafood: 'bg-blue-50 text-blue-600 border-blue-200',
+  'Bakery/Coffee': 'bg-amber-50 text-amber-600 border-amber-200',
+  'Casual Dining': 'bg-slate-50 text-slate-600 border-slate-200',
+  Specialty: 'bg-violet-50 text-violet-600 border-violet-200',
+  Asian: 'bg-rose-50 text-rose-600 border-rose-200',
+  'Market/Specialty': 'bg-amber-50 text-amber-600 border-amber-200',
+};
+
+const QuickViewModal = ({
+  open,
+  onOpenChange,
+  title,
+  description,
+  location,
+  cost,
+  url,
+  category,
+}: QuickViewModalProps) => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="max-w-md rounded-xl bg-card border-border shadow-lg backdrop-blur-xl sm:rounded-xl">
+      <DialogHeader>
+        <DialogTitle className="text-lg font-bold text-foreground leading-tight pr-6">
+          {title}
+        </DialogTitle>
+        {category && (
+          <span
+            className={`inline-block w-fit mt-1 text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full border ${tagColors[category] || 'bg-muted text-muted-foreground border-border'}`}
+          >
+            {category}
+          </span>
+        )}
+      </DialogHeader>
+
+      <div className="space-y-3 mt-1">
+        {description && (
+          <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+        )}
+
+        {location && (
+          <div className="flex items-start gap-2 text-sm text-foreground">
+            <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <span>{location}</span>
+          </div>
+        )}
+
+        {cost && (
+          <div className="flex items-center gap-2 text-sm text-foreground">
+            <DollarSign className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <span>{cost}</span>
+          </div>
+        )}
+
+        {url && (
+          <button
+            onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+            className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-foreground text-background text-sm font-semibold transition-opacity hover:opacity-90"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Visit Website
+          </button>
+        )}
+      </div>
+    </DialogContent>
+  </Dialog>
+);
+
+export default QuickViewModal;

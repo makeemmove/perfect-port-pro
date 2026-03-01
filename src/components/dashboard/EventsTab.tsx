@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { EVENTS, evTagMap, evClassMap } from '@/data/events';
+import type { CityEvent } from '@/data/events';
+import QuickViewModal from './QuickViewModal';
 
 const FILTERS = [
   { label: 'All', sub: 'All' },
@@ -27,6 +29,7 @@ const leftBarColors: Record<string, string> = {
 
 const EventsTab = () => {
   const [activeSub, setActiveSub] = useState('All');
+  const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
   const filtered = activeSub === 'All' ? EVENTS : EVENTS.filter(e => e.sub === activeSub);
 
   return (
@@ -84,12 +87,29 @@ const EventsTab = () => {
                     {lbl}
                   </span>
                   <span className="text-[11px] text-muted-foreground">{e.cost}</span>
+                  <button
+                    onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
+                    className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground border border-border hover:bg-foreground/10 transition-colors"
+                  >
+                    More Info
+                  </button>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      <QuickViewModal
+        open={!!selectedEvent}
+        onOpenChange={(open) => { if (!open) setSelectedEvent(null); }}
+        title={selectedEvent?.name || ''}
+        description={selectedEvent?.desc}
+        location={selectedEvent?.location}
+        cost={selectedEvent?.cost}
+        url={selectedEvent?.url}
+        category={selectedEvent?.sub}
+      />
     </div>
   );
 };
