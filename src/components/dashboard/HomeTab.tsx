@@ -13,7 +13,7 @@ import SrtaWidget from './widgets/SrtaWidget';
 import StatsWidget from './widgets/StatsWidget';
 import ComingUpWidget from './widgets/ComingUpWidget';
 
-const DEFAULT_ORDER = ['weather', 'mbta', 'stats', 'srta', 'coming-up'];
+const DEFAULT_ORDER = ['stats', 'coming-up', 'srta', 'mbta', 'weather'];
 const STORAGE_KEY = 'fr-widget-order';
 
 function loadOrder(): string[] {
