@@ -13,27 +13,20 @@ const Ticker = () => {
   const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (
-    <div className="h-9 overflow-hidden flex items-center flex-shrink-0 relative"
-         style={{
-           background: 'linear-gradient(90deg, hsla(211,100%,50%,0.15), hsla(270,91%,62%,0.10))',
-           borderBottom: '1px solid hsla(211,100%,50%,0.25)',
-         }}>
+    <div className="h-9 overflow-hidden flex items-center flex-shrink-0 relative bg-primary/[0.04] border-b border-primary/10">
       {/* Fade edges */}
-      <div className="absolute top-0 bottom-0 left-0 w-[60px] z-[2] pointer-events-none"
-           style={{ background: 'linear-gradient(to right, hsl(228,33%,6%), transparent)' }} />
-      <div className="absolute top-0 bottom-0 right-0 w-[60px] z-[2] pointer-events-none"
-           style={{ background: 'linear-gradient(to left, hsl(228,33%,6%), transparent)' }} />
+      <div className="absolute top-0 bottom-0 left-0 w-12 z-[2] pointer-events-none bg-gradient-to-r from-background to-transparent" />
+      <div className="absolute top-0 bottom-0 right-0 w-12 z-[2] pointer-events-none bg-gradient-to-l from-background to-transparent" />
 
-      <div className="flex-shrink-0 px-3.5 text-[10px] font-bold tracking-[0.12em] uppercase whitespace-nowrap z-[3] text-primary"
-           style={{ borderRight: '1px solid hsla(211,100%,50%,0.25)' }}>
-        ⬤ Live
+      <div className="flex-shrink-0 px-3 text-[10px] font-semibold tracking-widest uppercase whitespace-nowrap z-[3] text-primary border-r border-primary/10">
+        ● Live
       </div>
       <div className="flex-1 overflow-hidden">
-        <div className="flex whitespace-nowrap text-xs text-muted-foreground px-4"
+        <div className="flex whitespace-nowrap text-[11px] text-muted-foreground px-4"
              style={{ animation: 'ticker 50s linear infinite' }}>
           {doubled.map((item, i) => (
-            <span key={i} className="mr-14 text-foreground before:content-['▸_'] before:text-primary">
-              {item}
+            <span key={i} className="mr-12 text-foreground/70">
+              <span className="text-primary mr-1.5">▸</span>{item}
             </span>
           ))}
         </div>
