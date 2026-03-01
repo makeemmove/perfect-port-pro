@@ -5,6 +5,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { MBTA_ROUTES, MBTA_STATIONS, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
 import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
+import type { CityEvent } from '@/data/events';
 import { fetchWeather, WeatherData } from '@/data/weather';
 import DraggableWidget from './DraggableWidget';
 import WeatherWidget from './widgets/WeatherWidget';
@@ -12,6 +13,7 @@ import MbtaWidget from './widgets/MbtaWidget';
 import SrtaWidget from './widgets/SrtaWidget';
 import StatsWidget from './widgets/StatsWidget';
 import ComingUpWidget from './widgets/ComingUpWidget';
+import QuickViewModal from './QuickViewModal';
 
 const DEFAULT_ORDER = ['stats', 'coming-up', 'srta', 'mbta', 'weather'];
 const STORAGE_KEY = 'fr-widget-order';
