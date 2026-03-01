@@ -1,12 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
-import { TRAIN_DEPS, BUS_DEPS, t2m, nowSec, fmtCD } from '@/data/transit';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { MBTA_ROUTES, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
 import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
 import { fetchWeather, WeatherData } from '@/data/weather';
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from '@/components/ui/select';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 const HomeTab = () => {
   const [clock, setClock] = useState('Loading…');
   const [weather, setWeather] = useState<WeatherData | null>(null);
+
+  /* Route selection state */
+  const [selectedTrainId, setSelectedTrainId] = useState(MBTA_ROUTES[0].id);
+  const [selectedBusId, setSelectedBusId] = useState(SRTA_ROUTES[0].id);
+
+  const trainRoute = useMemo(() => MBTA_ROUTES.find(r => r.id === selectedTrainId) ?? MBTA_ROUTES[0], [selectedTrainId]);
+  const busRoute = useMemo(() => SRTA_ROUTES.find(r => r.id === selectedBusId) ?? SRTA_ROUTES[0], [selectedBusId]);
+
+  /* Transit countdown state */
   const [trainCountdown, setTrainCountdown] = useState('--:--');
   const [trainUrgent, setTrainUrgent] = useState(false);
   const [trainDir, setTrainDir] = useState('Calculating…');
@@ -15,6 +28,10 @@ const HomeTab = () => {
   const [busCountdown, setBusCountdown] = useState('--:--');
   const [busDep, setBusDep] = useState('--');
   const [busAfter, setBusAfter] = useState('Next: --');
+
+  /* Remaining departures for popovers */
+  const [remainingTrains, setRemainingTrains] = useState<{ time: string; dir: string }[]>([]);
+  const [remainingBuses, setRemainingBuses] = useState<string[]>([]);
 
   const eventsThisWeek = (() => {
     const now = new Date();
@@ -34,15 +51,21 @@ const HomeTab = () => {
     );
 
     const ns = nowSec();
+
+    /* Train */
+    const trainDeps = trainRoute.departures;
     let tn: { time: string; dir: string; ds: number } | null = null;
     let ta: { time: string; dir: string } | null = null;
-    for (const d of TRAIN_DEPS) {
+    const remTrains: { time: string; dir: string }[] = [];
+    for (const d of trainDeps) {
       const ds = t2m(d.time) * 60;
       if (ds > ns) {
+        remTrains.push(d);
         if (!tn) tn = { ...d, ds };
-        else if (!ta) { ta = { ...d }; break; }
+        else if (!ta) ta = { ...d };
       }
     }
+    setRemainingTrains(remTrains);
     if (tn) {
       const diff = tn.ds - ns;
       setTrainCountdown(fmtCD(diff) || '--:--');
@@ -54,18 +77,24 @@ const HomeTab = () => {
       setTrainCountdown('Done');
       setTrainUrgent(false);
       setTrainDepTime('—');
+      setTrainDir('No departures remaining');
       setTrainAfter('Service resumes tomorrow');
     }
 
+    /* Bus */
+    const busDeps = busRoute.departures;
     let bn: { time: string; ds: number } | null = null;
     let ba: { time: string } | null = null;
-    for (const t of BUS_DEPS) {
+    const remBuses: string[] = [];
+    for (const t of busDeps) {
       const ds = t2m(t) * 60;
       if (ds > ns) {
+        remBuses.push(t);
         if (!bn) bn = { time: t, ds };
-        else if (!ba) { ba = { time: t }; break; }
+        else if (!ba) ba = { time: t };
       }
     }
+    setRemainingBuses(remBuses);
     if (bn) {
       const diff = bn.ds - ns;
       setBusCountdown(fmtCD(diff) || '--:--');
@@ -74,9 +103,9 @@ const HomeTab = () => {
     } else {
       setBusCountdown('Done');
       setBusDep('—');
-      setBusAfter('Resumes 6:10 AM');
+      setBusAfter('Resumes tomorrow');
     }
-  }, []);
+  }, [trainRoute, busRoute]);
 
   useEffect(() => {
     tick();
@@ -106,59 +135,12 @@ const HomeTab = () => {
       </div>
 
       {/* Weather Card */}
+      <WeatherCard weather={weather} />
+
+      {/* MBTA Transit Card */}
       <div className="p-5 rounded-2xl bg-card border border-border shadow-card">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="text-[10px] font-semibold tracking-widest uppercase text-primary">📍 Fall River, MA</div>
-            <div className="mono text-5xl font-light leading-none text-foreground mt-1">
-              {weather ? weather.temp : '--'}<sup className="text-lg align-super font-normal">°F</sup>
-            </div>
-            <div className="text-sm text-muted-foreground mt-1">
-              {weather ? weather.label : 'Fetching weather…'}
-            </div>
-          </div>
-          <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center text-[42px] leading-none">
-            {weather ? weather.icon : '🌤'}
-          </div>
-        </div>
-
-        <div className="flex gap-4 flex-wrap mt-3 pt-3 border-t border-border">
-          <DetailItem label="Precip" value={weather ? weather.precip + '"' : '--'} />
-          <DetailItem label="Wind" value={weather ? weather.wind + ' mph' : '--'} />
-          <DetailItem label="Rain" value={weather ? weather.rainProb + '%' : '--%'} />
-        </div>
-        <div className="flex gap-4 flex-wrap mt-2 pt-2 border-t border-border">
-          <span className="text-[11px] text-amber-600 font-medium">☀ Rise: {weather?.sunrise ?? '--'}</span>
-          <span className="text-[11px] text-orange font-medium">☀ Set: {weather?.sunset ?? '--'}</span>
-          <span className="text-[11px] text-muted-foreground">{weather?.daylight ?? '--'} daylight</span>
-        </div>
-
-        {/* Hourly */}
-        <div className="mt-3 pt-3 border-t border-border">
-          <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">Next 6 Hours</div>
-          <div className="flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-            {weather?.hourly.length ? weather.hourly.map((h, i) => (
-              <div key={i} className={`flex-shrink-0 flex flex-col items-center gap-1 py-2 px-2.5 rounded-xl min-w-[52px] border transition-colors ${
-                h.isNow
-                  ? 'bg-primary/[0.06] border-primary/20'
-                  : 'bg-muted/50 border-border'
-              }`}>
-                <div className="mono text-[10px] text-muted-foreground">{h.time}</div>
-                <div className="text-base leading-none">{h.icon}</div>
-                <div className="mono text-[13px] font-semibold text-foreground">{h.temp}°</div>
-                <div className="text-[10px] text-primary font-medium">{h.rainProb}%</div>
-              </div>
-            )) : (
-              <div className="text-[11px] text-muted-foreground py-2">Loading…</div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Transit Card */}
-      <div className="p-5 rounded-2xl bg-card border border-border shadow-card">
-        <div className="flex items-center gap-2 mb-3">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-primary">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-primary flex-shrink-0">
             <rect x="4" y="3" width="16" height="16" rx="2" />
             <path d="M4 11h16M12 3v8" />
             <circle cx="8.5" cy="14.5" r="1" />
@@ -166,22 +148,56 @@ const HomeTab = () => {
             <path d="M8 19l-2 2M16 19l2 2" />
           </svg>
           <span className="text-[9px] font-semibold tracking-widest uppercase px-2 py-1 rounded-full bg-primary/[0.08] text-primary border border-primary/15">
-            MBTA Commuter Rail · Next Departure
+            MBTA Commuter Rail
           </span>
+          <Select value={selectedTrainId} onValueChange={setSelectedTrainId}>
+            <SelectTrigger className="h-7 w-auto min-w-[140px] text-[11px] border-border bg-muted/50 rounded-full px-3 gap-1.5">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MBTA_ROUTES.map(r => (
+                <SelectItem key={r.id} value={r.id} className="text-[12px]">{r.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="text-sm font-bold text-foreground">Fall River / New Bedford Line</div>
+        <div className="text-sm font-bold text-foreground">{trainRoute.name}</div>
         <div className="text-[11px] text-muted-foreground">{trainDir}</div>
         <div className="flex justify-between items-center mt-3">
-          <div className={`mono text-4xl font-semibold tracking-tight ${trainUrgent ? 'text-amber-500' : 'text-primary'}`}
-               style={trainUrgent ? { animation: 'urgent-pulse 1s ease infinite' } : {}}>
-            {trainCountdown}
-          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className={`mono text-4xl font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity ${trainUrgent ? 'text-amber-500' : 'text-primary'}`}
+                style={trainUrgent ? { animation: 'urgent-pulse 1s ease infinite' } : {}}
+              >
+                {trainCountdown}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-0 max-h-72 overflow-auto" align="start">
+              <div className="p-3 border-b border-border">
+                <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
+                  Remaining Departures · {trainRoute.name}
+                </div>
+              </div>
+              <div className="p-2">
+                {remainingTrains.length === 0 ? (
+                  <div className="text-[12px] text-muted-foreground p-2">No more departures today</div>
+                ) : remainingTrains.map((d, i) => (
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <span className="mono text-[13px] font-medium text-foreground">{d.time}</span>
+                    <span className="text-[11px] text-muted-foreground">{d.dir}</span>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
           <div className="text-right">
             <div className="text-[10px] text-muted-foreground font-medium">Departs at</div>
             <div className="mono text-base text-foreground">{trainDepTime}</div>
           </div>
         </div>
         <div className="text-[11px] text-muted-foreground mt-2">{trainAfter}</div>
+        <div className="text-[10px] text-muted-foreground/60 mt-1">Tap countdown for full schedule</div>
       </div>
 
       {/* Quick Stats */}
@@ -210,21 +226,54 @@ const HomeTab = () => {
         </div>
       </div>
 
-      {/* Bus Card */}
+      {/* SRTA Bus Card */}
       <div className="p-4 rounded-2xl bg-card border border-border shadow-card">
-        <div className="flex items-center gap-2 mb-2">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-primary">
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-primary flex-shrink-0">
             <rect x="2" y="7" width="20" height="13" rx="2" />
             <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M6 20v1M18 20v1" />
             <circle cx="7" cy="13" r="1" />
             <circle cx="17" cy="13" r="1" />
           </svg>
-          <span className="text-[10px] font-semibold tracking-widest uppercase text-primary">SRTA · Route 101 – South Main</span>
+          <span className="text-[10px] font-semibold tracking-widest uppercase text-primary">SRTA</span>
+          <Select value={selectedBusId} onValueChange={setSelectedBusId}>
+            <SelectTrigger className="h-7 w-auto min-w-[160px] text-[11px] border-border bg-muted/50 rounded-full px-3 gap-1.5">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SRTA_ROUTES.map(r => (
+                <SelectItem key={r.id} value={r.id} className="text-[12px]">{r.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex justify-between items-center">
           <div>
-            <div className="text-[11px] text-muted-foreground">Outbound</div>
-            <div className="mono text-3xl font-light text-primary">{busCountdown}</div>
+            <div className="text-[11px] text-muted-foreground">{busRoute.direction}</div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="mono text-3xl font-light text-primary cursor-pointer hover:opacity-80 transition-opacity">
+                  {busCountdown}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-0 max-h-72 overflow-auto" align="start">
+                <div className="p-3 border-b border-border">
+                  <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
+                    Remaining Departures · {busRoute.name}
+                  </div>
+                </div>
+                <div className="p-2">
+                  {remainingBuses.length === 0 ? (
+                    <div className="text-[12px] text-muted-foreground p-2">No more departures today</div>
+                  ) : remainingBuses.map((t, i) => (
+                    <div key={i} className="flex items-center py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
+                      <span className="mono text-[13px] font-medium text-foreground">{t}</span>
+                      <span className="text-[11px] text-muted-foreground ml-auto">{busRoute.direction}</span>
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="text-right">
             <div className="text-[10px] text-muted-foreground font-medium">Departs</div>
@@ -232,6 +281,7 @@ const HomeTab = () => {
             <div className="text-[10px] text-muted-foreground mt-1">{busAfter}</div>
           </div>
         </div>
+        <div className="text-[10px] text-muted-foreground/60 mt-1">Tap countdown for full schedule</div>
       </div>
 
       {/* Coming Up */}
@@ -257,6 +307,59 @@ const HomeTab = () => {
     </div>
   );
 };
+
+/* ── Sub-components ── */
+
+const WeatherCard = ({ weather }: { weather: WeatherData | null }) => (
+  <div className="p-5 rounded-2xl bg-card border border-border shadow-card">
+    <div className="flex justify-between items-start">
+      <div>
+        <div className="text-[10px] font-semibold tracking-widest uppercase text-primary">📍 Fall River, MA</div>
+        <div className="mono text-5xl font-light leading-none text-foreground mt-1">
+          {weather ? weather.temp : '--'}<sup className="text-lg align-super font-normal">°F</sup>
+        </div>
+        <div className="text-sm text-muted-foreground mt-1">
+          {weather ? weather.label : 'Fetching weather…'}
+        </div>
+      </div>
+      <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center text-[42px] leading-none">
+        {weather ? weather.icon : '🌤'}
+      </div>
+    </div>
+
+    <div className="flex gap-4 flex-wrap mt-3 pt-3 border-t border-border">
+      <DetailItem label="Precip" value={weather ? weather.precip + '"' : '--'} />
+      <DetailItem label="Wind" value={weather ? weather.wind + ' mph' : '--'} />
+      <DetailItem label="Rain" value={weather ? weather.rainProb + '%' : '--%'} />
+    </div>
+    <div className="flex gap-4 flex-wrap mt-2 pt-2 border-t border-border">
+      <span className="text-[11px] text-amber-600 font-medium">☀ Rise: {weather?.sunrise ?? '--'}</span>
+      <span className="text-[11px] text-orange font-medium">☀ Set: {weather?.sunset ?? '--'}</span>
+      <span className="text-[11px] text-muted-foreground">{weather?.daylight ?? '--'} daylight</span>
+    </div>
+
+    {/* Hourly */}
+    <div className="mt-3 pt-3 border-t border-border">
+      <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">Next 6 Hours</div>
+      <div className="flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        {weather?.hourly.length ? weather.hourly.map((h, i) => (
+          <div key={i} className={`flex-shrink-0 flex flex-col items-center gap-1 py-2 px-2.5 rounded-xl min-w-[52px] border transition-colors ${
+            h.isNow
+              ? 'bg-primary/[0.06] border-primary/20'
+              : 'bg-muted/50 border-border'
+          }`}>
+            <div className="mono text-[10px] text-muted-foreground">{h.time}</div>
+            <div className="text-base leading-none">{h.icon}</div>
+            <div className="mono text-[13px] font-semibold text-foreground">{h.temp}°</div>
+            <div className="text-[10px] text-primary font-medium">{h.rainProb}%</div>
+          </div>
+        )) : (
+          <div className="text-[11px] text-muted-foreground py-2">Loading…</div>
+        )}
+      </div>
+    </div>
+  </div>
+);
 
 const DetailItem = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
