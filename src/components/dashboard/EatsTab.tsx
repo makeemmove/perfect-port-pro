@@ -164,6 +164,12 @@ const EatsTab = () => {
                   <div className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis text-foreground">{r.name}</div>
                   <div className="text-[11px] text-muted-foreground mt-0.5">{r.sub} · {r.hours}</div>
                 </div>
+                <button
+                  onClick={(ev) => { ev.stopPropagation(); setSelectedRestaurant(r); }}
+                  className="text-[9px] font-semibold tracking-wide uppercase py-[2px] px-2 rounded-full bg-foreground/5 text-foreground border border-border hover:bg-foreground/10 transition-colors flex-shrink-0 mr-1"
+                >
+                  Info
+                </button>
                 <div className="mono text-xs text-muted-foreground flex-shrink-0">{r.price}</div>
               </div>
             );
