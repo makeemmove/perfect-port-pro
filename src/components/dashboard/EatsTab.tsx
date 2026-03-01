@@ -176,6 +176,17 @@ const EatsTab = () => {
           })}
         </div>
       </div>
+
+      <QuickViewModal
+        open={!!selectedRestaurant}
+        onOpenChange={(open) => { if (!open) setSelectedRestaurant(null); }}
+        title={selectedRestaurant?.name || ''}
+        description={selectedRestaurant?.desc}
+        location={selectedRestaurant?.loc}
+        cost={selectedRestaurant?.price}
+        url={selectedRestaurant?.url}
+        category={selectedRestaurant?.sub}
+      />
     </>
   );
 };
