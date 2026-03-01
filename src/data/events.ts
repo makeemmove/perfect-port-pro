@@ -10,6 +10,11 @@ export interface CityEvent {
 }
 
 export const EVENTS: CityEvent[] = [
+  // February 2026
+  {name:"AARP Free Tax Preparation Service",date:"2026-02-02",time:"9:00 AM",sub:"Community",cost:"Free",desc:"Free in-person tax preparation by AARP volunteers, 9am-12noon",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverma.gov/Calendar.php"},
+  {name:"Native American Storytelling & Crafts",date:"2026-02-19",time:"2:00 PM",sub:"Community",cost:"Free",desc:"Native American storytelling and crafts with the Pocasset Wampanoag Tribe",location:"Fall River Public Library, 104 North Main St",url:"https://www.vivafallriver.com/events"},
+  {name:"SketchyGOichie DRAW! Winter 2026",date:"2026-02-28",time:"12:00 PM",sub:"Arts & Culture",cost:"Paid",desc:"Drawing workshop/event",location:"Various, Fall River",url:"https://www.vivafallriver.com"},
+  {name:"Kid's Art Workshop with Susan Drayton",date:"2026-02-28",time:"12:00 PM",sub:"Arts & Culture",cost:"Paid",desc:"Children's art workshop with local artist",location:"Various, Fall River",url:"https://www.vivafallriver.com"},
   // March 2026
   {name:"Drawing the Figure (SoCo Art Labs)",date:"2026-03-01",time:"1:00 PM",sub:"Community",cost:"Free",desc:"Figure drawing with live model, adults only",location:"SoCo Art Labs, 418 Quequechan St",url:"https://www.vivafallriver.com/events"},
   {name:"Spilling the Tea: Victorian Tea Party",date:"2026-03-01",time:"2:00 PM",sub:"Community",cost:"Paid",desc:"Victorian tea party with true crime history at Lizzie Borden House",location:"Lizzie Borden House",url:"https://www.vivafallriver.com/events"},
@@ -74,25 +79,57 @@ export const EVENTS: CityEvent[] = [
   {name:"Muckraker-palooza 2026",date:"2026-04-19",time:"3:00 PM",sub:"Community",cost:"Paid",desc:"Annual community festival and music event",location:"Woodlawn, Fall River",url:"https://www.eventbrite.com/d/ma--fall-river/events/"},
   {name:"Signs, Signals, and Codes – Scout Workshop",date:"2026-04-19",time:"1:00 PM",sub:"Museum/Attraction",cost:"Paid",desc:"Scouting Merit Badge Workshop",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
   {name:"Little Theatre – Spring Production",date:"2026-04-25",time:"7:30 PM",sub:"Arts & Culture",cost:"Paid",desc:"Live theater production by Little Theatre of Fall River",location:"Narrows Center, Fall River",url:"https://newbedfordlight.org"},
+  {name:"Citizenship in the World – Scout Workshop",date:"2026-04-26",time:"1:00 PM",sub:"Museum/Attraction",cost:"Paid",desc:"Spring 2026 Scouting Merit Badge Workshop – SOLD OUT",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
+  {name:"Junior Detective and Playing the Past",date:"2026-04-26",time:"1:00 PM",sub:"Museum/Attraction",cost:"Paid",desc:"Girl Scout workshop – SOLD OUT",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
   {name:"Photography Group",date:"2026-04-29",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Photography enthusiasts group meeting",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
-  // May 2026+
+  // May 2026
   {name:"Spring Craft, Vendor Fair & Food Trucks",date:"2026-05-01",time:"10:00 AM",sub:"Community",cost:"Free",desc:"Spring craft fair with vendors and food trucks",location:"Liberal Club, Fall River",url:"https://festivalnet.com/fairs-festivals/Massachusetts/Fall-River-MA"},
   {name:"Cadette Special Agent Workshop",date:"2026-05-03",time:"1:00 PM",sub:"Museum/Attraction",cost:"Paid",desc:"Girl Scout workshop",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
+  {name:"Teen Game Night",date:"2026-05-07",time:"5:30 PM",sub:"Library",cost:"Free",desc:"Multiplayer video games for teens ages 13-18",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Mother's Day at Battleship Cove",date:"2026-05-10",time:"9:00 AM",sub:"Museum/Attraction",cost:"Paid",desc:"Special Mother's Day celebration",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
+  {name:"Writing Group",date:"2026-05-13",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Creative writing community",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  {name:"YA Comics Club",date:"2026-05-14",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Comics and graphic novels for teens 13-18",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  {name:"Homeschool Day",date:"2026-05-15",time:"9:00 AM",sub:"Museum/Attraction",cost:"$10-$15",desc:"Special homeschool day with workshops",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
+  {name:"Citizenship in the Community – Scout Workshop",date:"2026-05-17",time:"1:00 PM",sub:"Museum/Attraction",cost:"Paid",desc:"Spring 2026 Scouting Merit Badge Workshop – SOLD OUT",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
+  {name:"Junior Create & Innovate and Paddle Boats",date:"2026-05-17",time:"1:00 PM",sub:"Museum/Attraction",cost:"Paid",desc:"Girl Scout workshop",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
+  {name:"Books & Tea Club",date:"2026-05-20",time:"2:00 PM",sub:"Library",cost:"Free",desc:"Adult book club with tea",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Memorial Day at Battleship Cove",date:"2026-05-25",time:"9:00 AM",sub:"Museum/Attraction",cost:"Paid",desc:"Memorial Day ceremony and open museum",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
+  {name:"Photography Group",date:"2026-05-27",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Photography enthusiasts group meeting",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Battle of Fall River Reenactment Weekend",date:"2026-05-30",time:"10:00 AM",sub:"Community",cost:"Free",desc:"Historical reenactment of the Battle of Fall River",location:"Fall River Heritage State Park, 100 Davol St",url:"https://massachusetts250.org/event/battle-of-fall-river-reenactment-weekend/"},
+  // June 2026
+  {name:"Teen Game Night",date:"2026-06-04",time:"5:30 PM",sub:"Library",cost:"Free",desc:"Multiplayer video games for teens ages 13-18",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Fall River Farmers and Artisans Market",date:"2026-06-06",time:"10:00 AM",sub:"Community",cost:"Free",desc:"Local farmers and artisans market (weekly Saturdays, Jun-Oct)",location:"Cardinal Medeiros Towers, Fall River",url:"https://www.vivafallriver.com"},
+  {name:"Writing Group",date:"2026-06-10",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Creative writing community",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Summer Reading Program Kickoff",date:"2026-06-15",time:"10:00 AM",sub:"Library",cost:"Free",desc:"Annual summer reading program for all ages",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Heritage State Park Summer Programs",date:"2026-06-15",time:"10:00 AM",sub:"Park/Nature",cost:"Free",desc:"Summer outdoor and history programs",location:"Fall River Heritage State Park, 100 Davol St",url:"https://www.mass.gov/locations/fall-river-heritage-state-park"},
+  // July 2026
+  {name:"Teen Game Night",date:"2026-07-02",time:"5:30 PM",sub:"Library",cost:"Free",desc:"Multiplayer video games for teens ages 13-18",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  {name:"Writing Group",date:"2026-07-08",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Creative writing community",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  // August 2026
   {name:"Parish of the Good Shepherd Feast",date:"2026-08-01",time:"12:00 PM",sub:"Community",cost:"Free",desc:"Annual parish feast celebration",location:"Parish of the Good Shepherd, Fall River",url:"https://festivalnet.com/fairs-festivals/Massachusetts/Fall-River-MA"},
   {name:"August Adventures at Battleship Cove",date:"2026-08-05",time:"9:00 AM",sub:"Museum/Attraction",cost:"Free",desc:"Free admission during August Adventures",location:"Battleship Cove, 5 Water St, Fall River",url:"https://www.battleshipcove.org/events"},
+  {name:"Teen Game Night",date:"2026-08-06",time:"5:30 PM",sub:"Library",cost:"Free",desc:"Multiplayer video games for teens ages 13-18",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  {name:"Writing Group",date:"2026-08-12",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Creative writing community",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Take Me to the River Music Festival",date:"2026-08-22",time:"4:00 PM",sub:"Community",cost:"Paid",desc:"Waterfront music festival with food trucks and live music",location:"Fall River City Pier, Fall River Waterfront",url:"https://www.heraldnews.com"},
+  // September 2026
+  {name:"Teen Game Night",date:"2026-09-03",time:"5:30 PM",sub:"Library",cost:"Free",desc:"Multiplayer video games for teens ages 13-18",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  {name:"Writing Group",date:"2026-09-09",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Creative writing community",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Heritage State Park Fall Programs",date:"2026-09-15",time:"10:00 AM",sub:"Park/Nature",cost:"Free",desc:"Fall nature and history programs",location:"Fall River Heritage State Park, 100 Davol St",url:"https://www.mass.gov/locations/fall-river-heritage-state-park"},
+  // October 2026
+  {name:"Teen Game Night",date:"2026-10-01",time:"5:30 PM",sub:"Library",cost:"Free",desc:"Multiplayer video games for teens ages 13-18",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Oktoberfest at Holy Name School",date:"2026-10-01",time:"12:00 PM",sub:"Community",cost:"Free",desc:"Annual Oktoberfest celebration",location:"Holy Name School, Fall River",url:"https://festivalnet.com/fairs-festivals/Massachusetts/Fall-River-MA"},
+  {name:"Writing Group",date:"2026-10-14",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Creative writing community",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  // November 2026
   {name:"Diman PTO Craft Fair",date:"2026-11-01",time:"10:00 AM",sub:"Community",cost:"Free",desc:"Annual craft fair at Diman Vocational Technical High School",location:"Diman RVT High School, Fall River",url:"https://festivalnet.com/fairs-festivals/Massachusetts/Fall-River-MA"},
+  {name:"Teen Game Night",date:"2026-11-05",time:"5:30 PM",sub:"Library",cost:"Free",desc:"Multiplayer video games for teens ages 13-18",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  {name:"Writing Group",date:"2026-11-11",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Creative writing community",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
   {name:"Thanksmas Holiday Market",date:"2026-11-14",time:"4:00 PM",sub:"Community",cost:"Free",desc:"5th Annual Thanksmas Holiday Market",location:"Purchase Street, Fall River",url:"https://www.facebook.com/FallRiverFAM/"},
   {name:"Liberal Club Autumn Craft Fair",date:"2026-11-15",time:"10:00 AM",sub:"Community",cost:"Free",desc:"Autumn craft fair at the Liberal Club",location:"The Liberal Club, Fall River",url:"https://festivalnet.com/fairs-festivals/Massachusetts/Fall-River-MA"},
+  // December 2026
   {name:"Fall River Christmas Arts and Crafts Fair",date:"2026-12-01",time:"10:00 AM",sub:"Community",cost:"Free",desc:"Annual Christmas arts and crafts fair",location:"Durfee High School, Fall River",url:"https://festivalnet.com/fairs-festivals/Massachusetts/Fall-River-MA"},
+  {name:"Teen Game Night",date:"2026-12-03",time:"5:30 PM",sub:"Library",cost:"Free",desc:"Multiplayer video games for teens ages 13-18",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  {name:"Writing Group",date:"2026-12-09",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Creative writing community",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
+  {name:"Banned Book Club",date:"2026-12-24",time:"6:00 PM",sub:"Library",cost:"Free",desc:"Book club focused on banned and challenged books",location:"Fall River Public Library, 104 North Main St",url:"https://fallriverlibrary.org/events"},
 ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 export const evTagMap: Record<string, [string, string]> = {
