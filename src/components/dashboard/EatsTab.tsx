@@ -16,14 +16,13 @@ const CATEGORIES = [
 
 function catCol(s: string) {
   if (s.includes('Bakery') || s.includes('Coffee')) return '#d97706';
-  if (s === 'Portuguese' || s === 'Seafood' || s === 'Italian') return '#dc2626';
+  if (s === 'Portuguese') return '#dc2626';
+  if (s === 'Seafood') return '#0891b2';
+  if (s === 'Italian') return '#059669';
+  if (s === 'Asian') return '#7c3aed';
+  if (s === 'Casual Dining') return '#ea580c';
+  if (s === 'Specialty') return '#db2777';
   return '#3b82f6';
-}
-
-function catIco(s: string) {
-  if (s.includes('Bakery') || s.includes('Coffee')) return 'gold';
-  if (s === 'Portuguese' || s === 'Seafood') return 'crimson';
-  return 'def';
 }
 
 function catCC(s: string) {
@@ -54,6 +53,12 @@ function getIcon(sub: string) {
   return SVG_UTENSILS;
 }
 
+function catIco(s: string) {
+  if (s.includes('Bakery') || s.includes('Coffee')) return 'gold';
+  if (s === 'Portuguese' || s === 'Seafood') return 'crimson';
+  return 'def';
+}
+
 const EatsTab = () => {
   const [activeCat, setActiveCat] = useState('All');
   const [selected, setSelected] = useState<string | null>(null);
@@ -74,35 +79,59 @@ const EatsTab = () => {
       const col = catCol(r.sub);
       const ic = L.divIcon({
         className: '',
-        html: `<div style="width:12px;height:12px;border-radius:50%;background:${col};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2)"></div>`,
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
+        html: `<div style="
+          width:28px;height:28px;border-radius:50%;
+          background:${col};border:3px solid white;
+          box-shadow:0 2px 8px rgba(0,0,0,0.25);
+          display:flex;align-items:center;justify-content:center;
+          font-size:12px;color:white;font-weight:700;
+          transition:transform 0.2s;
+        ">${r.name.charAt(0)}</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
       });
       markersRef.current[r.name] = L.marker(c as [number, number], { icon: ic })
         .addTo(map)
         .bindPopup(
-          `<div style="font-family:'Inter',sans-serif;min-width:180px">
-            <div style="font-weight:700;font-size:14px;margin-bottom:4px;color:#1a1a2e">${r.name}</div>
-            <div style="font-size:11px;color:#6b7280;margin-bottom:6px">${r.sub} · ${r.price}</div>
-            <div style="font-size:12px;line-height:1.5;color:#374151">${r.desc}</div>
-            <div style="font-size:11px;margin-top:8px;color:#3b82f6;font-weight:500">${r.hours}</div>
-          </div>`
+          `<div style="font-family:'Inter',sans-serif;min-width:200px;padding:4px">
+            <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:#1a1a2e">${r.name}</div>
+            <div style="font-size:11px;color:#6b7280;margin-bottom:8px">${r.sub} · ${r.price}</div>
+            <div style="font-size:12px;line-height:1.6;color:#374151">${r.desc}</div>
+            <div style="font-size:11px;margin-top:10px;color:#3b82f6;font-weight:600">${r.hours}</div>
+          </div>`,
+          { maxWidth: 260, className: 'custom-popup' }
         );
     });
   }, []);
 
+  // Initialize map
   useEffect(() => {
     if (!mapRef.current || leafMapRef.current) return;
-    const map = L.map(mapRef.current, { zoomControl: false }).setView([41.7015, -71.1551], 14);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '©OpenStreetMap ©CARTO',
+    const map = L.map(mapRef.current, {
+      zoomControl: false,
+      attributionControl: false,
+    }).setView([41.7015, -71.1551], 14);
+
+    // Use a more visually appealing tile layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd',
       maxZoom: 19,
     }).addTo(map);
+
     L.control.zoom({ position: 'topright' }).addTo(map);
+    L.control.attribution({ position: 'bottomright', prefix: false }).addTo(map);
+
     leafMapRef.current = map;
     addMarkers(RESTAURANTS);
   }, [addMarkers]);
+
+  // Invalidate size when tab becomes visible (fixes grey tiles)
+  useEffect(() => {
+    const map = leafMapRef.current;
+    if (!map) return;
+    const timer = setTimeout(() => map.invalidateSize(), 100);
+    return () => clearTimeout(timer);
+  });
 
   useEffect(() => {
     addMarkers(filtered);
@@ -132,8 +161,19 @@ const EatsTab = () => {
 
   return (
     <>
-      <div ref={mapRef} className="flex-[0_0_40%] min-h-0 relative w-full" />
-      <div className="flex-[0_0_60%] overflow-y-auto bg-background" style={{ padding: '14px 16px 76px' }}>
+      {/* Map container with gradient overlay for polish */}
+      <div className="relative flex-[0_0_45%] min-h-0 w-full">
+        <div ref={mapRef} className="absolute inset-0 z-0" />
+        {/* Bottom gradient fade into list */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--background)))' }} />
+        {/* Restaurant count badge */}
+        <div className="absolute top-3 left-3 z-10 bg-card/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-md border border-border">
+          <span className="text-[11px] font-semibold text-foreground">{filtered.length} spots</span>
+        </div>
+      </div>
+
+      <div className="flex-[0_0_55%] overflow-y-auto bg-background" style={{ padding: '14px 16px 76px' }}>
         <div className="flex gap-2 mb-3 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
           {CATEGORIES.map(c => (
             <button key={c.cat} onClick={() => setActiveCat(c.cat)}
