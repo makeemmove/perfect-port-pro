@@ -36,6 +36,7 @@ const HomeTab = () => {
   const [clock, setClock] = useState('Loading…');
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
+  const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
 
   /* Route & station selection state */
   const isWeekend = useMemo(() => [0, 6].includes(new Date().getDay()), []);
