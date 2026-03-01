@@ -15,7 +15,7 @@ import StatsWidget from './widgets/StatsWidget';
 import ComingUpWidget from './widgets/ComingUpWidget';
 import QuickViewModal from './QuickViewModal';
 
-const DEFAULT_ORDER = ['stats', 'coming-up', 'srta', 'mbta', 'weather'];
+const DEFAULT_ORDER = ['stats', 'coming-up', 'weather', 'srta', 'mbta'];
 const STORAGE_KEY = 'fr-widget-order';
 
 function loadOrder(): string[] {
@@ -37,6 +37,7 @@ const HomeTab = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
+  const [eventOrder, setEventOrder] = useState<number[]>([0, 1, 2, 3, 4, 5]);
 
   /* Route & station selection state */
   const isWeekend = useMemo(() => [0, 6].includes(new Date().getDay()), []);
@@ -193,7 +194,7 @@ const HomeTab = () => {
         remainingBuses={remainingBuses}
       />
     ),
-    'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} onEventClick={setSelectedEvent} />,
+    'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} onEventClick={setSelectedEvent} eventOrder={eventOrder} onReorderEvents={setEventOrder} />,
   };
 
   return (
