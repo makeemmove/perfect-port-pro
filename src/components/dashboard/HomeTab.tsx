@@ -32,7 +32,7 @@ function loadOrder(): string[] {
   return DEFAULT_ORDER;
 }
 
-const HomeTab = () => {
+const HomeTab = ({ onNavigate }: { onNavigate?: (tab: 'eats' | 'events') => void }) => {
   const [clock, setClock] = useState('Loading…');
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
@@ -182,7 +182,7 @@ const HomeTab = () => {
         remainingTrains={remainingTrains}
       />
     ),
-    stats: <StatsWidget eventsThisWeek={eventsThisWeek} restaurantCount={RESTAURANTS.length} />,
+    stats: <StatsWidget eventsThisWeek={eventsThisWeek} restaurantCount={RESTAURANTS.length} onNavigate={onNavigate} />,
     srta: (
       <SrtaWidget
         selectedBusId={selectedBusId}
@@ -200,16 +200,14 @@ const HomeTab = () => {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Fall River</h1>
-          <div className="mono text-[11px] text-muted-foreground mt-0.5">{clock}</div>
-        </div>
-        <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase text-emerald">
+      <div className="text-center">
+        <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase text-emerald mb-1">
           <span className="w-[6px] h-[6px] rounded-full inline-block bg-emerald"
                 style={{ animation: 'live-pulse 2s ease infinite' }} />
           Live
         </div>
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Fall River</h1>
+        <div className="mono text-[11px] text-muted-foreground mt-0.5">{clock}</div>
       </div>
 
       {/* Draggable widgets */}

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import L from 'leaflet';
-import { RESTAURANTS, COORDS, Restaurant } from '@/data/restaurants';
+import { useState } from 'react';
+import { RESTAURANTS } from '@/data/restaurants';
+import type { Restaurant } from '@/data/restaurants';
 import QuickViewModal from './QuickViewModal';
 
 const CATEGORIES = [
@@ -14,207 +14,84 @@ const CATEGORIES = [
   { label: '🥢 Asian', cat: 'Asian' },
 ];
 
-function catCol(s: string) {
-  if (s.includes('Bakery') || s.includes('Coffee')) return '#d97706';
-  if (s === 'Portuguese') return '#dc2626';
-  if (s === 'Seafood') return '#0891b2';
-  if (s === 'Italian') return '#059669';
-  if (s === 'Asian') return '#7c3aed';
-  if (s === 'Casual Dining') return '#ea580c';
-  if (s === 'Specialty') return '#db2777';
-  return '#3b82f6';
-}
+const tagStyles: Record<string, string> = {
+  Portuguese: 'bg-red-50 text-red-600 border border-red-200',
+  'Bakery/Coffee': 'bg-amber-50 text-amber-600 border border-amber-200',
+  Italian: 'bg-emerald-50 text-emerald-600 border border-emerald-200',
+  Seafood: 'bg-cyan-50 text-cyan-600 border border-cyan-200',
+  Asian: 'bg-violet-50 text-violet-600 border border-violet-200',
+  'Casual Dining': 'bg-orange-50 text-orange-600 border border-orange-200',
+  Specialty: 'bg-pink-50 text-pink-600 border border-pink-200',
+};
 
-function catCC(s: string) {
-  if (s.includes('Bakery') || s.includes('Coffee')) return 'c-bakery';
-  if (s === 'Portuguese' || s === 'Seafood') return 'c-steak';
-  return 'c-default';
-}
-
-const SVG_BAKERY = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5">
-    <circle cx="12" cy="8" r="5" /><path d="M3 11h18M7 11v10M17 11v10M5 21h14" />
-  </svg>
-);
-const SVG_STEAK = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5">
-    <path d="M17 9c0-3.87-5-7-5-7S7 5.13 7 9a5 5 0 0 0 10 0z" /><path d="M7 21h10M12 14v7" />
-  </svg>
-);
-const SVG_UTENSILS = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5">
-    <path d="M3 2l1.5 14.5M7.5 2v6.5a3 3 0 0 0 6 0V2M21 2c0 7-3 10-3 10v9" />
-  </svg>
-);
-
-function getIcon(sub: string) {
-  if (sub.includes('Bakery') || sub.includes('Coffee')) return SVG_BAKERY;
-  if (sub === 'Portuguese' || sub === 'Seafood') return SVG_STEAK;
-  return SVG_UTENSILS;
-}
-
-function catIco(s: string) {
-  if (s.includes('Bakery') || s.includes('Coffee')) return 'gold';
-  if (s === 'Portuguese' || s === 'Seafood') return 'crimson';
-  return 'def';
-}
+const leftBarColors: Record<string, string> = {
+  Portuguese: '#dc2626',
+  'Bakery/Coffee': '#d97706',
+  Italian: '#059669',
+  Seafood: '#0891b2',
+  Asian: '#7c3aed',
+  'Casual Dining': '#ea580c',
+  Specialty: '#db2777',
+};
 
 const EatsTab = () => {
   const [activeCat, setActiveCat] = useState('All');
-  const [selected, setSelected] = useState<string | null>(null);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
-  const mapRef = useRef<HTMLDivElement>(null);
-  const leafMapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<Record<string, L.Marker>>({});
 
   const filtered = activeCat === 'All' ? RESTAURANTS : RESTAURANTS.filter(r => r.sub === activeCat);
 
-  const addMarkers = useCallback((list: Restaurant[]) => {
-    const map = leafMapRef.current;
-    if (!map) return;
-    Object.values(markersRef.current).forEach(m => m.remove());
-    markersRef.current = {};
-    list.forEach(r => {
-      const c = COORDS[r.name] || [41.7015, -71.1551];
-      const col = catCol(r.sub);
-      const ic = L.divIcon({
-        className: '',
-        html: `<div style="
-          width:28px;height:28px;border-radius:50%;
-          background:${col};border:3px solid white;
-          box-shadow:0 2px 8px rgba(0,0,0,0.25);
-          display:flex;align-items:center;justify-content:center;
-          font-size:12px;color:white;font-weight:700;
-          transition:transform 0.2s;
-        ">${r.name.charAt(0)}</div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-      });
-      markersRef.current[r.name] = L.marker(c as [number, number], { icon: ic })
-        .addTo(map)
-        .bindPopup(
-          `<div style="font-family:'Inter',sans-serif;min-width:200px;padding:4px">
-            <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:#1a1a2e">${r.name}</div>
-            <div style="font-size:11px;color:#6b7280;margin-bottom:8px">${r.sub} · ${r.price}</div>
-            <div style="font-size:12px;line-height:1.6;color:#374151">${r.desc}</div>
-            <div style="font-size:11px;margin-top:10px;color:#3b82f6;font-weight:600">${r.hours}</div>
-          </div>`,
-          { maxWidth: 260, className: 'custom-popup' }
-        );
-    });
-  }, []);
-
-  // Initialize map
-  useEffect(() => {
-    if (!mapRef.current || leafMapRef.current) return;
-    const map = L.map(mapRef.current, {
-      zoomControl: false,
-      attributionControl: false,
-    }).setView([41.7015, -71.1551], 14);
-
-    // Use a more visually appealing tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map);
-
-    L.control.zoom({ position: 'topright' }).addTo(map);
-    L.control.attribution({ position: 'bottomright', prefix: false }).addTo(map);
-
-    leafMapRef.current = map;
-    addMarkers(RESTAURANTS);
-  }, [addMarkers]);
-
-  // Invalidate size when tab becomes visible (fixes grey tiles)
-  useEffect(() => {
-    const map = leafMapRef.current;
-    if (!map) return;
-    const timer = setTimeout(() => map.invalidateSize(), 100);
-    return () => clearTimeout(timer);
-  });
-
-  useEffect(() => {
-    addMarkers(filtered);
-  }, [activeCat, filtered, addMarkers]);
-
-  const flyTo = (name: string) => {
-    setSelected(name);
-    const c = COORDS[name] || [41.7015, -71.1551];
-    const map = leafMapRef.current;
-    if (map) {
-      map.flyTo(c as [number, number], 17, { duration: 1.2 });
-      setTimeout(() => markersRef.current[name]?.openPopup(), 1300);
-    }
-  };
-
-  const borderColors: Record<string, string> = {
-    'c-bakery': '#d97706',
-    'c-steak': '#dc2626',
-    'c-default': '#d1d5db',
-  };
-
-  const icoStyles: Record<string, React.CSSProperties> = {
-    gold: { background: 'rgba(217,119,6,0.08)', color: '#d97706' },
-    crimson: { background: 'rgba(220,38,38,0.08)', color: '#dc2626' },
-    def: { background: 'rgba(107,114,128,0.06)', color: '#6b7280' },
-  };
-
   return (
-    <>
-      {/* Map container with gradient overlay for polish */}
-      <div className="relative flex-[0_0_45%] min-h-0 w-full">
-        <div ref={mapRef} className="absolute inset-0 z-0" />
-        {/* Bottom gradient fade into list */}
-        <div className="absolute bottom-0 left-0 right-0 h-8 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to bottom, transparent, hsl(var(--background)))' }} />
-        {/* Restaurant count badge */}
-        <div className="absolute top-3 left-3 z-10 bg-card/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-md border border-border">
-          <span className="text-[11px] font-semibold text-foreground">{filtered.length} spots</span>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Eats</h1>
+          <div className="text-xs text-muted-foreground">Restaurants &amp; Cafés</div>
         </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-6 h-6 text-gold">
+          <path d="M3 2l1.5 14.5M7.5 2v6.5a3 3 0 0 0 6 0V2M21 2c0 7-3 10-3 10v9" />
+        </svg>
       </div>
 
-      <div className="flex-[0_0_55%] overflow-y-auto bg-background" style={{ padding: '14px 16px 76px' }}>
-        <div className="flex gap-2 mb-3 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
-          {CATEGORIES.map(c => (
-            <button key={c.cat} onClick={() => setActiveCat(c.cat)}
-              className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-200 whitespace-nowrap border ${
-                activeCat === c.cat
-                  ? 'bg-foreground text-background border-foreground'
-                  : 'bg-card text-muted-foreground border-border hover:border-foreground/20'
-              }`}>
-              {c.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-col gap-2">
-          {filtered.map(r => {
-            const cc = catCC(r.sub);
-            const isSelected = selected === r.name;
-            return (
-              <div key={r.name}
-                onClick={() => flyTo(r.name)}
-                className={`flex items-center gap-3 py-3 px-3.5 rounded-xl cursor-pointer transition-all duration-200 relative overflow-hidden border ${
-                  isSelected ? 'bg-muted border-foreground/15 shadow-card-hover' : 'bg-card border-border shadow-card hover:shadow-card-hover'
-                }`}>
-                <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: borderColors[cc] || '#d1d5db' }} />
-                <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center" style={icoStyles[catIco(r.sub)]}>
-                  {getIcon(r.sub)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis text-foreground">{r.name}</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">{r.sub} · {r.hours}</div>
-                </div>
+      <div className="flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+        {CATEGORIES.map(c => (
+          <button key={c.cat} onClick={() => setActiveCat(c.cat)}
+            className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-200 border ${
+              activeCat === c.cat
+                ? 'bg-foreground text-background border-foreground'
+                : 'bg-card text-muted-foreground border-border hover:border-foreground/20'
+            }`}>
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-2.5">
+        {filtered.length === 0 ? (
+          <div className="text-muted-foreground text-center py-8 text-sm">No restaurants found</div>
+        ) : filtered.map((r, i) => (
+          <div key={i} className="flex gap-3.5 p-4 rounded-xl relative overflow-hidden bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: leftBarColors[r.sub] || '#3b82f6' }} />
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold mb-1 text-foreground">{r.name}</div>
+              <div className="text-xs text-muted-foreground leading-relaxed">
+                {r.desc.length > 90 ? r.desc.slice(0, 90) + '…' : r.desc}
+              </div>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span className={`text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full ${tagStyles[r.sub] || 'bg-muted text-muted-foreground border border-border'}`}>
+                  {r.sub}
+                </span>
+                <span className="text-[11px] text-muted-foreground">{r.hours}</span>
+                <span className="mono text-[11px] text-muted-foreground">{r.price}</span>
                 <button
                   onClick={(ev) => { ev.stopPropagation(); setSelectedRestaurant(r); }}
-                  className="text-[9px] font-semibold tracking-wide uppercase py-[2px] px-2 rounded-full bg-foreground/5 text-foreground border border-border hover:bg-foreground/10 transition-colors flex-shrink-0 mr-1"
+                  className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground border border-border hover:bg-foreground/10 transition-colors"
                 >
-                  Info
+                  More Info
                 </button>
-                <div className="mono text-xs text-muted-foreground flex-shrink-0">{r.price}</div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <QuickViewModal
@@ -227,7 +104,7 @@ const EatsTab = () => {
         url={selectedRestaurant?.url}
         category={selectedRestaurant?.sub}
       />
-    </>
+    </div>
   );
 };
 
