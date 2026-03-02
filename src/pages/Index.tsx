@@ -14,9 +14,10 @@ const Index = () => {
       <div className="flex-1 overflow-hidden relative">
         <div className={`absolute inset-0 overflow-y-auto ${activeTab === 'home' ? 'block' : 'hidden'}`}
              style={{ padding: '18px 16px 76px' }}>
-          <HomeTab />
+          <HomeTab onNavigate={(tab) => setActiveTab(tab as any)} />
         </div>
-        <div className={`absolute inset-0 ${activeTab === 'eats' ? 'flex flex-col' : 'hidden'}`}>
+        <div className={`absolute inset-0 overflow-y-auto ${activeTab === 'eats' ? 'block' : 'hidden'}`}
+             style={{ padding: '18px 16px 76px' }}>
           <EatsTab />
         </div>
         <div className={`absolute inset-0 overflow-y-auto ${activeTab === 'events' ? 'block' : 'hidden'}`}

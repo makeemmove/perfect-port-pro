@@ -35,7 +35,7 @@ export interface WeatherData {
   hourly: { time: string; temp: number; rainProb: number; icon: string; isNow: boolean }[];
 }
 
-const WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=41.7015&longitude=-71.1551&daily=sunrise,sunset&hourly=temperature_2m,wind_speed_10m,precipitation,precipitation_probability&current=temperature_2m,precipitation&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch';
+const WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=41.7015&longitude=-71.1551&daily=sunrise,sunset&hourly=temperature_2m,wind_speed_10m,precipitation,precipitation_probability,weather_code&current=temperature_2m,precipitation,weather_code&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch';
 
 export async function fetchWeather(): Promise<WeatherData | null> {
   try {
@@ -54,13 +54,7 @@ export async function fetchWeather(): Promise<WeatherData | null> {
     const rainProb = d.hourly.precipitation_probability[hIdx] ?? 0;
 
     let label: string, icon: string;
-    const precip = c.precipitation;
-    const prob = rainProb;
-    if (precip > 0.1) { [icon, label] = wcInfo(63); }
-    else if (precip > 0) { [icon, label] = wcInfo(51); }
-    else if (prob > 70) { [icon, label] = ['🌦', 'Likely Rain']; }
-    else if (prob > 40) { [icon, label] = ['⛅', 'Chance of Rain']; }
-    else { [icon, label] = ['🌤', 'Mostly Clear']; }
+    [icon, label] = wcInfo(c.weather_code ?? 0);
 
     let sunrise = '--', sunset = '--', daylight = '--';
     if (d.daily?.sunrise?.[0]) {
@@ -79,8 +73,8 @@ export async function fetchWeather(): Promise<WeatherData | null> {
       const lbl = localT.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
       const temp = Math.round(d.hourly.temperature_2m[idx]);
       const rp = d.hourly.precipitation_probability[idx] ?? 0;
-      const pr = d.hourly.precipitation[idx];
-      const hi = pr > 0.05 ? '🌧' : rp > 60 ? '🌦' : rp > 30 ? '⛅' : '☀️';
+      const wc = d.hourly.weather_code?.[idx] ?? 0;
+      const [hi] = wcInfo(wc);
       hourly.push({ time: i === 0 ? 'Now' : lbl, temp, rainProb: rp, icon: hi, isNow: i === 0 });
     }
 
