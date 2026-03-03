@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ExternalLink, RefreshCw, ArrowLeft } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ExternalLink, RefreshCw, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { NewsArticle } from '@/hooks/useNews';
 
 interface NewsTabProps {
@@ -10,23 +10,22 @@ interface NewsTabProps {
   onRefresh: () => void;
 }
 
-
 const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) => {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground">News</h1>
-          <div className="text-xs text-muted-foreground">
-            Fall River · {lastFetched ? `Updated ${new Date(lastFetched).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` : 'Loading...'}
+          <div className="text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
+            {lastFetched ? `Updated ${new Date(lastFetched).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` : 'Loading...'}
           </div>
         </div>
         <button
           onClick={onRefresh}
           disabled={isLoading}
-          className="p-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          className="p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
@@ -34,19 +33,43 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
 
       {isLoading && articles.length === 0 ? (
         <div className="space-y-3">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="p-4 rounded-xl bg-card border border-border animate-pulse">
-              <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-              <div className="h-3 bg-muted rounded w-full mb-1" />
-              <div className="h-3 bg-muted rounded w-2/3" />
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="p-5 rounded-2xl bg-card border border-border animate-pulse">
+              <div className="h-3 bg-muted rounded-full w-1/4 mb-3" />
+              <div className="h-4 bg-muted rounded w-5/6 mb-2" />
+              <div className="h-3 bg-muted rounded w-full" />
             </div>
           ))}
         </div>
       ) : articles.length === 0 ? (
-        <div className="text-muted-foreground text-center py-8 text-sm">No news articles available</div>
+        <div className="text-muted-foreground text-center py-12 text-sm">No news articles available</div>
       ) : (
-        <div className="flex flex-col gap-2.5">
-          {articles.map((article) => (
+        <div className="flex flex-col gap-3">
+          {/* Featured first article */}
+          {articles.length > 0 && (
+            <div
+              className="group p-5 rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all cursor-pointer relative overflow-hidden"
+              onClick={() => setSelectedArticle(articles[0])}
+            >
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary/60" />
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-primary bg-primary/8 px-2 py-0.5 rounded-full">Latest</span>
+                <span className="text-[10px] text-muted-foreground">{getTimeAgo(articles[0].published_at)}</span>
+              </div>
+              <h3 className="text-base font-bold text-foreground leading-snug mb-2 group-hover:text-primary transition-colors">
+                {articles[0].title}
+              </h3>
+              {articles[0].summary && (
+                <p className="text-xs text-muted-foreground leading-relaxed">{articles[0].summary}</p>
+              )}
+              <div className="flex items-center gap-1 mt-3 text-[10px] font-semibold text-primary uppercase tracking-wide">
+                Read more <ChevronRight className="w-3 h-3" />
+              </div>
+            </div>
+          )}
+
+          {/* Remaining articles in compact list */}
+          {articles.slice(1).map((article) => (
             <NewsCard key={article.id} article={article} onClick={() => setSelectedArticle(article)} />
           ))}
         </div>
@@ -56,15 +79,15 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
       <Dialog open={!!selectedArticle} onOpenChange={(open) => { if (!open) setSelectedArticle(null); }}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg leading-snug pr-6">{selectedArticle?.title}</DialogTitle>
+            <DialogTitle className="text-lg font-bold leading-snug pr-6">{selectedArticle?.title}</DialogTitle>
+            <DialogDescription className="text-[10px] text-muted-foreground mt-1">
+              {selectedArticle ? getTimeAgo(selectedArticle.published_at) : ''}
+            </DialogDescription>
           </DialogHeader>
           {selectedArticle && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-muted-foreground">{getTimeAgo(selectedArticle.published_at)}</span>
-              </div>
+            <div className="space-y-4 pt-2">
               {selectedArticle.content ? (
-                <div className="prose prose-sm max-w-none dark:prose-invert text-foreground text-sm leading-relaxed"
+                <div className="prose prose-sm max-w-none text-foreground text-sm leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: markdownToHtml(selectedArticle.content) }}
                 />
               ) : selectedArticle.summary ? (
@@ -73,7 +96,7 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
               {selectedArticle.source_url && (
                 <button
                   onClick={() => window.open(selectedArticle.source_url, '_blank', 'noopener,noreferrer')}
-                  className="flex items-center gap-2 text-xs text-primary hover:underline"
+                  className="flex items-center gap-2 text-xs font-medium text-primary hover:underline transition-colors"
                 >
                   <ExternalLink className="w-3.5 h-3.5" /> View Original Source
                 </button>
@@ -91,28 +114,24 @@ const NewsCard = ({ article, onClick }: { article: NewsArticle; onClick: () => v
 
   return (
     <div
-      className="p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow cursor-pointer"
+      className="group flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/20 hover:shadow-card-hover transition-all cursor-pointer"
       onClick={onClick}
     >
-      <div className="flex items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-foreground leading-snug mb-1.5">
-            {article.title}
-          </div>
-          {article.summary && (
-            <p className="text-xs text-muted-foreground leading-relaxed mb-2 line-clamp-2">
-              {article.summary}
-            </p>
-          )}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
-          </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[13px] font-semibold text-foreground leading-snug mb-1 group-hover:text-primary transition-colors">
+          {article.title}
         </div>
+        {article.summary && (
+          <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-1">{article.summary}</p>
+        )}
+      </div>
+      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+        <span className="text-[10px] text-muted-foreground whitespace-nowrap">{timeAgo}</span>
+        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
       </div>
     </div>
   );
 };
-
 
 function getTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();

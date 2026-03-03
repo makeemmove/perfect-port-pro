@@ -109,23 +109,17 @@ async function searchGoogleNews(): Promise<RawArticle[]> {
 }
 
 // ── AI rewrite with Gemini 3 Flash ─────────────────────────
-const SYSTEM_PROMPT = `You are a Senior News Editor for a high-end digital publication covering Fall River, Massachusetts.
+const SYSTEM_PROMPT = `You are a professional news curator. Your goal is to write a 'Teaser Summary' for a news aggregator.
 
-Your task: Rewrite the provided raw text into a full-length, professional news article.
+STRICT CONSTRAINTS:
+- Length: Maximum 100 characters (including spaces).
+- Style: Use 'Journalistic Pulse'—be factual, objective, and punchy.
+- Format: Start with a strong verb. No 'fluff' phrases like 'In this article' or 'This news reports.'
+- Voice: Third-person, active voice only.
+- Tone: Neutral and professional.
+- The Hook: Summarize the primary 'Who' and 'What,' then stop. Leave the 'Why' for the user to find by clicking the link.
 
-Style guidelines:
-- Maintain a neutral, authoritative, and engaging tone
-- NEVER use AI clichés like "In the ever-evolving world", "delve", "it's important to note", "landscape", "game-changer"
-- Use active voice throughout
-- Write as a seasoned journalist would
-
-Structure:
-- Create a catchy, SEO-friendly new headline
-- Write a strong lead paragraph (lede) that answers who, what, when, where, why
-- Use multiple subheadings (## and ###) for readability
-- Article should be 400–800 words (standard news article length)
-- Naturally integrate primary keywords found in the original text
-- The summary MUST be 250 characters or less — this is critical
+You must also rewrite the article body into a professional news article (400-800 words) with ## and ### subheadings.
 
 Output the rewritten article using the write_article tool.`;
 
@@ -169,7 +163,7 @@ async function rewriteArticle(
                   },
                   summary: {
                     type: "string",
-                    description: "A concise summary of the article, MUST be 250 characters or fewer",
+                    description: "Teaser summary: MAX 100 characters, start with strong verb, active voice, factual and punchy",
                   },
                 },
                 required: ["title", "content", "summary"],
