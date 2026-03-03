@@ -38,7 +38,7 @@ const ComingUpWidget = ({ upcomingEvents, onEventClick, eventOrder, onReorderEve
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={eventOrder.map(String)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-2 pb-3">
+          <div className="flex flex-col gap-3 pb-3">
             {orderedEvents.map(({ index, event }) => (
               <SortableEventItem
                 key={index}
