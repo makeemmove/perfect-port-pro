@@ -1,12 +1,11 @@
 const TICKER_ITEMS = [
   "Fall River Public Library — Spring 2026 programs now open",
-  "SRTA Bus 101/102/103 — $1.50 cash · $1.25 CharlieCard",
-  "MBTA Commuter Rail · Fall River/New Bedford Line · Zone 7 · $13.25 one-way",
-  "Read Across America Night — March 24 · 6 PM · Free",
-  "Voices Unheard Concert — March 26 · 8 PM · Free",
-  "Battleship Cove Homeschool Day — March 20 · $10-$15",
+  "David Nail Live — March 6 · Narrows Center · $51",
+  "Day of Portugal Festival — June 5-7 · Waterfront Park · Free",
+  "Battleship Cove Homeschool Day — March 20 · $15",
   "AARP Free Tax Prep daily through April 15 · 9 AM–Noon at the Library",
-  "Heritage State Park Spring Programs begin March 15 — Free",
+  "Great Feast of the Holy Ghost — August 20-25 · Kennedy Park · Free",
+  "Easter Scavenger Hunt — April 4 · Battleship Cove · $15",
 ];
 
 const Ticker = () => {

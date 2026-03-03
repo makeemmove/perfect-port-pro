@@ -35,7 +35,7 @@ export interface WeatherData {
   hourly: { time: string; temp: number; rainProb: number; icon: string; isNow: boolean }[];
 }
 
-const WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=41.7015&longitude=-71.1551&daily=sunrise,sunset&hourly=temperature_2m,wind_speed_10m,precipitation,precipitation_probability,weather_code&current=temperature_2m,precipitation,weather_code&timezone=auto&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch';
+const WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=41.7015&longitude=-71.1551&daily=sunrise,sunset&hourly=temperature_2m,wind_speed_10m,precipitation,precipitation_probability,weather_code&current=temperature_2m,precipitation,weather_code&timezone=America/New_York&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch';
 
 export async function fetchWeather(): Promise<WeatherData | null> {
   try {
@@ -46,9 +46,18 @@ export async function fetchWeather(): Promise<WeatherData | null> {
     const now = new Date();
 
     const times: string[] = d.hourly.time;
-    const nowISO = now.toISOString().slice(0, 13);
-    let hIdx = times.findIndex(t => t.startsWith(nowISO));
-    if (hIdx < 0) hIdx = 0;
+
+    // Find closest hourly index by comparing Date objects (handles timezone correctly)
+    let hIdx = 0;
+    const nowMs = now.getTime();
+    for (let i = 0; i < times.length; i++) {
+      const tMs = new Date(times[i]).getTime();
+      if (tMs <= nowMs) {
+        hIdx = i;
+      } else {
+        break;
+      }
+    }
 
     const windNow = d.hourly.wind_speed_10m[hIdx];
     const rainProb = d.hourly.precipitation_probability[hIdx] ?? 0;
