@@ -156,6 +156,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   }, []);
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
+    setActiveId(null);
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setWidgetOrder(prev => {
@@ -166,6 +167,10 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
         return next;
       });
     }
+  }, []);
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
   }, []);
 
   const widgetMap: Record<string, React.ReactNode> = {
