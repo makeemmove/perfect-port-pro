@@ -26,9 +26,9 @@ const MbtaWidget = ({
   trainCountdown, trainUrgent, trainDir, trainDepTime, trainAfter,
   remainingTrains,
 }: MbtaWidgetProps) => (
-  <div className="p-4 rounded-[24px] bg-card shadow-card">
+  <div className="p-4 rounded-[24px] bg-card shadow-card border-0">
     <div className="flex items-center gap-2 mb-2 flex-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-primary flex-shrink-0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-7 h-7 text-primary p-1 rounded-full bg-primary/10 flex-shrink-0">
         <rect x="4" y="3" width="16" height="16" rx="2" />
         <path d="M4 11h16M12 3v8" />
         <circle cx="8.5" cy="14.5" r="1" />
