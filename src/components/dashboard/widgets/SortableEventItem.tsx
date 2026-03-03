@@ -16,14 +16,14 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
     setActivatorNodeRef,
     transform,
     transition,
-    isDragging,
+    isDragging
   } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.85 : 1,
-    zIndex: isDragging ? 50 : 'auto' as const,
+    zIndex: isDragging ? 50 : 'auto' as const
   };
 
   const d = new Date(event.date);
@@ -32,15 +32,15 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2.5 py-2.5 px-4 rounded-2xl bg-card shadow-pill border border-border/40 active:scale-[0.97] transition-transform duration-150 group/event"
-    >
+      className="flex items-center gap-2.5 py-2.5 px-4 rounded-2xl bg-card border border-border/40 active:scale-[0.97] transition-transform duration-150 group/event shadow-card-hover opacity-100">
+      
       <button
         ref={setActivatorNodeRef}
         {...attributes}
         {...listeners}
         className="p-0.5 rounded opacity-30 group-hover/event:opacity-60 hover:!opacity-100 cursor-grab active:cursor-grabbing touch-none text-muted-foreground flex-shrink-0"
-        aria-label="Drag to reorder"
-      >
+        aria-label="Drag to reorder">
+        
         <svg width="10" height="10" viewBox="0 0 14 14" fill="currentColor">
           <circle cx="4" cy="2" r="1.3" />
           <circle cx="10" cy="2" r="1.3" />
@@ -57,16 +57,16 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
       <div className="mono text-[11px] text-muted-foreground flex-shrink-0">
         {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
       </div>
-      {onEventClick && (
-        <button
-          onClick={() => onEventClick(event)}
-          className="text-[9px] font-bold tracking-wider uppercase py-[3px] px-2.5 rounded-md bg-primary/10 text-primary hover:bg-primary/15 transition-colors flex-shrink-0"
-        >
+      {onEventClick &&
+      <button
+        onClick={() => onEventClick(event)}
+        className="text-[9px] font-bold tracking-wider uppercase py-[3px] px-2.5 rounded-md bg-primary/10 text-primary hover:bg-primary/15 transition-colors flex-shrink-0">
+        
           Info
         </button>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 };
 
 export default SortableEventItem;
