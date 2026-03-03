@@ -53,12 +53,6 @@ export default {
         purple: "hsl(var(--purple))",
         emerald: "hsl(var(--emerald))",
         orange: "hsl(var(--orange))",
-        surface: {
-          DEFAULT: "hsl(var(--surface))",
-          hover: "hsl(var(--surface-hover))",
-          border: "hsl(var(--surface-border))",
-          elevated: "hsl(var(--surface-elevated))",
-        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -76,10 +70,10 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        card: "0 16px 48px -8px rgba(0,0,0,0.18), 0 8px 20px -4px rgba(0,0,0,0.10)",
-        "card-hover": "0 20px 56px -8px rgba(0,0,0,0.28), 0 10px 24px -4px rgba(0,0,0,0.14)",
+        glass: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
+        "glass-hover": "0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
         soft: "0 2px 8px rgba(0,0,0,0.04)",
-        pill: "0 3px 10px -2px rgba(0,0,0,0.06), 0 1px 4px -1px rgba(0,0,0,0.03)",
+        pill: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
       },
       keyframes: {
         "accordion-down": {

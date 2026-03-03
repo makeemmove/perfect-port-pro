@@ -32,15 +32,15 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2.5 py-2.5 px-4 rounded-2xl bg-card border border-border/40 active:scale-[0.97] transition-transform duration-150 group/event shadow-card-hover opacity-100">
-      
+      className="flex items-center gap-3 py-3 px-4 glass-card active:scale-[0.98] transition-all duration-300 ease-in-out group/event"
+    >
       <button
         ref={setActivatorNodeRef}
         {...attributes}
         {...listeners}
         className="p-0.5 rounded opacity-30 group-hover/event:opacity-60 hover:!opacity-100 cursor-grab active:cursor-grabbing touch-none text-muted-foreground flex-shrink-0"
-        aria-label="Drag to reorder">
-        
+        aria-label="Drag to reorder"
+      >
         <svg width="10" height="10" viewBox="0 0 14 14" fill="currentColor">
           <circle cx="4" cy="2" r="1.3" />
           <circle cx="10" cy="2" r="1.3" />
@@ -50,23 +50,25 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
           <circle cx="10" cy="12" r="1.3" />
         </svg>
       </button>
-      <div className="w-5 h-5 rounded-full flex items-center justify-center bg-secondary/10 flex-shrink-0"><div className="w-2.5 h-2.5 rounded-full bg-secondary" /></div>
+      <div className="w-5 h-5 rounded-full flex items-center justify-center bg-secondary/10 flex-shrink-0">
+        <div className="w-2.5 h-2.5 rounded-full bg-secondary" />
+      </div>
       <div className="text-[13px] font-semibold flex-1 whitespace-nowrap overflow-hidden text-ellipsis text-foreground">
         {event.name}
       </div>
       <div className="mono text-[11px] text-muted-foreground flex-shrink-0">
         {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
       </div>
-      {onEventClick &&
-      <button
-        onClick={() => onEventClick(event)}
-        className="text-[9px] font-bold tracking-wider uppercase py-[3px] px-2.5 rounded-md bg-primary/10 text-primary hover:bg-primary/15 transition-colors flex-shrink-0">
-        
+      {onEventClick && (
+        <button
+          onClick={() => onEventClick(event)}
+          className="text-[9px] font-bold tracking-wider uppercase py-1 px-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition-colors duration-300 flex-shrink-0"
+        >
           Info
         </button>
-      }
-    </div>);
-
+      )}
+    </div>
+  );
 };
 
 export default SortableEventItem;
