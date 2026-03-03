@@ -201,11 +201,6 @@ const HomeTab = ({ onNavigate }: { onNavigate?: (tab: 'eats' | 'events') => void
     <div className="space-y-3">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase text-emerald mb-1">
-          <span className="w-[6px] h-[6px] rounded-full inline-block bg-emerald"
-                style={{ animation: 'live-pulse 2s ease infinite' }} />
-          Live
-        </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Fall River</h1>
         <div className="mono text-[11px] text-muted-foreground mt-0.5">{clock}</div>
       </div>
