@@ -1,7 +1,7 @@
 import type { WeatherData } from '@/data/weather';
 
 const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => (
-  <div className="p-4 rounded-[24px] bg-card shadow-card">
+  <div className="p-4 rounded-[24px] bg-card shadow-card border-0">
     <div className="flex justify-between items-start">
       <div>
         <div className="text-[10px] font-semibold tracking-widest uppercase text-primary">📍 Fall River, MA</div>
@@ -17,19 +17,19 @@ const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => (
       </div>
     </div>
 
-    <div className="flex gap-4 flex-wrap mt-2 pt-2"><div className="w-full h-px bg-muted/40 -mt-2 mb-0" />
+    <div className="flex gap-4 flex-wrap mt-2 pt-2"><div className="w-full h-px bg-muted/20 -mt-2 mb-0" />
       <DetailItem label="Precip" value={weather ? weather.precip + '"' : '--'} />
       <DetailItem label="Wind" value={weather ? weather.wind + ' mph' : '--'} />
       <DetailItem label="Rain" value={weather ? weather.rainProb + '%' : '--%'} />
     </div>
-    <div className="flex gap-4 flex-wrap mt-1.5 pt-1.5"><div className="w-full h-px bg-muted/40 -mt-1.5 mb-0" />
+    <div className="flex gap-4 flex-wrap mt-1.5 pt-1.5"><div className="w-full h-px bg-muted/20 -mt-1.5 mb-0" />
       <span className="text-[11px] text-amber-600 font-medium">☀ Rise: {weather?.sunrise ?? '--'}</span>
       <span className="text-[11px] text-orange font-medium">☀ Set: {weather?.sunset ?? '--'}</span>
       <span className="text-[11px] text-muted-foreground">{weather?.daylight ?? '--'} daylight</span>
     </div>
 
     {/* Hourly */}
-    <div className="mt-2 pt-2"><div className="w-full h-px bg-muted/40 -mt-2 mb-2" />
+    <div className="mt-2 pt-2"><div className="w-full h-px bg-muted/20 -mt-2 mb-2" />
       <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-1.5">Next 6 Hours</div>
       <div className="flex gap-1.5 overflow-x-auto snap-x snap-mandatory" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
         {weather?.hourly.length ? weather.hourly.map((h, i) => (

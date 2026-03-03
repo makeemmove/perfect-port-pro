@@ -21,9 +21,9 @@ const SrtaWidget = ({
   busCountdown, busDep, busAfter,
   remainingBuses,
 }: SrtaWidgetProps) => (
-  <div className="p-6 rounded-[24px] bg-card shadow-card">
+  <div className="p-4 rounded-[24px] bg-card shadow-card border-0">
     <div className="flex items-center gap-2 mb-3 flex-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-primary flex-shrink-0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-7 h-7 text-primary p-1 rounded-full bg-primary/10 flex-shrink-0">
         <rect x="2" y="7" width="20" height="13" rx="2" />
         <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M6 20v1M18 20v1" />
         <circle cx="7" cy="13" r="1" />
