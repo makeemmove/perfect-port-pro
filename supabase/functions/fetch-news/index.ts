@@ -1,53 +1,59 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const NEWS_SOURCES = [
   { name: "Fall River Reporter", url: "https://fallriverreporter.com/feed/", type: "rss" },
   { name: "Herald News", url: "https://www.heraldnews.com/arcio/rss/category/news/?query=Fall+River", type: "rss" },
-  { name: "Fall River Police Department", url: "https://www.facebook.com/FallRiverPolice/", type: "facebook" },
 ];
 
-interface NewsArticle {
+interface RawArticle {
   title: string;
   source: string;
   url: string;
   publishedAt: string;
-  summary: string;
+  description: string;
   imageUrl?: string;
 }
 
-async function fetchRSS(sourceUrl: string, sourceName: string): Promise<NewsArticle[]> {
+// ── RSS parser ──────────────────────────────────────────────
+async function fetchRSS(sourceUrl: string, sourceName: string): Promise<RawArticle[]> {
   try {
     const res = await fetch(sourceUrl, {
       headers: { "User-Agent": "Mozilla/5.0 FallRiverDashboard/1.0" },
     });
     if (!res.ok) return [];
     const xml = await res.text();
-
-    const articles: NewsArticle[] = [];
-    // Simple XML parsing for RSS items
+    const articles: RawArticle[] = [];
     const items = xml.split("<item>").slice(1);
     for (const item of items.slice(0, 5)) {
-      const title = item.match(/<title><!\[CDATA\[(.*?)\]\]>|<title>(.*?)<\/title>/)?.[1] || item.match(/<title>(.*?)<\/title>/)?.[1] || "";
-      const link = item.match(/<link>(.*?)<\/link>|<link><!\[CDATA\[(.*?)\]\]>/)?.[1] || "";
+      const title =
+        item.match(/<title><!\[CDATA\[(.*?)\]\]>/)?.[1] ||
+        item.match(/<title>(.*?)<\/title>/)?.[1] ||
+        "";
+      const link = item.match(/<link>(.*?)<\/link>/)?.[1] || "";
       const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || "";
-      const desc = item.match(/<description><!\[CDATA\[(.*?)\]\]>|<description>(.*?)<\/description>/s)?.[1] || "";
-      const imgMatch = item.match(/<media:content[^>]*url="([^"]+)"|<enclosure[^>]*url="([^"]+)"|<img[^>]*src="([^"]+)"/);
+      const desc =
+        item.match(/<description><!\[CDATA\[(.*?)\]\]>/s)?.[1] ||
+        item.match(/<description>(.*?)<\/description>/s)?.[1] ||
+        "";
+      const imgMatch = item.match(
+        /<media:content[^>]*url="([^"]+)"|<enclosure[^>]*url="([^"]+)"|<img[^>]*src="([^"]+)"/
+      );
       const imageUrl = imgMatch?.[1] || imgMatch?.[2] || imgMatch?.[3] || undefined;
-
       if (title) {
-        // Strip HTML tags from description
-        const cleanDesc = desc.replace(/<[^>]*>/g, "").trim().slice(0, 300);
+        const cleanDesc = desc.replace(/<[^>]*>/g, "").trim().slice(0, 600);
         articles.push({
           title: title.trim(),
           source: sourceName,
           url: link.trim(),
           publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
-          summary: cleanDesc,
+          description: cleanDesc,
           imageUrl,
         });
       }
@@ -59,30 +65,39 @@ async function fetchRSS(sourceUrl: string, sourceName: string): Promise<NewsArti
   }
 }
 
-async function searchFallRiverNews(): Promise<NewsArticle[]> {
-  // Use a Google News RSS feed for general Fall River news
+// ── Google News search ──────────────────────────────────────
+async function searchGoogleNews(): Promise<RawArticle[]> {
   try {
-    const url = "https://news.google.com/rss/search?q=Fall+River+Massachusetts&hl=en-US&gl=US&ceid=US:en";
+    const url =
+      "https://news.google.com/rss/search?q=Fall+River+Massachusetts&hl=en-US&gl=US&ceid=US:en";
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 FallRiverDashboard/1.0" },
     });
     if (!res.ok) return [];
     const xml = await res.text();
-    const articles: NewsArticle[] = [];
+    const articles: RawArticle[] = [];
     const items = xml.split("<item>").slice(1);
     for (const item of items.slice(0, 5)) {
       const title = item.match(/<title>(.*?)<\/title>/)?.[1] || "";
-      const link = item.match(/<link\/>(.*?)<pubDate>|<link>(.*?)<\/link>/)?.[1]?.trim() || "";
+      const link =
+        item.match(/<link\/>(.*?)<pubDate>/)?.[1]?.trim() ||
+        item.match(/<link>(.*?)<\/link>/)?.[1] ||
+        "";
       const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || "";
       const source = item.match(/<source[^>]*>(.*?)<\/source>/)?.[1] || "News";
-
       if (title) {
         articles.push({
-          title: title.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim(),
+          title: title
+            .replace(/&amp;/g, "&")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&#39;/g, "'")
+            .replace(/&quot;/g, '"')
+            .trim(),
           source: source.replace(/&amp;/g, "&").trim(),
           url: link,
           publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
-          summary: "",
+          description: "",
         });
       }
     }
@@ -93,130 +108,197 @@ async function searchFallRiverNews(): Promise<NewsArticle[]> {
   }
 }
 
-async function rewriteWithAI(articles: NewsArticle[]): Promise<NewsArticle[]> {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY || articles.length === 0) return articles;
+// ── AI rewrite with Gemini 3 Flash ─────────────────────────
+const SYSTEM_PROMPT = `You are a Senior News Editor for a high-end digital publication covering Fall River, Massachusetts.
 
+Your task: Rewrite the provided raw text into a full-length, professional news article.
+
+Style guidelines:
+- Maintain a neutral, authoritative, and engaging tone
+- NEVER use AI clichés like "In the ever-evolving world", "delve", "it's important to note", "landscape", "game-changer"
+- Use active voice throughout
+- Write as a seasoned journalist would
+
+Structure:
+- Create a catchy, SEO-friendly new headline
+- Write a strong lead paragraph (lede) that answers who, what, when, where, why
+- Use multiple subheadings (## and ###) for readability
+- Article should be 400–800 words (standard news article length)
+- Naturally integrate primary keywords found in the original text
+
+Output the rewritten article using the write_article tool.`;
+
+async function rewriteArticle(
+  raw: RawArticle,
+  apiKey: string
+): Promise<{ title: string; content: string; summary: string } | null> {
   try {
-    const articlesForAI = articles.slice(0, 10).map((a, i) => `[${i}] "${a.title}" - ${a.summary || "No description available"}`).join("\n");
-
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          {
-            role: "system",
-            content: "You are a local news editor for Fall River, MA. Rewrite each article headline and summary in your own words. Keep it concise, factual, and engaging. Return a JSON array with objects containing 'index' (number), 'title' (rewritten headline), and 'summary' (1-2 sentence summary). Do NOT add any information not in the original.",
-          },
+          { role: "system", content: SYSTEM_PROMPT },
           {
             role: "user",
-            content: `Rewrite these news articles:\n${articlesForAI}`,
+            content: `Rewrite this article:\n\nHeadline: ${raw.title}\nSource: ${raw.source}\nDescription: ${raw.description || "No description available"}\n\nCreate a full professional news article from this.`,
           },
         ],
         tools: [
           {
             type: "function",
             function: {
-              name: "rewrite_articles",
-              description: "Return rewritten article headlines and summaries",
+              name: "write_article",
+              description: "Save the rewritten news article",
               parameters: {
                 type: "object",
                 properties: {
-                  articles: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        index: { type: "number" },
-                        title: { type: "string" },
-                        summary: { type: "string" },
-                      },
-                      required: ["index", "title", "summary"],
-                      additionalProperties: false,
-                    },
+                  title: {
+                    type: "string",
+                    description: "Catchy, SEO-friendly headline",
+                  },
+                  content: {
+                    type: "string",
+                    description:
+                      "Full article body, 400-800 words, with markdown ## and ### subheadings",
+                  },
+                  summary: {
+                    type: "string",
+                    description: "1-2 sentence summary of the article",
                   },
                 },
-                required: ["articles"],
+                required: ["title", "content", "summary"],
                 additionalProperties: false,
               },
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "rewrite_articles" } },
+        tool_choice: { type: "function", function: { name: "write_article" } },
       }),
     });
 
     if (!response.ok) {
       console.error("AI gateway error:", response.status);
-      return articles;
+      return null;
     }
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) return articles;
+    if (!toolCall) return null;
 
-    const rewritten = JSON.parse(toolCall.function.arguments);
-    const rewrittenArticles = rewritten.articles || [];
-
-    for (const rw of rewrittenArticles) {
-      if (rw.index >= 0 && rw.index < articles.length) {
-        articles[rw.index].title = rw.title;
-        articles[rw.index].summary = rw.summary;
-      }
-    }
-
-    return articles;
+    return JSON.parse(toolCall.function.arguments);
   } catch (e) {
     console.error("AI rewrite error:", e);
-    return articles;
+    return null;
   }
 }
 
+// ── Main handler ────────────────────────────────────────────
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Fetch from all sources in parallel
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // 1. Scrape RSS feeds in parallel
     const [reporterArticles, heraldArticles, googleArticles] = await Promise.all([
       fetchRSS(NEWS_SOURCES[0].url, NEWS_SOURCES[0].name),
       fetchRSS(NEWS_SOURCES[1].url, NEWS_SOURCES[1].name),
-      searchFallRiverNews(),
+      searchGoogleNews(),
     ]);
 
-    // Combine and sort by date
-    let allArticles = [...reporterArticles, ...heraldArticles, ...googleArticles];
-    allArticles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    let allRaw = [...reporterArticles, ...heraldArticles, ...googleArticles];
 
     // Deduplicate by similar titles
     const seen = new Set<string>();
-    allArticles = allArticles.filter((a) => {
+    allRaw = allRaw.filter((a) => {
       const key = a.title.toLowerCase().slice(0, 40);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
 
-    // Limit to 15 articles
-    allArticles = allArticles.slice(0, 15);
+    // 2. Check which URLs already exist in DB
+    const urls = allRaw.map((a) => a.url).filter(Boolean);
+    const { data: existing } = await supabase
+      .from("articles")
+      .select("source_url")
+      .in("source_url", urls);
 
-    // Rewrite with AI
-    allArticles = await rewriteWithAI(allArticles);
+    const existingUrls = new Set((existing || []).map((e: any) => e.source_url));
+    const newArticles = allRaw.filter((a) => a.url && !existingUrls.has(a.url));
 
-    return new Response(JSON.stringify({ articles: allArticles, fetchedAt: new Date().toISOString() }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.log(`Found ${allRaw.length} scraped, ${existingUrls.size} exist, ${newArticles.length} new`);
+
+    // 3. Rewrite new articles with AI and insert into DB
+    if (LOVABLE_API_KEY && newArticles.length > 0) {
+      // Process up to 5 new articles per run to stay within rate limits
+      for (const raw of newArticles.slice(0, 5)) {
+        const rewritten = await rewriteArticle(raw, LOVABLE_API_KEY);
+        if (rewritten) {
+          const { error: insertError } = await supabase.from("articles").insert({
+            source_url: raw.url,
+            source_name: raw.source,
+            title: rewritten.title,
+            content: rewritten.content,
+            summary: rewritten.summary,
+            original_title: raw.title,
+            image_url: raw.imageUrl || null,
+            status: "published",
+            published_at: raw.publishedAt,
+          });
+          if (insertError) {
+            console.error("Insert error:", insertError.message);
+          }
+        } else {
+          // Fallback: insert without AI rewrite
+          await supabase.from("articles").insert({
+            source_url: raw.url,
+            source_name: raw.source,
+            title: raw.title,
+            content: raw.description || "",
+            summary: raw.description?.slice(0, 200) || "",
+            original_title: raw.title,
+            image_url: raw.imageUrl || null,
+            status: "published",
+            published_at: raw.publishedAt,
+          });
+        }
+      }
+    }
+
+    // 4. Return latest 15 articles from DB
+    const { data: articles, error: fetchError } = await supabase
+      .from("articles")
+      .select("*")
+      .eq("status", "published")
+      .order("published_at", { ascending: false })
+      .limit(15);
+
+    if (fetchError) throw fetchError;
+
+    return new Response(
+      JSON.stringify({ articles: articles || [], fetchedAt: new Date().toISOString() }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (e) {
     console.error("fetch-news error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error", articles: [] }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        error: e instanceof Error ? e.message : "Unknown error",
+        articles: [],
+      }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });

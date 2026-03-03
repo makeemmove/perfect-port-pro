@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { NewsArticle } from '@/hooks/useNews';
-import { ExternalLink } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -15,9 +14,10 @@ import MbtaWidget from './widgets/MbtaWidget';
 import SrtaWidget from './widgets/SrtaWidget';
 import StatsWidget from './widgets/StatsWidget';
 import ComingUpWidget from './widgets/ComingUpWidget';
+import NewsPreviewWidget from './widgets/NewsPreviewWidget';
 import QuickViewModal from './QuickViewModal';
 
-const DEFAULT_ORDER = ['stats', 'coming-up', 'weather', 'srta', 'mbta'];
+const DEFAULT_ORDER = ['stats', 'coming-up', 'weather', 'srta', 'mbta', 'news'];
 const STORAGE_KEY = 'fr-widget-order';
 
 function loadOrder(): string[] {
@@ -25,7 +25,6 @@ function loadOrder(): string[] {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved) as string[];
-      // Validate all default IDs are present
       if (DEFAULT_ORDER.every(id => parsed.includes(id)) && parsed.length === DEFAULT_ORDER.length) {
         return parsed;
       }
@@ -60,8 +59,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const [busCountdown, setBusCountdown] = useState('--:--');
   const [busDep, setBusDep] = useState('--');
   const [busAfter, setBusAfter] = useState('Next: --');
-
-  /* Remaining departures for popovers */
   const [remainingTrains, setRemainingTrains] = useState<{ time: string; dir: string }[]>([]);
   const [remainingBuses, setRemainingBuses] = useState<string[]>([]);
 
@@ -198,6 +195,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
       />
     ),
     'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} onEventClick={setSelectedEvent} eventOrder={eventOrder} onReorderEvents={setEventOrder} />,
+    news: <NewsPreviewWidget articles={newsArticles || []} onNewsClick={onNewsClick} />,
   };
 
   return (
@@ -222,41 +220,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
           ))}
         </SortableContext>
       </DndContext>
-
-      {/* News Preview */}
-      {newsArticles && newsArticles.length > 0 && (
-        <>
-          <div className="flex items-center gap-3 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mt-2
-                          before:flex-1 before:h-px before:bg-border
-                          after:flex-1 after:h-px after:bg-border">
-            📰 Latest News
-          </div>
-          <div className="flex flex-col gap-2">
-            {newsArticles.slice(0, 3).map((article, i) => (
-              <div
-                key={i}
-                className="p-3 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow cursor-pointer"
-                onClick={() => article.url && window.open(article.url, '_blank', 'noopener,noreferrer')}
-              >
-                <div className="text-sm font-semibold text-foreground leading-snug mb-1">{article.title}</div>
-                {article.summary && (
-                  <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-1">{article.summary}</p>
-                )}
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[10px] font-semibold text-primary">{article.source}</span>
-                  <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
-                </div>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={onNewsClick}
-            className="w-full py-2.5 rounded-xl bg-foreground/5 text-foreground text-[11px] font-semibold tracking-wide uppercase border border-border hover:bg-foreground/10 transition-colors"
-          >
-            View All News →
-          </button>
-        </>
-      )}
 
       <QuickViewModal
         open={!!selectedEvent}

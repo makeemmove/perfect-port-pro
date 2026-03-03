@@ -2,15 +2,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface NewsArticle {
+  id: string;
   title: string;
-  source: string;
-  url: string;
-  publishedAt: string;
-  summary: string;
-  imageUrl?: string;
+  source_name: string;
+  source_url: string;
+  content: string | null;
+  summary: string | null;
+  original_title: string | null;
+  image_url: string | null;
+  published_at: string;
+  status: string;
+  created_at: string;
 }
 
-const CACHE_KEY = 'fr-news-cache';
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 export function useNews() {
@@ -18,27 +22,29 @@ export function useNews() {
   const [isLoading, setIsLoading] = useState(false);
   const [lastFetched, setLastFetched] = useState<string | null>(null);
 
-  const fetchNews = useCallback(async () => {
+  const fetchFromDB = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('fetch-news');
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(15);
+
       if (error) throw error;
-      if (data?.articles) {
-        setArticles(data.articles);
-        setLastFetched(data.fetchedAt || new Date().toISOString());
-        try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify({ articles: data.articles, fetchedAt: data.fetchedAt }));
-        } catch { /* ignore */ }
+      if (data) {
+        setArticles(data as NewsArticle[]);
+        setLastFetched(new Date().toISOString());
       }
     } catch (e) {
-      console.error('Failed to fetch news:', e);
-      // Try loading from cache
+      console.error('Failed to fetch articles from DB:', e);
+      // Fallback: try edge function directly
       try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          setArticles(parsed.articles || []);
-          setLastFetched(parsed.fetchedAt || null);
+        const { data, error } = await supabase.functions.invoke('fetch-news');
+        if (!error && data?.articles) {
+          setArticles(data.articles);
+          setLastFetched(data.fetchedAt || new Date().toISOString());
         }
       } catch { /* ignore */ }
     } finally {
@@ -47,20 +53,10 @@ export function useNews() {
   }, []);
 
   useEffect(() => {
-    // Load cache first for instant display
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        setArticles(parsed.articles || []);
-        setLastFetched(parsed.fetchedAt || null);
-      }
-    } catch { /* ignore */ }
-
-    fetchNews();
-    const interval = setInterval(fetchNews, REFRESH_INTERVAL);
+    fetchFromDB();
+    const interval = setInterval(fetchFromDB, REFRESH_INTERVAL);
     return () => clearInterval(interval);
-  }, [fetchNews]);
+  }, [fetchFromDB]);
 
-  return { articles, isLoading, lastFetched, refetch: fetchNews };
+  return { articles, isLoading, lastFetched, refetch: fetchFromDB };
 }
