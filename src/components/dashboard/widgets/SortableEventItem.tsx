@@ -60,7 +60,7 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
       {onEventClick && (
         <button
           onClick={() => onEventClick(event)}
-          className="text-[9px] font-semibold tracking-wide uppercase py-[2px] px-2 rounded-full bg-muted text-primary hover:bg-muted/80 transition-colors flex-shrink-0"
+          className="text-[9px] font-semibold tracking-wide uppercase py-[2px] px-2 rounded-full bg-muted text-blue-700 hover:bg-muted/80 transition-colors flex-shrink-0"
         >
           Info
         </button>
