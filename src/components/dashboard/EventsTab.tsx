@@ -103,7 +103,7 @@ const EventsTab = () => {
               const cc = evClassMap[e.sub] || 'arts';
 
               return (
-                <div key={`${group.month}-${i}`} className="flex gap-3.5 p-4 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover active:scale-[0.98] hover:scale-[1.01] transition-all duration-150">
+                <div key={`${group.month}-${i}`} className="flex gap-3.5 p-5 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover active:scale-[0.98] hover:scale-[1.01] transition-all duration-150">
                   <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[24px]" style={{ background: leftBarColors[cc] || '#8b5cf6' }} />
                   <div className="flex-shrink-0 w-[50px] text-center flex flex-col items-center justify-center rounded-lg py-2 px-1 bg-muted/60">
                     <div className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">{mo}</div>
@@ -123,7 +123,7 @@ const EventsTab = () => {
                       <span className="text-[11px] text-muted-foreground">{e.cost}</span>
                       <button
                         onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
-                        className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground hover:bg-foreground/10 active:scale-[0.98] transition-all duration-150"
+                        className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-muted text-primary hover:bg-muted/80 active:scale-[0.98] transition-all duration-150"
                       >
                         More Info
                       </button>
