@@ -22,9 +22,10 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
       label: 'Eats',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5" strokeWidth={2}>
-          <path d="M11 2v6.5c0 1.38-1.12 2.5-2.5 2.5S6 9.88 6 8.5V2" />
-          <path d="M8.5 2v6.5" />
-          <path d="M8.5 11v11" />
+          <rect x="3" y="3" width="18" height="18" rx="4" />
+          <path d="M13 7v4c0 .8-.7 1.5-1.5 1.5S10 11.8 10 11V7" />
+          <path d="M11.5 7v4" />
+          <path d="M11.5 12.5v4.5" />
         </svg>
       ),
     },

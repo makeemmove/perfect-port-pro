@@ -45,7 +45,10 @@ function groupByMonth(events: CityEvent[]): { month: string; events: CityEvent[]
     if (!groups[key]) groups[key] = [];
     groups[key].push(e);
   }
-  return Object.entries(groups).map(([month, events]) => ({ month, events }));
+  return Object.entries(groups).map(([month, evts]) => ({
+    month,
+    events: evts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+  }));
 }
 
 const EventsTab = () => {

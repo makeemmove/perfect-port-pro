@@ -44,7 +44,7 @@ const MbtaWidget = ({
 
     <div className="flex flex-wrap gap-2 mb-3">
       <Select value={selectedTrainId} onValueChange={setSelectedTrainId}>
-        <SelectTrigger className="h-8 w-auto min-w-[180px] text-[11px] bg-muted/50 rounded-full px-3 gap-1.5 border-none">
+        <SelectTrigger className="h-7 w-auto min-w-[140px] text-[11px] bg-muted/50 rounded-full px-3 gap-1.5 border-none">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -54,7 +54,7 @@ const MbtaWidget = ({
         </SelectContent>
       </Select>
       <Select value={selectedStation} onValueChange={setSelectedStation}>
-        <SelectTrigger className="h-8 w-auto min-w-[140px] text-[11px] bg-muted/50 rounded-full px-3 gap-1.5 border-none">
+        <SelectTrigger className="h-7 w-auto min-w-[120px] text-[11px] bg-muted/50 rounded-full px-3 gap-1.5 border-none">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -64,29 +64,7 @@ const MbtaWidget = ({
         </SelectContent>
       </Select>
     </div>
-
-    <Popover>
-      <PopoverTrigger asChild>
-        <button className="text-sm font-bold text-foreground hover:text-primary transition-colors duration-300 cursor-pointer text-left">
-          {trainRoute.name} <span className="text-[10px] text-muted-foreground">▾</span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64 p-2 rounded-2xl" align="start">
-        <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2 px-2">Select Route</div>
-        {MBTA_ROUTES.map((r) => (
-          <button
-            key={r.id}
-            onClick={() => setSelectedTrainId(r.id)}
-            className={`w-full text-left text-[12px] py-2 px-2 rounded-xl transition-colors duration-300 ${
-              r.id === selectedTrainId ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50 text-foreground'
-            }`}
-          >
-            {r.name}
-          </button>
-        ))}
-      </PopoverContent>
-    </Popover>
-    <div className="text-[11px] text-muted-foreground mt-0.5">{trainDir}</div>
+    <div className="text-[11px] text-muted-foreground">{trainDir}</div>
 
     <div className="flex justify-between items-center mt-4">
       <Popover>
