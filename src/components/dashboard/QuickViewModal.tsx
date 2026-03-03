@@ -44,35 +44,35 @@ const QuickViewModal = ({
   category,
 }: QuickViewModalProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-w-md rounded-[24px] bg-card shadow-card-hover backdrop-blur-xl sm:rounded-[24px]">
+    <DialogContent className="max-w-md rounded-[20px] bg-card/95 backdrop-blur-[15px] shadow-glass-hover sm:rounded-[20px]">
       <DialogHeader>
         <DialogTitle className="text-lg font-bold text-foreground leading-tight pr-6">
           {title}
         </DialogTitle>
         {category && (
           <span
-            className={`inline-block w-fit mt-1 text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full ${tagColors[category] || 'bg-muted text-muted-foreground'}`}
+            className={`inline-block w-fit mt-1.5 text-[10px] font-semibold tracking-wide uppercase py-1 px-2.5 rounded-full ${tagColors[category] || 'bg-muted text-muted-foreground'}`}
           >
             {category}
           </span>
         )}
       </DialogHeader>
 
-      <div className="space-y-3 mt-1">
+      <div className="space-y-4 mt-2">
         {description && (
           <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
         )}
 
         {location && (
           <div className="flex items-start gap-2 text-sm text-foreground">
-            <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" strokeWidth={2} />
             <span>{location}</span>
           </div>
         )}
 
         {cost && (
           <div className="flex items-center gap-2 text-sm text-foreground">
-            <DollarSign className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <DollarSign className="w-4 h-4 text-muted-foreground flex-shrink-0" strokeWidth={2} />
             <span>{cost}</span>
           </div>
         )}
@@ -80,9 +80,9 @@ const QuickViewModal = ({
         {url && (
           <button
             onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
-            className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-full bg-foreground text-background text-sm font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+            className="w-full mt-2 flex items-center justify-center gap-2 py-3 px-4 rounded-full bg-foreground text-background text-sm font-semibold transition-all duration-300 ease-in-out hover:opacity-90 active:scale-[0.98]"
           >
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="w-4 h-4" strokeWidth={2} />
             Visit Website
           </button>
         )}

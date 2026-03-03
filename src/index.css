@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,14 +6,14 @@
 
 @layer base {
   :root {
-    --background: 0 0% 96%;
-    --foreground: 220 20% 12%;
+    --background: 210 20% 98%;
+    --foreground: 210 29% 17%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 12%;
+    --card-foreground: 210 29% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 12%;
+    --popover-foreground: 210 29% 17%;
 
     --primary: 203 100% 38%;
     --primary-foreground: 0 0% 100%;
@@ -22,39 +22,42 @@
     --secondary-foreground: 0 0% 100%;
 
     --muted: 210 20% 96%;
-    --muted-foreground: 220 10% 46%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 42 100% 50%;
+    --accent: 43 74% 52%;
     --accent-foreground: 0 0% 10%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 10% 90%;
-    --input: 210 20% 93%;
+    --border: 214 14% 89%;
+    --input: 214 14% 89%;
     --ring: 203 100% 38%;
 
-    --radius: 1.5rem;
+    --radius: 1.25rem;
 
     /* Custom palette */
-    --gold: 42 96% 53%;
+    --gold: 43 74% 52%;
     --crimson: 0 70% 50%;
     --blue: 203 100% 38%;
     --purple: 260 60% 55%;
     --emerald: 160 84% 39%;
     --orange: 25 95% 53%;
-    --surface: 0 0% 100%;
-    --surface-hover: 210 20% 96%;
-    --surface-border: 210 20% 96%;
-    --surface-elevated: 0 0% 100%;
+
+    /* Glass surface tokens */
+    --glass-bg: 0 0% 100% / 0.95;
+    --glass-blur: 15px;
+    --glass-border: 214 14% 89%;
+    --glass-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+    --glass-shadow-hover: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 20% 12%;
+    --sidebar-foreground: 210 29% 17%;
     --sidebar-primary: 203 100% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 260 60% 55%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 210 20% 96%;
+    --sidebar-border: 214 14% 89%;
     --sidebar-ring: 203 100% 38%;
   }
 }
@@ -71,20 +74,37 @@
     background: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    line-height: 1.7;
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-weight: 800;
     line-height: 1.2;
+    letter-spacing: -0.02em;
   }
 }
 
+/* Utility classes */
 .mono {
   font-family: 'JetBrains Mono', monospace;
+}
+
+.glass-card {
+  background: hsla(var(--glass-bg));
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid hsl(var(--glass-border));
+  box-shadow: var(--glass-shadow);
+  border-radius: 20px;
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.glass-card:hover {
+  box-shadow: var(--glass-shadow-hover);
 }
 
 /* Ticker */
@@ -108,16 +128,17 @@
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(220 13% 85%); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: hsl(215 16% 85%); border-radius: 4px; }
 
-/* Leaflet overrides — light theme */
-.leaflet-container { background: hsl(220 14% 96%) !important; }
+/* Leaflet overrides */
+.leaflet-container { background: hsl(210 20% 98%) !important; }
 .leaflet-popup-content-wrapper {
-  background: hsl(0 0% 100%) !important;
-  color: hsl(220 20% 12%) !important;
-  border: 1px solid hsl(220 13% 91%) !important;
-  border-radius: 14px !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08) !important;
+  background: hsla(var(--glass-bg)) !important;
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--glass-border)) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--glass-shadow) !important;
 }
 .leaflet-popup-tip { background: hsl(0 0% 100%) !important; }
-.leaflet-popup-close-button { color: hsl(220 10% 46%) !important; }
+.leaflet-popup-close-button { color: hsl(var(--muted-foreground)) !important; }

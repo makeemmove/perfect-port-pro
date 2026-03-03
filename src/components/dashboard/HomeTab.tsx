@@ -41,7 +41,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const upcomingCount = useMemo(() => EVENTS.filter(e => new Date(e.date) >= new Date()).length, []);
   const [eventOrder, setEventOrder] = useState<number[]>(() => Array.from({ length: Math.min(upcomingCount, 6) }, (_, i) => i));
 
-  /* Route & station selection state */
   const isWeekend = useMemo(() => [0, 6].includes(new Date().getDay()), []);
   const [selectedTrainId, setSelectedTrainId] = useState(isWeekend ? 'weekend-inbound' : 'weekday-inbound');
   const [selectedStation, setSelectedStation] = useState<string>(MBTA_STATIONS[0]);
@@ -50,7 +49,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const trainRoute = useMemo(() => MBTA_ROUTES.find(r => r.id === selectedTrainId) ?? MBTA_ROUTES[0], [selectedTrainId]);
   const busRoute = useMemo(() => SRTA_ROUTES.find(r => r.id === selectedBusId) ?? SRTA_ROUTES[0], [selectedBusId]);
 
-  /* Transit countdown state */
   const [trainCountdown, setTrainCountdown] = useState('--:--');
   const [trainUrgent, setTrainUrgent] = useState(false);
   const [trainDir, setTrainDir] = useState('Calculating…');
@@ -83,7 +81,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
 
     const ns = nowSec();
 
-    /* Train — station-specific logic */
     const trainDeps = trainRoute.departures;
     let tn: { time: string; dir: string; ds: number } | null = null;
     let ta: { time: string; dir: string } | null = null;
@@ -114,7 +111,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
       setTrainAfter('Service resumes tomorrow');
     }
 
-    /* Bus */
     const busDeps = busRoute.departures;
     let bn: { time: string; ds: number } | null = null;
     let ba: { time: string } | null = null;
@@ -199,11 +195,13 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="text-center pt-2">
-        <h1 className="text-4xl font-black text-foreground" style={{ letterSpacing: '-0.06em' }}>Fall River <span className="text-primary font-black">Connect</span></h1>
-        <div className="mono text-[11px] text-muted-foreground mt-1">{clock}</div>
+      <div className="text-center pt-4 pb-2">
+        <h1 className="text-4xl font-extrabold text-foreground" style={{ letterSpacing: '-0.03em' }}>
+          Fall River <span className="text-primary">Connect</span>
+        </h1>
+        <div className="mono text-[11px] text-muted-foreground mt-2">{clock}</div>
       </div>
 
       {/* Draggable widgets */}

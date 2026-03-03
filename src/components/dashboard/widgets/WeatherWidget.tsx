@@ -1,60 +1,79 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import type { WeatherData } from '@/data/weather';
 
-const WeatherWidget = ({ weather }: {weather: WeatherData | null;}) =>
-<div className="p-4 bg-card shadow-card-hover border border-border/60 rounded-[20px]">
-    <div className="flex justify-between items-start">
-      <div>
-        <div className="text-[10px] font-semibold tracking-widest uppercase text-primary">📍 Fall River, MA</div>
-        <div className="mono text-4xl font-light leading-none text-foreground mt-1">
-          {weather ? weather.temp : '--'}<sup className="text-base align-super font-normal">°F</sup>
-        </div>
-        <div className="text-sm text-muted-foreground mt-1">
-          {weather ? weather.label : 'Fetching weather…'}
-        </div>
-      </div>
-      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-[32px] leading-none">
-        {weather ? weather.icon : '🌤'}
-      </div>
-    </div>
-
-    <div className="flex gap-4 flex-wrap mt-2 pt-2 border-t border-border/30">
-      <DetailItem label="Precip" value={weather ? weather.precip + '"' : '--'} />
-      <DetailItem label="Wind" value={weather ? weather.wind + ' mph' : '--'} />
-      <DetailItem label="Rain" value={weather ? weather.rainProb + '%' : '--%'} />
-    </div>
-    <div className="flex gap-4 flex-wrap mt-1.5 pt-1.5 border-t border-border/30">
-      <span className="text-[11px] text-amber-600 font-medium">☀ Rise: {weather?.sunrise ?? '--'}</span>
-      <span className="text-[11px] text-orange font-medium">☀ Set: {weather?.sunset ?? '--'}</span>
-      <span className="text-[11px] text-muted-foreground">{weather?.daylight ?? '--'} daylight</span>
-    </div>
-
-    {/* Hourly */}
-    <div className="mt-2 pt-2 border-t border-border/30">
-      <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-1.5">Next 6 Hours</div>
-      <div className="flex gap-1.5 overflow-x-auto snap-x snap-mandatory" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-        {weather?.hourly.length ? weather.hourly.map((h, i) =>
-      <div key={i} className={`flex-shrink-0 snap-start flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-2xl min-w-[46px] transition-colors ${
-      h.isNow ?
-      'bg-primary/[0.06] shadow-soft' :
-      'bg-muted/50'}`
-      }>
-            <div className="mono text-[10px] text-muted-foreground">{h.time}</div>
-            <div className="text-base leading-none">{h.icon}</div>
-            <div className="mono text-[13px] font-semibold text-foreground">{h.temp}°</div>
-            <div className="text-[10px] text-primary font-medium">{h.rainProb}%</div>
+const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => {
+  if (!weather) {
+    return (
+      <div className="glass-card p-6">
+        <div className="flex justify-between items-start">
+          <div className="space-y-3 flex-1">
+            <Skeleton className="h-3 w-28 rounded-full" />
+            <Skeleton className="h-10 w-20 rounded-lg" />
+            <Skeleton className="h-4 w-36 rounded-full" />
           </div>
-      ) :
-      <div className="text-[11px] text-muted-foreground py-2">Loading…</div>
-      }
+          <Skeleton className="w-10 h-10 rounded-full" />
+        </div>
+        <div className="flex gap-4 mt-4 pt-4 border-t border-border/30">
+          <Skeleton className="h-3 w-16 rounded-full" />
+          <Skeleton className="h-3 w-20 rounded-full" />
+          <Skeleton className="h-3 w-14 rounded-full" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="glass-card p-6">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="text-[10px] font-semibold tracking-widest uppercase text-primary">📍 Fall River, MA</div>
+          <div className="mono text-4xl font-light leading-none text-foreground mt-2">
+            {weather.temp}<sup className="text-base align-super font-normal">°F</sup>
+          </div>
+          <div className="text-sm text-muted-foreground mt-1.5">{weather.label}</div>
+        </div>
+        <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center text-[36px] leading-none">
+          {weather.icon}
+        </div>
+      </div>
+
+      <div className="flex gap-4 flex-wrap mt-4 pt-4 border-t border-border/30">
+        <DetailItem label="Precip" value={weather.precip + '"'} />
+        <DetailItem label="Wind" value={weather.wind + ' mph'} />
+        <DetailItem label="Rain" value={weather.rainProb + '%'} />
+      </div>
+      <div className="flex gap-4 flex-wrap mt-2 pt-2 border-t border-border/30">
+        <span className="text-[11px] text-accent font-medium">☀ Rise: {weather.sunrise}</span>
+        <span className="text-[11px] text-accent font-medium">☀ Set: {weather.sunset}</span>
+        <span className="text-[11px] text-muted-foreground">{weather.daylight} daylight</span>
+      </div>
+
+      {/* Hourly */}
+      <div className="mt-4 pt-4 border-t border-border/30">
+        <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">Next 6 Hours</div>
+        <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+          {weather.hourly.length ? weather.hourly.map((h, i) => (
+            <div key={i} className={`flex-shrink-0 snap-start flex flex-col items-center gap-0.5 py-2 px-2.5 rounded-2xl min-w-[48px] transition-all duration-300 ease-in-out ${
+              h.isNow ? 'bg-primary/[0.06] shadow-soft' : 'bg-muted/50'
+            }`}>
+              <div className="mono text-[10px] text-muted-foreground">{h.time}</div>
+              <div className="text-base leading-none">{h.icon}</div>
+              <div className="mono text-[13px] font-semibold text-foreground">{h.temp}°</div>
+              <div className="text-[10px] text-primary font-medium">{h.rainProb}%</div>
+            </div>
+          )) : (
+            <div className="text-[11px] text-muted-foreground py-2">Loading…</div>
+          )}
+        </div>
       </div>
     </div>
-  </div>;
+  );
+};
 
-
-const DetailItem = ({ label, value }: {label: string;value: string;}) =>
-<div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+const DetailItem = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
     {label}: <strong className="text-foreground font-medium">{value}</strong>
-  </div>;
-
+  </div>
+);
 
 export default WeatherWidget;

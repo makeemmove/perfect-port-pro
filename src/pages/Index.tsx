@@ -15,22 +15,20 @@ const Index = () => {
     <div className="flex flex-col h-[100dvh]">
       <Ticker />
       <div className="flex-1 overflow-hidden relative">
-        <div className={`absolute inset-0 overflow-y-auto ${activeTab === 'home' ? 'block' : 'hidden'}`}
-             style={{ padding: '12px 16px 76px' }}>
-          <HomeTab onNavigate={(tab) => setActiveTab(tab as any)} newsArticles={articles} onNewsClick={() => setActiveTab('news')} />
-        </div>
-        <div className={`absolute inset-0 overflow-y-auto ${activeTab === 'eats' ? 'block' : 'hidden'}`}
-             style={{ padding: '12px 16px 76px' }}>
-          <EatsTab />
-        </div>
-        <div className={`absolute inset-0 overflow-y-auto ${activeTab === 'events' ? 'block' : 'hidden'}`}
-             style={{ padding: '12px 16px 76px' }}>
-          <EventsTab />
-        </div>
-        <div className={`absolute inset-0 overflow-y-auto ${activeTab === 'news' ? 'block' : 'hidden'}`}
-             style={{ padding: '12px 16px 76px' }}>
-          <NewsTab articles={articles} isLoading={isLoading} lastFetched={lastFetched} onRefresh={refetch} />
-        </div>
+        {(['home', 'eats', 'events', 'news'] as const).map(tab => (
+          <div
+            key={tab}
+            className={`absolute inset-0 overflow-y-auto ${activeTab === tab ? 'block' : 'hidden'}`}
+            style={{ padding: '16px 24px 84px' }}
+          >
+            <div className="max-w-lg mx-auto">
+              {tab === 'home' && <HomeTab onNavigate={(t) => setActiveTab(t as any)} newsArticles={articles} onNewsClick={() => setActiveTab('news')} />}
+              {tab === 'eats' && <EatsTab />}
+              {tab === 'events' && <EventsTab />}
+              {tab === 'news' && <NewsTab articles={articles} isLoading={isLoading} lastFetched={lastFetched} onRefresh={refetch} />}
+            </div>
+          </div>
+        ))}
       </div>
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
