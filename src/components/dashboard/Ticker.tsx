@@ -1,19 +1,27 @@
-const TICKER_ITEMS = [
-  "Fall River Public Library — Spring 2026 programs now open",
-  "David Nail Live — March 6 · Narrows Center · $51",
-  "Day of Portugal Festival — June 5-7 · Waterfront Park · Free",
-  "Battleship Cove Homeschool Day — March 20 · $15",
-  "AARP Free Tax Prep daily through April 15 · 9 AM–Noon at the Library",
-  "Great Feast of the Holy Ghost — August 20-25 · Kennedy Park · Free",
-  "Easter Scavenger Hunt — April 4 · Battleship Cove · $15",
+type TickerItem = { text: string; category: 'breaking' | 'event' | 'community' | 'education' };
+
+const TICKER_ITEMS: TickerItem[] = [
+  { text: "Fall River Public Library — Spring 2026 programs now open", category: "education" },
+  { text: "David Nail Live — March 6 · Narrows Center · $51", category: "event" },
+  { text: "Day of Portugal Festival — June 5-7 · Waterfront Park · Free", category: "event" },
+  { text: "Battleship Cove Homeschool Day — March 20 · $15", category: "education" },
+  { text: "AARP Free Tax Prep daily through April 15 · 9 AM–Noon at the Library", category: "community" },
+  { text: "Great Feast of the Holy Ghost — August 20-25 · Kennedy Park · Free", category: "event" },
+  { text: "Easter Scavenger Hunt — April 4 · Battleship Cove · $15", category: "event" },
 ];
+
+const categoryColors: Record<TickerItem['category'], string> = {
+  breaking: 'text-destructive',
+  event: 'text-secondary',
+  community: 'text-blue-500',
+  education: 'text-emerald-500',
+};
 
 const Ticker = () => {
   const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (
     <div className="h-9 overflow-hidden flex items-center flex-shrink-0 relative bg-primary/[0.04] border-b border-primary/10">
-      {/* Fade edges */}
       <div className="absolute top-0 bottom-0 left-0 w-12 z-[2] pointer-events-none bg-gradient-to-r from-background to-transparent" />
       <div className="absolute top-0 bottom-0 right-0 w-12 z-[2] pointer-events-none bg-gradient-to-l from-background to-transparent" />
 
@@ -25,7 +33,7 @@ const Ticker = () => {
              style={{ animation: 'ticker 50s linear infinite' }}>
           {doubled.map((item, i) => (
             <span key={i} className="mr-12 text-foreground/70">
-              <span className="text-primary mr-1.5">▸</span>{item}
+              <span className={`${categoryColors[item.category]} mr-1.5`}>▸</span>{item.text}
             </span>
           ))}
         </div>
