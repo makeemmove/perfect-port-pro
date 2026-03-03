@@ -7,7 +7,7 @@ interface StatsWidgetProps {
 const StatsWidget = ({ eventsThisWeek, restaurantCount, onNavigate }: StatsWidgetProps) => (
   <div className="grid grid-cols-2 gap-3">
     <div
-      className="p-5 rounded-[24px] bg-card shadow-card cursor-pointer active:scale-95 transition-transform duration-150"
+      className="p-5 rounded-[24px] bg-card shadow-card cursor-pointer active:scale-[0.98] transition-transform duration-150"
       onClick={() => onNavigate?.('events')}
     >
       <div className="mb-2">
@@ -22,7 +22,7 @@ const StatsWidget = ({ eventsThisWeek, restaurantCount, onNavigate }: StatsWidge
       <div className="text-[11px] text-muted-foreground mt-0.5">Library &amp; Community</div>
     </div>
     <div
-      className="p-5 rounded-[24px] bg-card shadow-card cursor-pointer active:scale-95 transition-transform duration-150"
+      className="p-5 rounded-[24px] bg-card shadow-card cursor-pointer active:scale-[0.98] transition-transform duration-150"
       onClick={() => onNavigate?.('eats')}
     >
       <div className="mb-2">

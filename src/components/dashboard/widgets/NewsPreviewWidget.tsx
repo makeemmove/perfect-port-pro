@@ -20,7 +20,7 @@ const NewsPreviewWidget = ({ articles, onNewsClick }: NewsPreviewWidgetProps) =>
         {articles.slice(0, 3).map((article, i) => (
           <div
             key={article.id}
-            className="group flex items-center gap-3 p-4 rounded-[24px] bg-card shadow-card active:scale-95 transition-transform duration-150 cursor-pointer"
+            className="group flex items-center gap-3 p-4 rounded-[24px] bg-card shadow-card active:scale-[0.98] transition-transform duration-150 cursor-pointer"
             onClick={() => onNewsClick?.()}
           >
             <div className="flex-1 min-w-0">
@@ -37,7 +37,7 @@ const NewsPreviewWidget = ({ articles, onNewsClick }: NewsPreviewWidgetProps) =>
       </div>
       <button
         onClick={onNewsClick}
-        className="w-full py-2.5 rounded-full bg-foreground/[0.03] text-foreground text-[11px] font-semibold tracking-wide uppercase shadow-card active:scale-95 transition-transform duration-150"
+        className="w-full py-2.5 rounded-full bg-muted/60 text-foreground text-[11px] font-semibold tracking-wide uppercase active:scale-[0.98] transition-transform duration-150"
       >
         View All News →
       </button>

@@ -21,7 +21,7 @@ const Ticker = () => {
   const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (
-    <div className="h-9 overflow-hidden flex items-center flex-shrink-0 relative bg-primary/[0.04]">
+    <div className="h-9 overflow-hidden flex items-center flex-shrink-0 relative bg-card border-b border-border">
       <div className="absolute top-0 bottom-0 left-0 w-12 z-[2] pointer-events-none bg-gradient-to-r from-background to-transparent" />
       <div className="absolute top-0 bottom-0 right-0 w-12 z-[2] pointer-events-none bg-gradient-to-l from-background to-transparent" />
 
