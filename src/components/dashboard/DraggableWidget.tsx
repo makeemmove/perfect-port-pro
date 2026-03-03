@@ -21,30 +21,25 @@ const DraggableWidget = ({ id, children, isMobile = false, isAnyDragging = false
   } = useSortable({ id });
 
   const baseTransform = CSS.Transform.toString(transform);
-  
-  const style = isMobile
-    ? {
-        transform: isDragging
-          ? `${baseTransform || ''} scale(1.03)`.trim()
-          : baseTransform || undefined,
-        transition: transition || 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease, box-shadow 0.25s ease',
-        opacity: isDragging ? 1 : isAnyDragging ? 0.5 : 1,
-        zIndex: isDragging ? 50 : 'auto' as const,
-        boxShadow: isDragging ? '0 12px 28px -4px rgba(0,0,0,0.18), 0 4px 10px -2px rgba(0,0,0,0.1)' : undefined,
-        touchAction: 'none' as const,
-        WebkitUserSelect: 'none' as const,
-        userSelect: 'none' as const,
-      }
-    : {
-        transform: baseTransform || undefined,
-        transition: transition || 'transform 0.3s ease-in-out',
-        opacity: isDragging ? 0.92 : 1,
-        zIndex: isDragging ? 50 : 'auto' as const,
-        scale: isDragging ? '1.02' : '1',
-      };
 
-  // Mobile: listeners on entire card, no grip button
   if (isMobile) {
+    const style: React.CSSProperties = {
+      transform: isDragging
+        ? `${baseTransform || ''} scale(1.03)`.trim()
+        : baseTransform || undefined,
+      transition: isDragging
+        ? 'box-shadow 0.2s ease, opacity 0.2s ease'
+        : transition || 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease, box-shadow 0.25s ease',
+      opacity: isDragging ? 1 : isAnyDragging ? 0.45 : 1,
+      zIndex: isDragging ? 50 : 'auto',
+      boxShadow: isDragging
+        ? '0 16px 32px -6px rgba(0,0,0,0.22), 0 6px 12px -4px rgba(0,0,0,0.12)'
+        : undefined,
+      touchAction: isDragging ? 'none' : 'auto',
+      WebkitUserSelect: 'none',
+      userSelect: 'none',
+    };
+
     return (
       <div
         ref={setNodeRef}
@@ -58,7 +53,15 @@ const DraggableWidget = ({ id, children, isMobile = false, isAnyDragging = false
     );
   }
 
-  // Desktop: activator on corner grip button
+  // Desktop: activator on corner grip button — unchanged
+  const style: React.CSSProperties = {
+    transform: baseTransform || undefined,
+    transition: transition || 'transform 0.3s ease-in-out',
+    opacity: isDragging ? 0.92 : 1,
+    zIndex: isDragging ? 50 : 'auto',
+    scale: isDragging ? '1.02' : '1',
+  };
+
   return (
     <div ref={setNodeRef} style={style} className="relative group mb-2">
       <button
