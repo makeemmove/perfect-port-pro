@@ -214,17 +214,22 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
           Fall River <span className="text-primary">Connect</span>
         </h1>
         <div className="mono text-[11px] text-muted-foreground mt-2">{clock}</div>
+        {isMobile && (
+          <div className="text-[10px] text-muted-foreground/60 mt-1">Press &amp; hold to reorder</div>
+        )}
       </div>
 
       {/* Draggable widgets */}
       <DndContext
+        sensors={sensors}
         collisionDetection={closestCenter}
         modifiers={[restrictToVerticalAxis]}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={widgetOrder} strategy={verticalListSortingStrategy}>
           {widgetOrder.map(id => (
-            <DraggableWidget key={id} id={id}>
+            <DraggableWidget key={id} id={id} isMobile={isMobile} isAnyDragging={!!activeId}>
               {widgetMap[id]}
             </DraggableWidget>
           ))}
