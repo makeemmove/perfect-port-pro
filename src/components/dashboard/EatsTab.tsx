@@ -15,13 +15,13 @@ const CATEGORIES = [
 ];
 
 const tagStyles: Record<string, string> = {
-  Portuguese: 'bg-red-50 text-red-600 border border-red-200',
-  'Bakery/Coffee': 'bg-amber-50 text-amber-600 border border-amber-200',
-  Italian: 'bg-emerald-50 text-emerald-600 border border-emerald-200',
-  Seafood: 'bg-cyan-50 text-cyan-600 border border-cyan-200',
-  Asian: 'bg-violet-50 text-violet-600 border border-violet-200',
-  'Casual Dining': 'bg-orange-50 text-orange-600 border border-orange-200',
-  Specialty: 'bg-pink-50 text-pink-600 border border-pink-200',
+  Portuguese: 'bg-red-50 text-red-600',
+  'Bakery/Coffee': 'bg-amber-50 text-amber-600',
+  Italian: 'bg-emerald-50 text-emerald-600',
+  Seafood: 'bg-cyan-50 text-cyan-600',
+  Asian: 'bg-violet-50 text-violet-600',
+  'Casual Dining': 'bg-orange-50 text-orange-600',
+  Specialty: 'bg-pink-50 text-pink-600',
 };
 
 const leftBarColors: Record<string, string> = {
@@ -55,7 +55,7 @@ const EatsTab = () => {
       <div className="flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
         {CATEGORIES.map(c => (
           <button key={c.cat} onClick={() => setActiveCat(c.cat)}
-            className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-150 active:scale-[0.95] ${
+            className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-150 active:scale-[0.98] ${
               activeCat === c.cat
                 ? 'bg-foreground text-background shadow-soft'
                 : 'bg-card text-muted-foreground shadow-card hover:shadow-card-hover'
@@ -69,7 +69,7 @@ const EatsTab = () => {
         {filtered.length === 0 ? (
           <div className="text-muted-foreground text-center py-8 text-sm">No restaurants found</div>
         ) : filtered.map((r, i) => (
-          <div key={i} className="flex gap-3.5 p-4 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.97] transition-all duration-150">
+          <div key={i} className="flex gap-3.5 p-4 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150">
             <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[24px]" style={{ background: leftBarColors[r.sub] || '#3b82f6' }} />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold mb-1 text-foreground">{r.name}</div>
@@ -77,14 +77,14 @@ const EatsTab = () => {
                 {r.desc.length > 90 ? r.desc.slice(0, 90) + '…' : r.desc}
               </div>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <span className={`text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full ${tagStyles[r.sub] || 'bg-muted text-muted-foreground border border-border'}`}>
+                <span className={`text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full ${tagStyles[r.sub] || 'bg-muted text-muted-foreground'}`}>
                   {r.sub}
                 </span>
                 <span className="text-[11px] text-muted-foreground">{r.hours}</span>
                 <span className="mono text-[11px] text-muted-foreground">{r.price}</span>
                 <button
                   onClick={(ev) => { ev.stopPropagation(); setSelectedRestaurant(r); }}
-                  className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground hover:bg-foreground/10 active:scale-[0.95] transition-all duration-150"
+                  className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground hover:bg-foreground/10 active:scale-[0.98] transition-all duration-150"
                 >
                   More Info
                 </button>

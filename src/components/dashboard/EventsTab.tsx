@@ -20,12 +20,12 @@ const FILTERS = [
 ];
 
 const tagStyles: Record<string, string> = {
-  purple: 'bg-secondary/10 text-secondary border border-secondary/20',
-  blue: 'bg-blue-50 text-blue-600 border border-blue-200',
-  gold: 'bg-amber-50 text-amber-600 border border-amber-200',
-  green: 'bg-emerald-50 text-emerald-600 border border-emerald-200',
-  orange: 'bg-orange-50 text-orange-600 border border-orange-200',
-  red: 'bg-red-50 text-red-600 border border-red-200',
+  purple: 'bg-secondary/10 text-secondary',
+  blue: 'bg-blue-50 text-blue-600',
+  gold: 'bg-amber-50 text-amber-600',
+  green: 'bg-emerald-50 text-emerald-600',
+  orange: 'bg-orange-50 text-orange-600',
+  red: 'bg-red-50 text-red-600',
 };
 
 const leftBarColors: Record<string, string> = {
@@ -75,7 +75,7 @@ const EventsTab = () => {
       <div className="flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
         {FILTERS.map(f => (
           <button key={f.sub} onClick={() => setActiveSub(f.sub)}
-            className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-150 active:scale-[0.95] ${
+            className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-150 active:scale-[0.98] ${
               activeSub === f.sub
                 ? 'bg-foreground text-background shadow-soft'
                 : 'bg-card text-muted-foreground shadow-card hover:shadow-card-hover'
@@ -103,7 +103,7 @@ const EventsTab = () => {
               const cc = evClassMap[e.sub] || 'arts';
 
               return (
-                <div key={`${group.month}-${i}`} className="flex gap-3.5 p-4 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover active:scale-[0.97] hover:scale-[1.01] transition-all duration-150">
+                <div key={`${group.month}-${i}`} className="flex gap-3.5 p-4 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover active:scale-[0.98] hover:scale-[1.01] transition-all duration-150">
                   <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[24px]" style={{ background: leftBarColors[cc] || '#8b5cf6' }} />
                   <div className="flex-shrink-0 w-[50px] text-center flex flex-col items-center justify-center rounded-lg py-2 px-1 bg-muted/60">
                     <div className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">{mo}</div>
@@ -123,7 +123,7 @@ const EventsTab = () => {
                       <span className="text-[11px] text-muted-foreground">{e.cost}</span>
                       <button
                         onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
-                        className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground hover:bg-foreground/10 active:scale-[0.95] transition-all duration-150"
+                        className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground hover:bg-foreground/10 active:scale-[0.98] transition-all duration-150"
                       >
                         More Info
                       </button>
