@@ -5,7 +5,7 @@ interface StatsWidgetProps {
 }
 
 const StatsWidget = ({ eventsThisWeek, restaurantCount, onNavigate }: StatsWidgetProps) =>
-<div className="grid grid-cols-2 gap-4 shadow-card-hover rounded-lg opacity-100">
+<div className="grid grid-cols-2 gap-4 shadow-card-hover opacity-100 rounded-sm">
     <div
     className="p-5 rounded-[20px] bg-card shadow-card border border-border/60 cursor-pointer active:scale-95 transition-transform duration-150"
     onClick={() => onNavigate?.('events')}>
