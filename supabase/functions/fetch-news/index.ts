@@ -125,6 +125,7 @@ Structure:
 - Use multiple subheadings (## and ###) for readability
 - Article should be 400–800 words (standard news article length)
 - Naturally integrate primary keywords found in the original text
+- The summary MUST be 250 characters or less — this is critical
 
 Output the rewritten article using the write_article tool.`;
 
@@ -168,7 +169,7 @@ async function rewriteArticle(
                   },
                   summary: {
                     type: "string",
-                    description: "1-2 sentence summary of the article",
+                    description: "A concise summary of the article, MUST be 250 characters or fewer",
                   },
                 },
                 required: ["title", "content", "summary"],

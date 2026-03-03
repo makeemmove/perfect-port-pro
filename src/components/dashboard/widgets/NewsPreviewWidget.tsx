@@ -28,7 +28,6 @@ const NewsPreviewWidget = ({ articles, onNewsClick }: NewsPreviewWidgetProps) =>
               <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-1">{article.summary}</p>
             )}
             <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-[10px] font-semibold text-primary">{article.source_name}</span>
               <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
             </div>
           </div>

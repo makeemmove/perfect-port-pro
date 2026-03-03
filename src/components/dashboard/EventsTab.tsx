@@ -11,6 +11,12 @@ const FILTERS = [
   { label: '🎉 Festival', sub: 'Festival' },
   { label: '🎄 Holiday', sub: 'Holiday' },
   { label: '👨‍👩‍👧 Family', sub: 'Family' },
+  { label: '🏘 Community', sub: 'Community' },
+  { label: '🎭 Theater', sub: 'Theater' },
+  { label: '📚 Education', sub: 'Education' },
+  { label: '🍔 Food', sub: 'Food' },
+  { label: '⚽ Sports', sub: 'Sports' },
+  { label: '🏛 Civic', sub: 'Civic' },
 ];
 
 const tagStyles: Record<string, string> = {
