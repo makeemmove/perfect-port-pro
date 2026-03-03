@@ -52,7 +52,7 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
   ];
 
   return (
-    <div className="h-[60px] flex-shrink-0 flex relative z-50 bg-card shadow-card">
+    <div className="h-[60px] flex-shrink-0 flex relative z-50 bg-card border-t border-border/40">
       {tabs.map(tab => (
         <button
           key={tab.id}

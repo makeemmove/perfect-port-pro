@@ -199,11 +199,11 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-black text-foreground" style={{ letterSpacing: '-0.06em' }}>Fall River <span className="text-primary font-black">Connect</span></h1>
-        <div className="mono text-[11px] text-muted-foreground mt-0.5">{clock}</div>
+      <div className="text-center pt-2">
+        <h1 className="text-4xl font-black text-foreground" style={{ letterSpacing: '-0.06em' }}>Fall River <span className="text-primary font-black">Connect</span></h1>
+        <div className="mono text-[11px] text-muted-foreground mt-1">{clock}</div>
       </div>
 
       {/* Draggable widgets */}

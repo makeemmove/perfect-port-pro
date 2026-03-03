@@ -76,10 +76,10 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        card: "0 16px 40px -8px rgba(0,0,0,0.22), 0 8px 16px -6px rgba(0,0,0,0.14)",
-        "card-hover": "0 20px 50px -8px rgba(0,0,0,0.28), 0 10px 20px -6px rgba(0,0,0,0.16)",
+        card: "0 4px 16px -2px rgba(0,0,0,0.08), 0 2px 6px -1px rgba(0,0,0,0.04)",
+        "card-hover": "0 8px 24px -4px rgba(0,0,0,0.12), 0 4px 10px -2px rgba(0,0,0,0.06)",
         soft: "0 2px 8px rgba(0,0,0,0.04)",
-        pill: "0 12px 24px -8px rgba(0,0,0,0.15), 0 6px 10px -5px rgba(0,0,0,0.08)",
+        pill: "0 3px 10px -2px rgba(0,0,0,0.06), 0 1px 4px -1px rgba(0,0,0,0.03)",
       },
       keyframes: {
         "accordion-down": {
