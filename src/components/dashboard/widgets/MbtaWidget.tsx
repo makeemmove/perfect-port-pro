@@ -1,8 +1,8 @@
 import { MBTA_ROUTES, MBTA_STATIONS } from '@/data/transit';
 import type { TrainRoute } from '@/data/transit';
 import {
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-} from '@/components/ui/select';
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from
+'@/components/ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 interface MbtaWidgetProps {
@@ -16,7 +16,7 @@ interface MbtaWidgetProps {
   trainDir: string;
   trainDepTime: string;
   trainAfter: string;
-  remainingTrains: { time: string; dir: string }[];
+  remainingTrains: {time: string;dir: string;}[];
 }
 
 const MbtaWidget = ({
@@ -24,9 +24,9 @@ const MbtaWidget = ({
   selectedStation, setSelectedStation,
   trainRoute,
   trainCountdown, trainUrgent, trainDir, trainDepTime, trainAfter,
-  remainingTrains,
-}: MbtaWidgetProps) => (
-  <div className="p-4 rounded-[24px] bg-card shadow-card border-0">
+  remainingTrains
+}: MbtaWidgetProps) =>
+<div className="p-4 bg-card border-0 rounded-md opacity-100 shadow-card-hover">
     <div className="flex items-center gap-2 mb-2 flex-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-7 h-7 text-primary p-1 rounded-full bg-primary/10 flex-shrink-0">
         <rect x="4" y="3" width="16" height="16" rx="2" />
@@ -47,9 +47,9 @@ const MbtaWidget = ({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {MBTA_ROUTES.map(r => (
-            <SelectItem key={r.id} value={r.id} className="text-[12px]">{r.name}</SelectItem>
-          ))}
+          {MBTA_ROUTES.map((r) =>
+        <SelectItem key={r.id} value={r.id} className="text-[12px]">{r.name}</SelectItem>
+        )}
         </SelectContent>
       </Select>
       <Select value={selectedStation} onValueChange={setSelectedStation}>
@@ -57,9 +57,9 @@ const MbtaWidget = ({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {trainRoute.stations.map(s => (
-            <SelectItem key={s} value={s} className="text-[12px]">📍 {s}</SelectItem>
-          ))}
+          {trainRoute.stations.map((s) =>
+        <SelectItem key={s} value={s} className="text-[12px]">📍 {s}</SelectItem>
+        )}
         </SelectContent>
       </Select>
     </div>
@@ -73,17 +73,17 @@ const MbtaWidget = ({
       </PopoverTrigger>
       <PopoverContent className="w-64 p-2" align="start">
         <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2 px-2">Select Route</div>
-        {MBTA_ROUTES.map(r => (
-          <button
-            key={r.id}
-            onClick={() => setSelectedTrainId(r.id)}
-            className={`w-full text-left text-[12px] py-2 px-2 rounded-lg transition-colors ${
-              r.id === selectedTrainId ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50 text-foreground'
-            }`}
-          >
+        {MBTA_ROUTES.map((r) =>
+      <button
+        key={r.id}
+        onClick={() => setSelectedTrainId(r.id)}
+        className={`w-full text-left text-[12px] py-2 px-2 rounded-lg transition-colors ${
+        r.id === selectedTrainId ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50 text-foreground'}`
+        }>
+        
             {r.name}
           </button>
-        ))}
+      )}
       </PopoverContent>
     </Popover>
     <div className="text-[11px] text-muted-foreground">{trainDir}</div>
@@ -92,9 +92,9 @@ const MbtaWidget = ({
       <Popover>
         <PopoverTrigger asChild>
           <button
-            className={`mono text-3xl font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity ${trainUrgent ? 'text-amber-500' : 'text-primary'}`}
-            style={trainUrgent ? { animation: 'urgent-pulse 1s ease infinite' } : {}}
-          >
+          className={`mono text-3xl font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity ${trainUrgent ? 'text-amber-500' : 'text-primary'}`}
+          style={trainUrgent ? { animation: 'urgent-pulse 1s ease infinite' } : {}}>
+          
             {trainCountdown}
           </button>
         </PopoverTrigger>
@@ -105,14 +105,14 @@ const MbtaWidget = ({
             </div>
           </div>
           <div className="p-2">
-            {remainingTrains.length === 0 ? (
-              <div className="text-[12px] text-muted-foreground p-2">No more departures today</div>
-            ) : remainingTrains.map((d, i) => (
-              <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
+            {remainingTrains.length === 0 ?
+          <div className="text-[12px] text-muted-foreground p-2">No more departures today</div> :
+          remainingTrains.map((d, i) =>
+          <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
                 <span className="mono text-[13px] font-medium text-foreground">{d.time}</span>
                 <span className="text-[11px] text-muted-foreground">{d.dir}</span>
               </div>
-            ))}
+          )}
           </div>
         </PopoverContent>
       </Popover>
@@ -123,7 +123,7 @@ const MbtaWidget = ({
     </div>
     <div className="text-[11px] text-muted-foreground mt-2">{trainAfter}</div>
     <div className="text-[10px] text-muted-foreground/60 mt-1">Tap countdown for full schedule</div>
-  </div>
-);
+  </div>;
+
 
 export default MbtaWidget;
