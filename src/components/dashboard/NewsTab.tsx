@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ExternalLink, RefreshCw } from 'lucide-react';
+import { ExternalLink, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { NewsArticle } from '@/hooks/useNews';
 
 interface NewsTabProps {
@@ -10,12 +11,14 @@ interface NewsTabProps {
 }
 
 const sourceColors: Record<string, string> = {
-  'Fall River Reporter': 'bg-primary/10 text-primary border-primary/20',
-  'Herald News': 'bg-amber-50 text-amber-600 border-amber-200',
-  'Fall River Police Department': 'bg-blue-50 text-blue-600 border-blue-200',
+  'fall river reporter': 'bg-primary/10 text-primary border-primary/20',
+  'herald news': 'bg-amber-50 text-amber-600 border-amber-200',
+  'fall river police department': 'bg-blue-50 text-blue-600 border-blue-200',
 };
 
 const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) => {
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -48,25 +51,57 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
         <div className="text-muted-foreground text-center py-8 text-sm">No news articles available</div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {articles.map((article, i) => (
-            <NewsCard key={i} article={article} />
+          {articles.map((article) => (
+            <NewsCard key={article.id} article={article} onClick={() => setSelectedArticle(article)} />
           ))}
         </div>
       )}
+
+      {/* Article detail modal */}
+      <Dialog open={!!selectedArticle} onOpenChange={(open) => { if (!open) setSelectedArticle(null); }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg leading-snug pr-6">{selectedArticle?.title}</DialogTitle>
+          </DialogHeader>
+          {selectedArticle && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full border ${getColorClass(selectedArticle.source_name)}`}>
+                  {selectedArticle.source_name}
+                </span>
+                <span className="text-[10px] text-muted-foreground">{getTimeAgo(selectedArticle.published_at)}</span>
+              </div>
+              {selectedArticle.content ? (
+                <div className="prose prose-sm max-w-none dark:prose-invert text-foreground text-sm leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: markdownToHtml(selectedArticle.content) }}
+                />
+              ) : selectedArticle.summary ? (
+                <p className="text-sm text-muted-foreground leading-relaxed">{selectedArticle.summary}</p>
+              ) : null}
+              {selectedArticle.source_url && (
+                <button
+                  onClick={() => window.open(selectedArticle.source_url, '_blank', 'noopener,noreferrer')}
+                  className="flex items-center gap-2 text-xs text-primary hover:underline"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> View Original Source
+                </button>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-const NewsCard = ({ article }: { article: NewsArticle }) => {
-  const timeAgo = getTimeAgo(article.publishedAt);
-  const colorClass = Object.entries(sourceColors).find(([key]) =>
-    article.source.toLowerCase().includes(key.toLowerCase())
-  )?.[1] || 'bg-muted text-muted-foreground border-border';
+const NewsCard = ({ article, onClick }: { article: NewsArticle; onClick: () => void }) => {
+  const timeAgo = getTimeAgo(article.published_at);
+  const colorClass = getColorClass(article.source_name);
 
   return (
     <div
       className="p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow cursor-pointer"
-      onClick={() => article.url && window.open(article.url, '_blank', 'noopener,noreferrer')}
+      onClick={onClick}
     >
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
@@ -80,18 +115,21 @@ const NewsCard = ({ article }: { article: NewsArticle }) => {
           )}
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full border ${colorClass}`}>
-              {article.source}
+              {article.source_name}
             </span>
             <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
-            {article.url && (
-              <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
-            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+function getColorClass(sourceName: string): string {
+  const lower = sourceName.toLowerCase();
+  return Object.entries(sourceColors).find(([key]) => lower.includes(key))?.[1]
+    || 'bg-muted text-muted-foreground border-border';
+}
 
 function getTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -101,6 +139,18 @@ function getTimeAgo(dateStr: string): string {
   if (hrs < 24) return `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
   return `${days}d ago`;
+}
+
+function markdownToHtml(md: string): string {
+  return md
+    .replace(/### (.*?)$/gm, '<h3 class="text-base font-bold mt-4 mb-1">$1</h3>')
+    .replace(/## (.*?)$/gm, '<h2 class="text-lg font-bold mt-5 mb-2">$1</h2>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n\n/g, '</p><p class="mb-3">')
+    .replace(/\n/g, '<br/>')
+    .replace(/^/, '<p class="mb-3">')
+    .replace(/$/, '</p>');
 }
 
 export default NewsTab;
