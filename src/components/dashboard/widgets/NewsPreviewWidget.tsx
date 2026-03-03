@@ -20,7 +20,7 @@ const NewsPreviewWidget = ({ articles, onNewsClick }: NewsPreviewWidgetProps) =>
         {articles.slice(0, 3).map((article, i) => (
           <div
             key={article.id}
-            className="group flex items-center gap-3 p-3 rounded-[24px] bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150 cursor-pointer"
+            className="group flex items-center gap-3 p-4 rounded-[24px] bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150 cursor-pointer"
             onClick={() => onNewsClick?.()}
           >
             <div className="flex-1 min-w-0">

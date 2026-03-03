@@ -69,7 +69,7 @@ const EatsTab = () => {
         {filtered.length === 0 ? (
           <div className="text-muted-foreground text-center py-8 text-sm">No restaurants found</div>
         ) : filtered.map((r, i) => (
-          <div key={i} className="flex gap-3.5 p-4 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150">
+          <div key={i} className="flex gap-3.5 p-5 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150">
             <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[24px]" style={{ background: leftBarColors[r.sub] || '#3b82f6' }} />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold mb-1 text-foreground">{r.name}</div>
@@ -84,7 +84,7 @@ const EatsTab = () => {
                 <span className="mono text-[11px] text-muted-foreground">{r.price}</span>
                 <button
                   onClick={(ev) => { ev.stopPropagation(); setSelectedRestaurant(r); }}
-                  className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground hover:bg-foreground/10 active:scale-[0.98] transition-all duration-150"
+                  className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-muted text-primary hover:bg-muted/80 active:scale-[0.98] transition-all duration-150"
                 >
                   More Info
                 </button>

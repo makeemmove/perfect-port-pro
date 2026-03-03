@@ -1,7 +1,7 @@
 import type { WeatherData } from '@/data/weather';
 
 const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => (
-  <div className="p-5 rounded-[24px] bg-card shadow-card">
+  <div className="p-6 rounded-[24px] bg-card shadow-card">
     <div className="flex justify-between items-start">
       <div>
         <div className="text-[10px] font-semibold tracking-widest uppercase text-primary">📍 Fall River, MA</div>
