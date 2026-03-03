@@ -58,7 +58,7 @@ const EatsTab = () => {
             className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-150 active:scale-[0.98] ${
               activeCat === c.cat
                 ? 'bg-foreground text-background shadow-soft'
-                : 'bg-card text-muted-foreground shadow-card hover:shadow-card-hover'
+                : 'bg-card text-muted-foreground shadow-card'
             }`}>
             {c.label}
           </button>
@@ -69,7 +69,7 @@ const EatsTab = () => {
         {filtered.length === 0 ? (
           <div className="text-muted-foreground text-center py-8 text-sm">No restaurants found</div>
         ) : filtered.map((r, i) => (
-          <div key={i} className="flex gap-3.5 p-5 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150">
+          <div key={i} className="flex gap-3.5 p-5 rounded-[24px] relative overflow-hidden bg-card shadow-card active:scale-95 transition-transform duration-150">
             <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[24px]" style={{ background: leftBarColors[r.sub] || '#3b82f6' }} />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold mb-1 text-foreground">{r.name}</div>
