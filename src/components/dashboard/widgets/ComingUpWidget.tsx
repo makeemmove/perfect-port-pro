@@ -27,9 +27,9 @@ const ComingUpWidget = ({ upcomingEvents, onEventClick, eventOrder, onReorderEve
 
   return (
     <>
-      <div className="flex items-center gap-3 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mt-2
-                      before:flex-1 before:h-px before:bg-border
-                      after:flex-1 after:h-px after:bg-border">
+      <div className="flex items-center gap-3 text-[10px] font-semibold tracking-[0.15em] uppercase text-muted-foreground mt-3 mb-1
+                      before:flex-1 before:h-px before:bg-border/60
+                      after:flex-1 after:h-px after:bg-border/60">
         ⚡ Coming Up
       </div>
       <DndContext
@@ -38,7 +38,7 @@ const ComingUpWidget = ({ upcomingEvents, onEventClick, eventOrder, onReorderEve
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={eventOrder.map(String)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-3 pb-3">
+          <div className="flex flex-col gap-2.5 pb-2">
             {orderedEvents.map(({ index, event }) => (
               <SortableEventItem
                 key={index}
