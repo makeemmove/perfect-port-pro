@@ -28,15 +28,22 @@ const DraggableWidget = ({ id, children }: DraggableWidgetProps) => {
 
   return (
     <div ref={setNodeRef} style={style} className="relative group mb-2">
-      <div
+      <button
         ref={setActivatorNodeRef}
         {...attributes}
         {...listeners}
-        className="flex justify-center pt-2 pb-1.5 cursor-grab active:cursor-grabbing touch-none"
+        className="absolute top-3 right-3 w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none z-10 opacity-40 group-hover:opacity-70 hover:!opacity-100 transition-opacity duration-300"
         aria-label="Drag to reorder"
       >
-        <div className="w-10 h-1 rounded-full bg-muted-foreground/15" />
-      </div>
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor" className="text-muted-foreground">
+          <circle cx="4" cy="2" r="1.5" />
+          <circle cx="10" cy="2" r="1.5" />
+          <circle cx="4" cy="7" r="1.5" />
+          <circle cx="10" cy="7" r="1.5" />
+          <circle cx="4" cy="12" r="1.5" />
+          <circle cx="10" cy="12" r="1.5" />
+        </svg>
+      </button>
       {children}
     </div>
   );

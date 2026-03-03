@@ -72,7 +72,7 @@ const SrtaWidget = ({
     <div className="flex justify-between items-center mt-4">
       <Popover>
         <PopoverTrigger asChild>
-          <button className="mono text-4xl font-semibold tracking-tight text-primary cursor-pointer hover:opacity-80 transition-all duration-300">
+          <button className="mono text-3xl font-semibold tracking-tight text-primary cursor-pointer hover:opacity-80 transition-all duration-300">
             {busCountdown}
           </button>
         </PopoverTrigger>
