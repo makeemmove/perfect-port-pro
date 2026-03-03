@@ -199,7 +199,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-black text-foreground" style={{ letterSpacing: '-0.06em' }}>Fall River <span className="text-primary font-black">Connect</span></h1>

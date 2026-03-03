@@ -16,7 +16,7 @@ const NewsPreviewWidget = ({ articles, onNewsClick }: NewsPreviewWidgetProps) =>
                       after:flex-1 after:h-px after:bg-border">
         <Newspaper className="w-3 h-3" /> Latest News
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-3">
         {articles.slice(0, 3).map((article, i) => (
           <div
             key={article.id}
