@@ -39,7 +39,8 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
-  const [eventOrder, setEventOrder] = useState<number[]>([0, 1, 2, 3, 4, 5]);
+  const upcomingCount = useMemo(() => EVENTS.filter(e => new Date(e.date) >= new Date()).length, []);
+  const [eventOrder, setEventOrder] = useState<number[]>(() => Array.from({ length: Math.min(upcomingCount, 6) }, (_, i) => i));
 
   /* Route & station selection state */
   const isWeekend = useMemo(() => [0, 6].includes(new Date().getDay()), []);
