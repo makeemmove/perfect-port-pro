@@ -76,8 +76,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        card: "0 12px 24px -8px rgba(0,0,0,0.15), 0 6px 10px -5px rgba(0,0,0,0.08)",
-        "card-hover": "0 12px 24px -8px rgba(0,0,0,0.15), 0 6px 10px -5px rgba(0,0,0,0.08)",
+        card: "0 16px 40px -8px rgba(0,0,0,0.22), 0 8px 16px -6px rgba(0,0,0,0.14)",
+        "card-hover": "0 20px 50px -8px rgba(0,0,0,0.28), 0 10px 20px -6px rgba(0,0,0,0.16)",
         soft: "0 2px 8px rgba(0,0,0,0.04)",
         pill: "0 12px 24px -8px rgba(0,0,0,0.15), 0 6px 10px -5px rgba(0,0,0,0.08)",
       },
