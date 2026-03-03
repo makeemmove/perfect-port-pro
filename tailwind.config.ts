@@ -77,7 +77,7 @@ export default {
       },
       boxShadow: {
         card: "0 16px 48px -8px rgba(0,0,0,0.18), 0 8px 20px -4px rgba(0,0,0,0.10)",
-        "card-hover": "0 12px 32px -4px rgba(0,0,0,0.16), 0 6px 14px -3px rgba(0,0,0,0.08)",
+        "card-hover": "0 20px 56px -8px rgba(0,0,0,0.28), 0 10px 24px -4px rgba(0,0,0,0.14)",
         soft: "0 2px 8px rgba(0,0,0,0.04)",
         pill: "0 3px 10px -2px rgba(0,0,0,0.06), 0 1px 4px -1px rgba(0,0,0,0.03)",
       },
