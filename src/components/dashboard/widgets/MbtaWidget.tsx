@@ -26,7 +26,7 @@ const MbtaWidget = ({
   trainCountdown, trainUrgent, trainDir, trainDepTime, trainAfter,
   remainingTrains,
 }: MbtaWidgetProps) => (
-  <div className="p-5 rounded-2xl bg-card border border-border shadow-card">
+  <div className="p-5 rounded-[24px] bg-card shadow-card">
     <div className="flex items-center gap-2 mb-3 flex-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-primary flex-shrink-0">
         <rect x="4" y="3" width="16" height="16" rx="2" />
@@ -35,7 +35,7 @@ const MbtaWidget = ({
         <circle cx="15.5" cy="14.5" r="1" />
         <path d="M8 19l-2 2M16 19l2 2" />
       </svg>
-      <span className="text-[9px] font-semibold tracking-widest uppercase px-2 py-1 rounded-full bg-primary/[0.08] text-primary border border-primary/15">
+      <span className="text-[9px] font-semibold tracking-widest uppercase px-2 py-1 rounded-full bg-primary/[0.08] text-primary">
         MBTA Commuter Rail
       </span>
     </div>
@@ -43,7 +43,7 @@ const MbtaWidget = ({
     {/* Route + Station selectors */}
     <div className="flex flex-wrap gap-2 mb-3">
       <Select value={selectedTrainId} onValueChange={setSelectedTrainId}>
-        <SelectTrigger className="h-7 w-auto min-w-[180px] text-[11px] border-border bg-muted/50 rounded-full px-3 gap-1.5">
+        <SelectTrigger className="h-7 w-auto min-w-[180px] text-[11px] bg-muted/50 rounded-full px-3 gap-1.5 border-none">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -53,7 +53,7 @@ const MbtaWidget = ({
         </SelectContent>
       </Select>
       <Select value={selectedStation} onValueChange={setSelectedStation}>
-        <SelectTrigger className="h-7 w-auto min-w-[140px] text-[11px] border-border bg-muted/50 rounded-full px-3 gap-1.5">
+        <SelectTrigger className="h-7 w-auto min-w-[140px] text-[11px] bg-muted/50 rounded-full px-3 gap-1.5 border-none">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -99,7 +99,7 @@ const MbtaWidget = ({
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-72 p-0 max-h-72 overflow-auto" align="start">
-          <div className="p-3 border-b border-border">
+          <div className="p-3 border-b border-muted/60">
             <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
               Remaining at {selectedStation} · {trainRoute.name}
             </div>
