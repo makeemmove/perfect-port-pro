@@ -30,9 +30,9 @@ const StatsWidget = ({ eventsThisWeek, restaurantCount, onNavigate }: StatsWidge
       <div className="mb-3">
         <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5 text-primary">
-            <circle cx="12" cy="13" r="7" />
-            <path d="M7 7V4M7 4L6 2M7 4L8 2" />
-            <path d="M17 7V3M17 3L16.5 2M17 3L17.5 2M17 3V2" />
+            <path d="M11 2v6.5c0 1.38-1.12 2.5-2.5 2.5S6 9.88 6 8.5V2" />
+            <path d="M8.5 2v6.5" />
+            <path d="M8.5 11v11" />
           </svg>
         </div>
       </div>

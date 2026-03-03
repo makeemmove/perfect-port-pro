@@ -11,82 +11,72 @@ export interface WeatherData {
   hourly: { time: string; temp: number; rainProb: number; icon: string; isNow: boolean }[];
 }
 
-const WC: Record<number, [string, string]> = {
-  0:['☀️','Clear'],1:['🌤','Mostly Clear'],2:['⛅','Partly Cloudy'],3:['☁️','Overcast'],
-  45:['🌫','Foggy'],48:['🌫','Freezing Fog'],
-  51:['🌦','Light Drizzle'],53:['🌦','Drizzle'],55:['🌧','Dense Drizzle'],
-  56:['🌨','Freezing Drizzle'],57:['🌨','Heavy Freezing Drizzle'],
-  61:['🌧','Light Rain'],63:['🌧','Rain'],65:['🌧','Heavy Rain'],
-  66:['🌨','Freezing Rain'],67:['🌨','Heavy Freezing Rain'],
-  71:['🌨','Light Snow'],73:['❄️','Snow'],75:['❄️','Heavy Snow'],77:['🌨','Snow Grains'],
-  80:['🌦','Light Showers'],81:['🌧','Showers'],82:['⛈','Heavy Showers'],
-  85:['🌨','Snow Showers'],86:['❄️','Heavy Snow Showers'],
-  95:['⛈','Thunderstorm'],96:['⛈','Thunderstorm w/Hail'],99:['⛈','Heavy Thunderstorm'],
-};
+const API_KEY = 'c07bd9dae1e05e6549146b718568329b';
+const LAT = 41.7015;
+const LON = -71.1551;
 
-function wcInfo(code: number): [string, string] {
-  const keys = Object.keys(WC).map(Number).sort((a, b) => a - b);
-  const found = keys.filter(k => k <= code).pop();
-  return found !== undefined ? WC[found] : ['🌤', 'Variable'];
+const CURRENT_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&units=imperial&appid=${API_KEY}`;
+const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&units=imperial&appid=${API_KEY}`;
+
+function owmIcon(id: number): [string, string] {
+  if (id >= 200 && id < 300) return ['⛈', 'Thunderstorm'];
+  if (id >= 300 && id < 400) return ['🌦', 'Drizzle'];
+  if (id >= 500 && id < 511) return ['🌧', 'Rain'];
+  if (id === 511) return ['🌨', 'Freezing Rain'];
+  if (id >= 520 && id < 600) return ['🌧', 'Showers'];
+  if (id >= 600 && id < 700) return ['❄️', 'Snow'];
+  if (id >= 700 && id < 800) return ['🌫', 'Hazy'];
+  if (id === 800) return ['☀️', 'Clear'];
+  if (id === 801) return ['🌤', 'Mostly Clear'];
+  if (id === 802) return ['⛅', 'Partly Cloudy'];
+  if (id >= 803) return ['☁️', 'Overcast'];
+  return ['🌤', 'Variable'];
 }
 
-function fmtTime12(isoStr: string): string {
-  const d = new Date(isoStr);
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+function fmtUnix(ts: number): string {
+  return new Date(ts * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
-
-const WEATHER_URL = 'https://api.open-meteo.com/v1/forecast?latitude=41.7015&longitude=-71.1551&daily=sunrise,sunset&hourly=temperature_2m,wind_speed_10m,precipitation,precipitation_probability,weather_code&current=temperature_2m,precipitation,weather_code&timezone=America/New_York&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch';
 
 export async function fetchWeather(): Promise<WeatherData | null> {
   try {
-    const res = await fetch(WEATHER_URL);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const d = await res.json();
-    const c = d.current;
-    const now = new Date();
+    const [curRes, fcRes] = await Promise.all([fetch(CURRENT_URL), fetch(FORECAST_URL)]);
+    if (!curRes.ok || !fcRes.ok) throw new Error('HTTP error');
+    const cur = await curRes.json();
+    const fc = await fcRes.json();
 
-    const times: string[] = d.hourly.time;
-    let hIdx = 0;
-    const nowMs = now.getTime();
-    for (let i = 0; i < times.length; i++) {
-      const tMs = new Date(times[i]).getTime();
-      if (tMs <= nowMs) hIdx = i; else break;
-    }
+    const [icon, label] = owmIcon(cur.weather?.[0]?.id ?? 800);
+    const sunrise = fmtUnix(cur.sys.sunrise);
+    const sunset = fmtUnix(cur.sys.sunset);
+    const daylightHrs = ((cur.sys.sunset - cur.sys.sunrise) / 3600).toFixed(1) + 'h';
 
-    const windNow = d.hourly.wind_speed_10m[hIdx];
-    const rainProb = d.hourly.precipitation_probability[hIdx] ?? 0;
-    const [icon, label] = wcInfo(c.weather_code ?? 0);
-
-    let sunrise = '--', sunset = '--', daylight = '--';
-    if (d.daily?.sunrise?.[0]) {
-      sunrise = fmtTime12(d.daily.sunrise[0]);
-      sunset = fmtTime12(d.daily.sunset[0]);
-      const rise = new Date(d.daily.sunrise[0]);
-      const set = new Date(d.daily.sunset[0]);
-      daylight = ((set.getTime() - rise.getTime()) / 3600000).toFixed(1) + 'h';
-    }
-
+    // Build hourly from 3-hour forecast (take first 8 entries)
     const hourly: WeatherData['hourly'] = [];
-    for (let i = 0; i < 8; i++) {
-      const idx = hIdx + i;
-      if (idx >= times.length) break;
-      const localT = new Date(times[idx]);
-      const lbl = localT.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
-      const temp = Math.round(d.hourly.temperature_2m[idx]);
-      const rp = d.hourly.precipitation_probability[idx] ?? 0;
-      const wc = d.hourly.weather_code?.[idx] ?? 0;
-      const [hi] = wcInfo(wc);
-      hourly.push({ time: i === 0 ? 'Now' : lbl, temp, rainProb: rp, icon: hi, isNow: i === 0 });
+    const now = Date.now();
+    for (let i = 0; i < Math.min(8, fc.list.length); i++) {
+      const item = fc.list[i];
+      const t = new Date(item.dt * 1000);
+      const lbl = t.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+      const [hi] = owmIcon(item.weather?.[0]?.id ?? 800);
+      const isNow = i === 0 && Math.abs(item.dt * 1000 - now) < 3 * 3600 * 1000;
+      hourly.push({
+        time: isNow ? 'Now' : lbl,
+        temp: Math.round(item.main.temp),
+        rainProb: Math.round((item.pop ?? 0) * 100),
+        icon: hi,
+        isNow,
+      });
     }
 
     return {
-      temp: Math.round(c.temperature_2m),
-      precip: c.precipitation,
-      wind: Math.round(windNow),
-      rainProb,
+      temp: Math.round(cur.main.temp),
+      precip: cur.rain?.['1h'] ?? cur.snow?.['1h'] ?? 0,
+      wind: Math.round(cur.wind.speed),
+      rainProb: Math.round((fc.list[0]?.pop ?? 0) * 100),
       label,
       icon,
-      sunrise, sunset, daylight,
+      sunrise,
+      sunset,
+      daylight: daylightHrs,
       hourly,
     };
   } catch {

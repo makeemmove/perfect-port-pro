@@ -148,7 +148,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
 
   useEffect(() => {
     fetchWeather().then(setWeather);
-    const interval = setInterval(() => fetchWeather().then(setWeather), 600000);
+    const interval = setInterval(() => fetchWeather().then(setWeather), 300000);
     return () => clearInterval(interval);
   }, []);
 
