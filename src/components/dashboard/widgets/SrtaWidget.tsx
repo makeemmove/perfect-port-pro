@@ -1,8 +1,8 @@
 import { SRTA_ROUTES } from '@/data/transit';
 import type { BusRoute } from '@/data/transit';
 import {
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
-} from '@/components/ui/select';
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from
+'@/components/ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 interface SrtaWidgetProps {
@@ -19,9 +19,9 @@ const SrtaWidget = ({
   selectedBusId, setSelectedBusId,
   busRoute,
   busCountdown, busDep, busAfter,
-  remainingBuses,
-}: SrtaWidgetProps) => (
-  <div className="p-4 rounded-[24px] bg-card shadow-card border-0">
+  remainingBuses
+}: SrtaWidgetProps) =>
+<div className="p-4 bg-card border-0 shadow-card-hover rounded-sm opacity-100">
     <div className="flex items-center gap-2 mb-3 flex-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-7 h-7 text-primary p-1 rounded-full bg-primary/10 flex-shrink-0">
         <rect x="2" y="7" width="20" height="13" rx="2" />
@@ -37,9 +37,9 @@ const SrtaWidget = ({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {SRTA_ROUTES.map(r => (
-            <SelectItem key={r.id} value={r.id} className="text-[12px]">{r.name}</SelectItem>
-          ))}
+          {SRTA_ROUTES.map((r) =>
+        <SelectItem key={r.id} value={r.id} className="text-[12px]">{r.name}</SelectItem>
+        )}
         </SelectContent>
       </Select>
     </div>
@@ -53,17 +53,17 @@ const SrtaWidget = ({
       </PopoverTrigger>
       <PopoverContent className="w-72 p-2 max-h-80 overflow-auto" align="start">
         <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2 px-2">Select Route</div>
-        {SRTA_ROUTES.map(r => (
-          <button
-            key={r.id}
-            onClick={() => setSelectedBusId(r.id)}
-            className={`w-full text-left text-[12px] py-2 px-2 rounded-lg transition-colors ${
-              r.id === selectedBusId ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50 text-foreground'
-            }`}
-          >
+        {SRTA_ROUTES.map((r) =>
+      <button
+        key={r.id}
+        onClick={() => setSelectedBusId(r.id)}
+        className={`w-full text-left text-[12px] py-2 px-2 rounded-lg transition-colors ${
+        r.id === selectedBusId ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50 text-foreground'}`
+        }>
+        
             {r.name}
           </button>
-        ))}
+      )}
       </PopoverContent>
     </Popover>
     <div className="text-[11px] text-muted-foreground">{busRoute.direction}</div>
@@ -82,14 +82,14 @@ const SrtaWidget = ({
             </div>
           </div>
           <div className="p-2">
-            {remainingBuses.length === 0 ? (
-              <div className="text-[12px] text-muted-foreground p-2">No more departures today</div>
-            ) : remainingBuses.map((t, i) => (
-              <div key={i} className="flex items-center py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
+            {remainingBuses.length === 0 ?
+          <div className="text-[12px] text-muted-foreground p-2">No more departures today</div> :
+          remainingBuses.map((t, i) =>
+          <div key={i} className="flex items-center py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
                 <span className="mono text-[13px] font-medium text-foreground">{t}</span>
                 <span className="text-[11px] text-muted-foreground ml-auto">{busRoute.direction}</span>
               </div>
-            ))}
+          )}
           </div>
         </PopoverContent>
       </Popover>
@@ -100,7 +100,7 @@ const SrtaWidget = ({
     </div>
     <div className="text-[11px] text-muted-foreground mt-2">{busAfter}</div>
     <div className="text-[10px] text-muted-foreground/60 mt-1">Tap countdown for full schedule</div>
-  </div>
-);
+  </div>;
+
 
 export default SrtaWidget;
