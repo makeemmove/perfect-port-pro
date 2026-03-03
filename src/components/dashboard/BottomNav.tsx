@@ -1,6 +1,6 @@
 interface BottomNavProps {
-  activeTab: 'home' | 'eats' | 'events';
-  onTabChange: (tab: 'home' | 'eats' | 'events') => void;
+  activeTab: 'home' | 'eats' | 'events' | 'news';
+  onTabChange: (tab: 'home' | 'eats' | 'events' | 'news') => void;
 }
 
 const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
@@ -36,6 +36,16 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
           <rect x="3" y="4" width="18" height="18" rx="2" />
           <path d="M16 2v4M8 2v4M3 10h18" />
           <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
+        </svg>
+      ),
+    },
+    {
+      id: 'news' as const,
+      label: 'News',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5" strokeWidth={1.6}>
+          <rect x="2" y="3" width="20" height="18" rx="2" />
+          <path d="M7 7h6M7 11h10M7 15h8" />
         </svg>
       ),
     },

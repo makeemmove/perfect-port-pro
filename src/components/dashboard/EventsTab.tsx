@@ -31,12 +31,26 @@ const leftBarColors: Record<string, string> = {
   holiday: '#dc2626',
 };
 
+// Group events by month
+function groupByMonth(events: CityEvent[]): { month: string; events: CityEvent[] }[] {
+  const groups: Record<string, CityEvent[]> = {};
+  for (const e of events) {
+    const d = new Date(e.date);
+    const key = isNaN(d.getTime()) ? 'Other' : d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(e);
+  }
+  return Object.entries(groups).map(([month, events]) => ({ month, events }));
+}
+
 const EventsTab = () => {
   const [activeSub, setActiveSub] = useState('All');
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
   const filtered = activeSub === 'All'
     ? EVENTS
     : EVENTS.filter(e => e.sub === activeSub || (activeSub === 'Kids' && e.sub === 'Kids/Education'));
+
+  const grouped = groupByMonth(filtered);
 
   return (
     <div className="space-y-4">
@@ -65,47 +79,56 @@ const EventsTab = () => {
         ))}
       </div>
 
-      <div className="flex flex-col gap-2.5">
-        {filtered.length === 0 ? (
-          <div className="text-muted-foreground text-center py-8 text-sm">No events found</div>
-        ) : filtered.map((e, i) => {
-          const d = new Date(e.date);
-          const mo = isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-          const dy = isNaN(d.getTime()) ? '' : d.getDate();
-          const [cls, lbl] = evTagMap[e.sub] || ['purple', e.sub || 'Event'];
-          const cc = evClassMap[e.sub] || 'arts';
+      {grouped.length === 0 ? (
+        <div className="text-muted-foreground text-center py-8 text-sm">No events found</div>
+      ) : grouped.map(group => (
+        <div key={group.month}>
+          <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2 mt-3 flex items-center gap-2
+                          before:flex-1 before:h-px before:bg-border
+                          after:flex-1 after:h-px after:bg-border">
+            {group.month}
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {group.events.map((e, i) => {
+              const d = new Date(e.date);
+              const mo = isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+              const dy = isNaN(d.getTime()) ? '' : d.getDate();
+              const [cls, lbl] = evTagMap[e.sub] || ['purple', e.sub || 'Event'];
+              const cc = evClassMap[e.sub] || 'arts';
 
-          return (
-            <div key={i} className="flex gap-3.5 p-4 rounded-xl relative overflow-hidden bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow">
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: leftBarColors[cc] || '#8b5cf6' }} />
-              <div className="flex-shrink-0 w-[50px] text-center flex flex-col items-center justify-center rounded-lg py-2 px-1 bg-muted/60">
-                <div className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">{mo}</div>
-                <div className="mono text-2xl font-light text-foreground leading-none">{dy}</div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold mb-1 text-foreground">{e.name}</div>
-                {e.location && (
-                  <div className="text-xs text-muted-foreground leading-relaxed">
-                    📍 {e.location}
+              return (
+                <div key={`${group.month}-${i}`} className="flex gap-3.5 p-4 rounded-xl relative overflow-hidden bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow">
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: leftBarColors[cc] || '#8b5cf6' }} />
+                  <div className="flex-shrink-0 w-[50px] text-center flex flex-col items-center justify-center rounded-lg py-2 px-1 bg-muted/60">
+                    <div className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">{mo}</div>
+                    <div className="mono text-2xl font-light text-foreground leading-none">{dy}</div>
                   </div>
-                )}
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <span className={`text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full ${tagStyles[cls] || tagStyles.purple}`}>
-                    {lbl}
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">{e.cost}</span>
-                  <button
-                    onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
-                    className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground border border-border hover:bg-foreground/10 transition-colors"
-                  >
-                    More Info
-                  </button>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold mb-1 text-foreground">{e.name}</div>
+                    {e.location && (
+                      <div className="text-xs text-muted-foreground leading-relaxed">
+                        📍 {e.location}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <span className={`text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full ${tagStyles[cls] || tagStyles.purple}`}>
+                        {lbl}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground">{e.cost}</span>
+                      <button
+                        onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
+                        className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground border border-border hover:bg-foreground/10 transition-colors"
+                      >
+                        More Info
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
       <QuickViewModal
         open={!!selectedEvent}

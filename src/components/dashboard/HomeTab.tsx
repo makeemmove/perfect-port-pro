@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { NewsArticle } from '@/hooks/useNews';
+import { ExternalLink } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -32,12 +34,13 @@ function loadOrder(): string[] {
   return DEFAULT_ORDER;
 }
 
-const HomeTab = ({ onNavigate }: { onNavigate?: (tab: 'eats' | 'events') => void }) => {
+const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab: 'eats' | 'events') => void; newsArticles?: NewsArticle[]; onNewsClick?: () => void }) => {
   const [clock, setClock] = useState('Loading…');
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
-  const [eventOrder, setEventOrder] = useState<number[]>([0, 1, 2, 3, 4, 5]);
+  const upcomingCount = useMemo(() => EVENTS.filter(e => new Date(e.date) >= new Date()).length, []);
+  const [eventOrder, setEventOrder] = useState<number[]>(() => Array.from({ length: Math.min(upcomingCount, 6) }, (_, i) => i));
 
   /* Route & station selection state */
   const isWeekend = useMemo(() => [0, 6].includes(new Date().getDay()), []);
@@ -201,11 +204,6 @@ const HomeTab = ({ onNavigate }: { onNavigate?: (tab: 'eats' | 'events') => void
     <div className="space-y-3">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-widest uppercase text-emerald mb-1">
-          <span className="w-[6px] h-[6px] rounded-full inline-block bg-emerald"
-                style={{ animation: 'live-pulse 2s ease infinite' }} />
-          Live
-        </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Fall River</h1>
         <div className="mono text-[11px] text-muted-foreground mt-0.5">{clock}</div>
       </div>
@@ -224,6 +222,41 @@ const HomeTab = ({ onNavigate }: { onNavigate?: (tab: 'eats' | 'events') => void
           ))}
         </SortableContext>
       </DndContext>
+
+      {/* News Preview */}
+      {newsArticles && newsArticles.length > 0 && (
+        <>
+          <div className="flex items-center gap-3 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mt-2
+                          before:flex-1 before:h-px before:bg-border
+                          after:flex-1 after:h-px after:bg-border">
+            📰 Latest News
+          </div>
+          <div className="flex flex-col gap-2">
+            {newsArticles.slice(0, 3).map((article, i) => (
+              <div
+                key={i}
+                className="p-3 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow cursor-pointer"
+                onClick={() => article.url && window.open(article.url, '_blank', 'noopener,noreferrer')}
+              >
+                <div className="text-sm font-semibold text-foreground leading-snug mb-1">{article.title}</div>
+                {article.summary && (
+                  <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-1">{article.summary}</p>
+                )}
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[10px] font-semibold text-primary">{article.source}</span>
+                  <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={onNewsClick}
+            className="w-full py-2.5 rounded-xl bg-foreground/5 text-foreground text-[11px] font-semibold tracking-wide uppercase border border-border hover:bg-foreground/10 transition-colors"
+          >
+            View All News →
+          </button>
+        </>
+      )}
 
       <QuickViewModal
         open={!!selectedEvent}
