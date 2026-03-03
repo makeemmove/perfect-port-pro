@@ -32,7 +32,7 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 py-2.5 px-4 rounded-2xl bg-muted/60 shadow-pill active:scale-[0.98] transition-transform duration-150 group/event"
+      className="flex items-center gap-2 py-2 px-4 rounded-full bg-muted/60 shadow-pill active:scale-[0.98] transition-transform duration-150 group/event"
     >
       <button
         ref={setActivatorNodeRef}
@@ -50,7 +50,7 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
           <circle cx="10" cy="12" r="1.3" />
         </svg>
       </button>
-      <div className="w-2 h-2 rounded-full flex-shrink-0 bg-secondary" />
+      <div className="w-5 h-5 rounded-full flex items-center justify-center bg-primary/10 flex-shrink-0"><div className="w-2 h-2 rounded-full bg-secondary" /></div>
       <div className="text-[13px] font-medium flex-1 whitespace-nowrap overflow-hidden text-ellipsis text-foreground">
         {event.name}
       </div>
