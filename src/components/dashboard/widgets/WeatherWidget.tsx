@@ -1,39 +1,39 @@
 import type { WeatherData } from '@/data/weather';
 
 const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => (
-  <div className="p-6 rounded-[24px] bg-card shadow-card">
+  <div className="p-4 rounded-[24px] bg-card shadow-card">
     <div className="flex justify-between items-start">
       <div>
         <div className="text-[10px] font-semibold tracking-widest uppercase text-primary">📍 Fall River, MA</div>
-        <div className="mono text-5xl font-light leading-none text-foreground mt-1">
-          {weather ? weather.temp : '--'}<sup className="text-lg align-super font-normal">°F</sup>
+        <div className="mono text-4xl font-light leading-none text-foreground mt-1">
+          {weather ? weather.temp : '--'}<sup className="text-base align-super font-normal">°F</sup>
         </div>
         <div className="text-sm text-muted-foreground mt-1">
           {weather ? weather.label : 'Fetching weather…'}
         </div>
       </div>
-      <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center text-[42px] leading-none">
+      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center text-[32px] leading-none">
         {weather ? weather.icon : '🌤'}
       </div>
     </div>
 
-    <div className="flex gap-4 flex-wrap mt-3 pt-3"><div className="w-full h-px bg-muted/40 -mt-3 mb-0" />
+    <div className="flex gap-4 flex-wrap mt-2 pt-2"><div className="w-full h-px bg-muted/40 -mt-2 mb-0" />
       <DetailItem label="Precip" value={weather ? weather.precip + '"' : '--'} />
       <DetailItem label="Wind" value={weather ? weather.wind + ' mph' : '--'} />
       <DetailItem label="Rain" value={weather ? weather.rainProb + '%' : '--%'} />
     </div>
-    <div className="flex gap-4 flex-wrap mt-2 pt-2"><div className="w-full h-px bg-muted/40 -mt-2 mb-0" />
+    <div className="flex gap-4 flex-wrap mt-1.5 pt-1.5"><div className="w-full h-px bg-muted/40 -mt-1.5 mb-0" />
       <span className="text-[11px] text-amber-600 font-medium">☀ Rise: {weather?.sunrise ?? '--'}</span>
       <span className="text-[11px] text-orange font-medium">☀ Set: {weather?.sunset ?? '--'}</span>
       <span className="text-[11px] text-muted-foreground">{weather?.daylight ?? '--'} daylight</span>
     </div>
 
     {/* Hourly */}
-    <div className="mt-3 pt-3"><div className="w-full h-px bg-muted/40 -mt-3 mb-3" />
-      <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">Next 6 Hours</div>
+    <div className="mt-2 pt-2"><div className="w-full h-px bg-muted/40 -mt-2 mb-2" />
+      <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-1.5">Next 6 Hours</div>
       <div className="flex gap-1.5 overflow-x-auto snap-x snap-mandatory" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
         {weather?.hourly.length ? weather.hourly.map((h, i) => (
-          <div key={i} className={`flex-shrink-0 snap-start flex flex-col items-center gap-1 py-2 px-2.5 rounded-2xl min-w-[52px] transition-colors ${
+          <div key={i} className={`flex-shrink-0 snap-start flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-2xl min-w-[46px] transition-colors ${
             h.isNow
               ? 'bg-primary/[0.06] shadow-soft'
               : 'bg-muted/50'

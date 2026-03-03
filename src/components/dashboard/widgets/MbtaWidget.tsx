@@ -26,8 +26,8 @@ const MbtaWidget = ({
   trainCountdown, trainUrgent, trainDir, trainDepTime, trainAfter,
   remainingTrains,
 }: MbtaWidgetProps) => (
-  <div className="p-6 rounded-[24px] bg-card shadow-card">
-    <div className="flex items-center gap-2 mb-3 flex-wrap">
+  <div className="p-4 rounded-[24px] bg-card shadow-card">
+    <div className="flex items-center gap-2 mb-2 flex-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-primary flex-shrink-0">
         <rect x="4" y="3" width="16" height="16" rx="2" />
         <path d="M4 11h16M12 3v8" />
@@ -41,7 +41,7 @@ const MbtaWidget = ({
     </div>
 
     {/* Route + Station selectors */}
-    <div className="flex flex-wrap gap-2 mb-3">
+    <div className="flex flex-wrap gap-2 mb-2">
       <Select value={selectedTrainId} onValueChange={setSelectedTrainId}>
         <SelectTrigger className="h-7 w-auto min-w-[180px] text-[11px] bg-muted/50 rounded-full px-3 gap-1.5 border-none">
           <SelectValue />
@@ -88,11 +88,11 @@ const MbtaWidget = ({
     </Popover>
     <div className="text-[11px] text-muted-foreground">{trainDir}</div>
 
-    <div className="flex justify-between items-center mt-3">
+    <div className="flex justify-between items-center mt-2">
       <Popover>
         <PopoverTrigger asChild>
           <button
-            className={`mono text-4xl font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity ${trainUrgent ? 'text-amber-500' : 'text-primary'}`}
+            className={`mono text-3xl font-semibold tracking-tight cursor-pointer hover:opacity-80 transition-opacity ${trainUrgent ? 'text-amber-500' : 'text-primary'}`}
             style={trainUrgent ? { animation: 'urgent-pulse 1s ease infinite' } : {}}
           >
             {trainCountdown}
