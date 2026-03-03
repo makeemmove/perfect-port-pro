@@ -199,10 +199,10 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-3">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl tracking-tighter text-foreground" style={{ fontWeight: 900, letterSpacing: '-0.05em' }}>Fall River <span className="text-primary" style={{ fontWeight: 900 }}>Connect</span></h1>
+        <h1 className="text-3xl tracking-tighter text-foreground" style={{ fontWeight: 900, letterSpacing: '-0.05em' }}>Fall River <span className="text-primary" style={{ fontWeight: 800 }}>Connect</span></h1>
         <div className="mono text-[11px] text-muted-foreground mt-0.5">{clock}</div>
       </div>
 
