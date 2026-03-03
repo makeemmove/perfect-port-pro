@@ -48,7 +48,7 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
           {/* Featured first article */}
           {articles.length > 0 && (
             <div
-              className="group p-5 rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all cursor-pointer relative overflow-hidden"
+              className="group p-5 rounded-[20px] bg-card border border-border shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150 cursor-pointer relative overflow-hidden"
               onClick={() => setSelectedArticle(articles[0])}
             >
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary/60" />
@@ -114,7 +114,7 @@ const NewsCard = ({ article, onClick }: { article: NewsArticle; onClick: () => v
 
   return (
     <div
-      className="group flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/20 hover:shadow-card-hover transition-all cursor-pointer"
+      className="group flex items-center gap-4 p-4 rounded-[20px] bg-card border border-border shadow-card hover:border-primary/20 hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150 cursor-pointer"
       onClick={onClick}
     >
       <div className="flex-1 min-w-0">
