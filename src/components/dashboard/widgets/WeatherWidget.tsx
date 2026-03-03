@@ -1,7 +1,7 @@
 import type { WeatherData } from '@/data/weather';
 
 const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => (
-  <div className="p-5 rounded-2xl bg-card border border-border shadow-card">
+  <div className="p-5 rounded-[24px] bg-card shadow-card">
     <div className="flex justify-between items-start">
       <div>
         <div className="text-[10px] font-semibold tracking-widest uppercase text-primary">📍 Fall River, MA</div>
@@ -17,26 +17,26 @@ const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => (
       </div>
     </div>
 
-    <div className="flex gap-4 flex-wrap mt-3 pt-3 border-t border-border">
+    <div className="flex gap-4 flex-wrap mt-3 pt-3 border-t border-muted/60">
       <DetailItem label="Precip" value={weather ? weather.precip + '"' : '--'} />
       <DetailItem label="Wind" value={weather ? weather.wind + ' mph' : '--'} />
       <DetailItem label="Rain" value={weather ? weather.rainProb + '%' : '--%'} />
     </div>
-    <div className="flex gap-4 flex-wrap mt-2 pt-2 border-t border-border">
+    <div className="flex gap-4 flex-wrap mt-2 pt-2 border-t border-muted/60">
       <span className="text-[11px] text-amber-600 font-medium">☀ Rise: {weather?.sunrise ?? '--'}</span>
       <span className="text-[11px] text-orange font-medium">☀ Set: {weather?.sunset ?? '--'}</span>
       <span className="text-[11px] text-muted-foreground">{weather?.daylight ?? '--'} daylight</span>
     </div>
 
     {/* Hourly */}
-    <div className="mt-3 pt-3 border-t border-border">
+    <div className="mt-3 pt-3 border-t border-muted/60">
       <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">Next 6 Hours</div>
       <div className="flex gap-1.5 overflow-x-auto snap-x snap-mandatory" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
         {weather?.hourly.length ? weather.hourly.map((h, i) => (
-          <div key={i} className={`flex-shrink-0 snap-start flex flex-col items-center gap-1 py-2 px-2.5 rounded-xl min-w-[52px] border transition-colors ${
+          <div key={i} className={`flex-shrink-0 snap-start flex flex-col items-center gap-1 py-2 px-2.5 rounded-2xl min-w-[52px] transition-colors ${
             h.isNow
-              ? 'bg-primary/[0.06] border-primary/20'
-              : 'bg-muted/50 border-border'
+              ? 'bg-primary/[0.06] shadow-soft'
+              : 'bg-muted/50'
           }`}>
             <div className="mono text-[10px] text-muted-foreground">{h.time}</div>
             <div className="text-base leading-none">{h.icon}</div>

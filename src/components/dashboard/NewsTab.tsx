@@ -25,7 +25,7 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
         <button
           onClick={onRefresh}
           disabled={isLoading}
-          className="p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all disabled:opacity-50"
+          className="p-2.5 rounded-full bg-card shadow-card text-muted-foreground hover:text-foreground hover:shadow-card-hover active:scale-[0.95] transition-all duration-150 disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
@@ -34,7 +34,7 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
       {isLoading && articles.length === 0 ? (
         <div className="space-y-3">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="p-5 rounded-2xl bg-card border border-border animate-pulse">
+            <div key={i} className="p-5 rounded-[24px] bg-card animate-pulse shadow-card">
               <div className="h-3 bg-muted rounded-full w-1/4 mb-3" />
               <div className="h-4 bg-muted rounded w-5/6 mb-2" />
               <div className="h-3 bg-muted rounded w-full" />
@@ -48,7 +48,7 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
           {/* Featured first article */}
           {articles.length > 0 && (
             <div
-              className="group p-5 rounded-[20px] bg-card border border-border shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150 cursor-pointer relative overflow-hidden"
+              className="group p-5 rounded-[24px] bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.97] transition-all duration-150 cursor-pointer relative overflow-hidden"
               onClick={() => setSelectedArticle(articles[0])}
             >
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary/60" />
@@ -114,7 +114,7 @@ const NewsCard = ({ article, onClick }: { article: NewsArticle; onClick: () => v
 
   return (
     <div
-      className="group flex items-center gap-4 p-4 rounded-[20px] bg-card border border-border shadow-card hover:border-primary/20 hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.98] transition-all duration-150 cursor-pointer"
+      className="group flex items-center gap-4 p-4 rounded-[24px] bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.97] transition-all duration-150 cursor-pointer"
       onClick={onClick}
     >
       <div className="flex-1 min-w-0">

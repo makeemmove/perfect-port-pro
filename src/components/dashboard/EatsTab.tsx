@@ -55,10 +55,10 @@ const EatsTab = () => {
       <div className="flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
         {CATEGORIES.map(c => (
           <button key={c.cat} onClick={() => setActiveCat(c.cat)}
-            className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-200 border ${
+            className={`flex-shrink-0 py-1.5 px-3.5 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-150 active:scale-[0.95] ${
               activeCat === c.cat
-                ? 'bg-foreground text-background border-foreground'
-                : 'bg-card text-muted-foreground border-border hover:border-foreground/20'
+                ? 'bg-foreground text-background shadow-soft'
+                : 'bg-card text-muted-foreground shadow-card hover:shadow-card-hover'
             }`}>
             {c.label}
           </button>
@@ -69,8 +69,8 @@ const EatsTab = () => {
         {filtered.length === 0 ? (
           <div className="text-muted-foreground text-center py-8 text-sm">No restaurants found</div>
         ) : filtered.map((r, i) => (
-          <div key={i} className="flex gap-3.5 p-4 rounded-xl relative overflow-hidden bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow">
-            <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: leftBarColors[r.sub] || '#3b82f6' }} />
+          <div key={i} className="flex gap-3.5 p-4 rounded-[24px] relative overflow-hidden bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.97] transition-all duration-150">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[24px]" style={{ background: leftBarColors[r.sub] || '#3b82f6' }} />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold mb-1 text-foreground">{r.name}</div>
               <div className="text-xs text-muted-foreground leading-relaxed">
@@ -84,7 +84,7 @@ const EatsTab = () => {
                 <span className="mono text-[11px] text-muted-foreground">{r.price}</span>
                 <button
                   onClick={(ev) => { ev.stopPropagation(); setSelectedRestaurant(r); }}
-                  className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground border border-border hover:bg-foreground/10 transition-colors"
+                  className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full bg-foreground/5 text-foreground hover:bg-foreground/10 active:scale-[0.95] transition-all duration-150"
                 >
                   More Info
                 </button>

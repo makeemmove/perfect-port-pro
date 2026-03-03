@@ -32,7 +32,7 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 py-2.5 px-3.5 rounded-xl bg-card border border-border shadow-card hover:shadow-card-hover transition-shadow group/event"
+      className="flex items-center gap-2 py-2.5 px-3.5 rounded-[20px] bg-card shadow-card hover:shadow-card-hover hover:scale-[1.01] active:scale-[0.97] transition-all duration-150 group/event"
     >
       <button
         ref={setActivatorNodeRef}
@@ -60,7 +60,7 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
       {onEventClick && (
         <button
           onClick={() => onEventClick(event)}
-          className="text-[9px] font-semibold tracking-wide uppercase py-[2px] px-2 rounded-full bg-foreground/5 text-foreground border border-border hover:bg-foreground/10 transition-colors flex-shrink-0"
+          className="text-[9px] font-semibold tracking-wide uppercase py-[2px] px-2 rounded-full bg-foreground/5 text-foreground hover:bg-foreground/10 transition-colors flex-shrink-0"
         >
           Info
         </button>

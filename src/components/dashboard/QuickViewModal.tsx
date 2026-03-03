@@ -44,7 +44,7 @@ const QuickViewModal = ({
   category,
 }: QuickViewModalProps) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-w-md rounded-xl bg-card border-border shadow-lg backdrop-blur-xl sm:rounded-xl">
+    <DialogContent className="max-w-md rounded-[24px] bg-card shadow-card-hover backdrop-blur-xl sm:rounded-[24px]">
       <DialogHeader>
         <DialogTitle className="text-lg font-bold text-foreground leading-tight pr-6">
           {title}
@@ -80,7 +80,7 @@ const QuickViewModal = ({
         {url && (
           <button
             onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
-            className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-foreground text-background text-sm font-semibold transition-opacity hover:opacity-90"
+            className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-full bg-foreground text-background text-sm font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.97]"
           >
             <ExternalLink className="w-4 h-4" />
             Visit Website
