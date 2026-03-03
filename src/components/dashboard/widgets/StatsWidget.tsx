@@ -4,12 +4,12 @@ interface StatsWidgetProps {
   onNavigate?: (tab: 'eats' | 'events') => void;
 }
 
-const StatsWidget = ({ eventsThisWeek, restaurantCount, onNavigate }: StatsWidgetProps) => (
-  <div className="grid grid-cols-2 gap-3">
+const StatsWidget = ({ eventsThisWeek, restaurantCount, onNavigate }: StatsWidgetProps) =>
+<div className="grid grid-cols-2 gap-3 shadow-card-hover rounded-sm opacity-100">
     <div
-      className="p-5 rounded-[20px] bg-card shadow-card hover:shadow-card-hover border border-border/60 cursor-pointer active:scale-95 transition-all duration-200"
-      onClick={() => onNavigate?.('events')}
-    >
+    className="p-5 rounded-[20px] bg-card shadow-card hover:shadow-card-hover border border-border/60 cursor-pointer active:scale-95 transition-all duration-200"
+    onClick={() => onNavigate?.('events')}>
+    
       <div className="mb-3">
         <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5 text-primary">
@@ -24,9 +24,9 @@ const StatsWidget = ({ eventsThisWeek, restaurantCount, onNavigate }: StatsWidge
       <div className="text-[11px] text-muted-foreground mt-1">Library &amp; Community</div>
     </div>
     <div
-      className="p-5 rounded-[20px] bg-card shadow-card hover:shadow-card-hover border border-border/60 cursor-pointer active:scale-95 transition-all duration-200"
-      onClick={() => onNavigate?.('eats')}
-    >
+    className="p-5 rounded-[20px] bg-card shadow-card hover:shadow-card-hover border border-border/60 cursor-pointer active:scale-95 transition-all duration-200"
+    onClick={() => onNavigate?.('eats')}>
+    
       <div className="mb-3">
         <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-5 h-5 text-primary">
@@ -40,7 +40,7 @@ const StatsWidget = ({ eventsThisWeek, restaurantCount, onNavigate }: StatsWidge
       <div className="text-3xl font-bold text-foreground leading-none">{restaurantCount}</div>
       <div className="text-[11px] text-muted-foreground mt-1">Restaurants &amp; Cafés</div>
     </div>
-  </div>
-);
+  </div>;
+
 
 export default StatsWidget;
