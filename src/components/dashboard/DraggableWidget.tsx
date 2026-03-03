@@ -1,5 +1,11 @@
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, MoreVertical } from 'lucide-react';
 import type { ReactNode } from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface DraggableWidgetProps {
   id: string;
@@ -11,26 +17,34 @@ interface DraggableWidgetProps {
 const DraggableWidget = ({ id, children, onMoveUp, onMoveDown }: DraggableWidgetProps) => {
   return (
     <div className="relative mb-2">
-      <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
-        {onMoveUp && (
-          <button
-            onClick={onMoveUp}
-            className="w-7 h-7 rounded-full bg-accent/15 text-accent flex items-center justify-center hover:bg-accent/25 transition-colors duration-200"
-            aria-label="Move up"
-          >
-            <ChevronUp size={16} />
-          </button>
-        )}
-        {onMoveDown && (
-          <button
-            onClick={onMoveDown}
-            className="w-7 h-7 rounded-full bg-accent/15 text-accent flex items-center justify-center hover:bg-accent/25 transition-colors duration-200"
-            aria-label="Move down"
-          >
-            <ChevronDown size={16} />
-          </button>
-        )}
-      </div>
+      {(onMoveUp || onMoveDown) && (
+        <div className="absolute top-2 right-2 z-10">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="w-7 h-7 rounded-full bg-accent/10 text-muted-foreground flex items-center justify-center hover:bg-accent/20 transition-colors duration-200"
+                aria-label="Reorder widget"
+              >
+                <MoreVertical size={16} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[140px]">
+              {onMoveUp && (
+                <DropdownMenuItem onClick={onMoveUp}>
+                  <ChevronUp size={16} className="mr-2" />
+                  Move Up
+                </DropdownMenuItem>
+              )}
+              {onMoveDown && (
+                <DropdownMenuItem onClick={onMoveDown}>
+                  <ChevronDown size={16} className="mr-2" />
+                  Move Down
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
       {children}
     </div>
   );
