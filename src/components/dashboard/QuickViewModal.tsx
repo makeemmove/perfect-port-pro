@@ -51,7 +51,7 @@ const QuickViewModal = ({
         </DialogTitle>
         {category && (
           <span
-            className={`inline-block w-fit mt-1 text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full border ${tagColors[category] || 'bg-muted text-muted-foreground border-border'}`}
+            className={`inline-block w-fit mt-1 text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full ${tagColors[category] || 'bg-muted text-muted-foreground'}`}
           >
             {category}
           </span>
@@ -80,7 +80,7 @@ const QuickViewModal = ({
         {url && (
           <button
             onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
-            className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-full bg-foreground text-background text-sm font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.97]"
+            className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-full bg-foreground text-background text-sm font-semibold transition-all duration-150 hover:opacity-90 className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 px-4 rounded-full bg-foreground text-background text-sm font-semibold transition-all duration-150 hover:opacity-90 active:scale-[0.98]""
           >
             <ExternalLink className="w-4 h-4" />
             Visit Website
