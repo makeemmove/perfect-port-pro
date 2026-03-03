@@ -31,9 +31,9 @@ const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => (
     {/* Hourly */}
     <div className="mt-3 pt-3 border-t border-border">
       <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">Next 6 Hours</div>
-      <div className="flex gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex gap-1.5 overflow-x-auto snap-x snap-mandatory" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
         {weather?.hourly.length ? weather.hourly.map((h, i) => (
-          <div key={i} className={`flex-shrink-0 flex flex-col items-center gap-1 py-2 px-2.5 rounded-xl min-w-[52px] border transition-colors ${
+          <div key={i} className={`flex-shrink-0 snap-start flex flex-col items-center gap-1 py-2 px-2.5 rounded-xl min-w-[52px] border transition-colors ${
             h.isNow
               ? 'bg-primary/[0.06] border-primary/20'
               : 'bg-muted/50 border-border'

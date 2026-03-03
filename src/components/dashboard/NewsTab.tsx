@@ -10,11 +10,6 @@ interface NewsTabProps {
   onRefresh: () => void;
 }
 
-const sourceColors: Record<string, string> = {
-  'fall river reporter': 'bg-primary/10 text-primary border-primary/20',
-  'herald news': 'bg-amber-50 text-amber-600 border-amber-200',
-  'fall river police department': 'bg-blue-50 text-blue-600 border-blue-200',
-};
 
 const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) => {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
@@ -66,9 +61,6 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
           {selectedArticle && (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full border ${getColorClass(selectedArticle.source_name)}`}>
-                  {selectedArticle.source_name}
-                </span>
                 <span className="text-[10px] text-muted-foreground">{getTimeAgo(selectedArticle.published_at)}</span>
               </div>
               {selectedArticle.content ? (
@@ -96,7 +88,6 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
 
 const NewsCard = ({ article, onClick }: { article: NewsArticle; onClick: () => void }) => {
   const timeAgo = getTimeAgo(article.published_at);
-  const colorClass = getColorClass(article.source_name);
 
   return (
     <div
@@ -114,9 +105,6 @@ const NewsCard = ({ article, onClick }: { article: NewsArticle; onClick: () => v
             </p>
           )}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-[10px] font-semibold tracking-wide uppercase py-[3px] px-2.5 rounded-full border ${colorClass}`}>
-              {article.source_name}
-            </span>
             <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
           </div>
         </div>
@@ -125,11 +113,6 @@ const NewsCard = ({ article, onClick }: { article: NewsArticle; onClick: () => v
   );
 };
 
-function getColorClass(sourceName: string): string {
-  const lower = sourceName.toLowerCase();
-  return Object.entries(sourceColors).find(([key]) => lower.includes(key))?.[1]
-    || 'bg-muted text-muted-foreground border-border';
-}
 
 function getTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
