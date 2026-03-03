@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { NewsArticle } from '@/hooks/useNews';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { MBTA_ROUTES, MBTA_STATIONS, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
 import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
