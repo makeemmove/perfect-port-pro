@@ -1,8 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { NewsArticle } from '@/hooks/useNews';
-import { DndContext, closestCenter, DragEndEvent, DragStartEvent, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MBTA_ROUTES, MBTA_STATIONS, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
 import { RESTAURANTS } from '@/data/restaurants';
@@ -40,11 +37,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
 
-  const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
-  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 350, tolerance: 25 } });
-  const sensors = useSensors(pointerSensor, touchSensor);
   const upcomingCount = useMemo(() => EVENTS.filter(e => new Date(e.date) >= new Date()).length, []);
   const [eventOrder, setEventOrder] = useState<number[]>(() => Array.from({ length: Math.min(upcomingCount, 6) }, (_, i) => i));
 
@@ -155,22 +148,16 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
     return () => clearInterval(interval);
   }, []);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    setActiveId(null);
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setWidgetOrder(prev => {
-        const oldIndex = prev.indexOf(active.id as string);
-        const newIndex = prev.indexOf(over.id as string);
-        const next = arrayMove(prev, oldIndex, newIndex);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-        return next;
-      });
-    }
-  }, []);
-
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
+  const moveWidget = useCallback((id: string, direction: 'up' | 'down') => {
+    setWidgetOrder(prev => {
+      const idx = prev.indexOf(id);
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= prev.length) return prev;
+      const next = [...prev];
+      [next[idx], next[swapIdx]] = [next[swapIdx], next[idx]];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
   }, []);
 
   const widgetMap: Record<string, React.ReactNode> = {
@@ -214,27 +201,19 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
           Fall River <span className="text-primary">Connect</span>
         </h1>
         <div className="mono text-[11px] text-muted-foreground mt-2">{clock}</div>
-        {isMobile && (
-          <div className="text-[10px] text-muted-foreground/60 mt-1">Press &amp; hold to reorder</div>
-        )}
       </div>
 
-      {/* Draggable widgets */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={widgetOrder} strategy={verticalListSortingStrategy}>
-          {widgetOrder.map(id => (
-            <DraggableWidget key={id} id={id} isMobile={isMobile} isAnyDragging={!!activeId}>
-              {widgetMap[id]}
-            </DraggableWidget>
-          ))}
-        </SortableContext>
-      </DndContext>
+      {/* Widgets with arrow reorder */}
+      {widgetOrder.map((id, idx) => (
+        <DraggableWidget
+          key={id}
+          id={id}
+          onMoveUp={idx > 0 ? () => moveWidget(id, 'up') : undefined}
+          onMoveDown={idx < widgetOrder.length - 1 ? () => moveWidget(id, 'down') : undefined}
+        >
+          {widgetMap[id]}
+        </DraggableWidget>
+      ))}
 
       <QuickViewModal
         open={!!selectedEvent}
