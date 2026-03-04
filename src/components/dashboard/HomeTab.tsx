@@ -35,7 +35,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const isMobile = useIsMobile();
   const [clock, setClock] = useState('Loading…');
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [widgetOrder, setWidgetOrder] = useState(loadOrder);
+  const [widgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
 
   const upcomingCount = useMemo(() => EVENTS.filter(e => new Date(e.date) >= new Date()).length, []);
@@ -148,18 +148,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
     return () => clearInterval(interval);
   }, []);
 
-  const moveWidget = useCallback((id: string, direction: 'up' | 'down') => {
-    setWidgetOrder(prev => {
-      const idx = prev.indexOf(id);
-      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-      if (swapIdx < 0 || swapIdx >= prev.length) return prev;
-      const next = [...prev];
-      [next[idx], next[swapIdx]] = [next[swapIdx], next[idx]];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  }, []);
-
   const widgetMap: Record<string, React.ReactNode> = {
     weather: <WeatherWidget weather={weather} />,
     mbta: (
@@ -203,14 +191,9 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
         <div className="mono text-[11px] text-muted-foreground mt-2">{clock}</div>
       </div>
 
-      {/* Widgets with arrow reorder */}
-      {widgetOrder.map((id, idx) => (
-        <DraggableWidget
-          key={id}
-          id={id}
-          onMoveUp={idx > 0 ? () => moveWidget(id, 'up') : undefined}
-          onMoveDown={idx < widgetOrder.length - 1 ? () => moveWidget(id, 'down') : undefined}
-        >
+      {/* Widgets */}
+      {widgetOrder.map((id) => (
+        <DraggableWidget key={id} id={id}>
           {widgetMap[id]}
         </DraggableWidget>
       ))}

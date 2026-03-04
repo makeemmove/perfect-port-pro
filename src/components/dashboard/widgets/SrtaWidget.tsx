@@ -21,7 +21,7 @@ const SrtaWidget = ({
   busCountdown, busDep, busAfter,
   remainingBuses
 }: SrtaWidgetProps) => (
-  <div className="glass-card p-6">
+  <div className="glass-card p-6 py-[15px]">
     <div className="flex items-center gap-2 mb-3 flex-wrap">
       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-primary">
@@ -34,8 +34,11 @@ const SrtaWidget = ({
       <span className="text-[9px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full bg-primary/[0.06] text-primary">
         SRTA
       </span>
+    </div>
+
+    <div className="flex flex-wrap gap-2 mb-3">
       <Select value={selectedBusId} onValueChange={setSelectedBusId}>
-        <SelectTrigger className="h-8 w-auto min-w-[180px] text-[11px] bg-muted/50 rounded-full px-3 gap-1.5 border-none">
+        <SelectTrigger className="h-7 w-auto min-w-[180px] text-[11px] bg-muted/50 rounded-full px-3 gap-1.5 border-none">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -45,29 +48,7 @@ const SrtaWidget = ({
         </SelectContent>
       </Select>
     </div>
-
-    <Popover>
-      <PopoverTrigger asChild>
-        <button className="text-sm font-bold text-foreground hover:text-primary transition-colors duration-300 cursor-pointer text-left">
-          {busRoute.name} <span className="text-[10px] text-muted-foreground">▾</span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-72 p-2 max-h-80 overflow-auto rounded-2xl" align="start">
-        <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2 px-2">Select Route</div>
-        {SRTA_ROUTES.map((r) => (
-          <button
-            key={r.id}
-            onClick={() => setSelectedBusId(r.id)}
-            className={`w-full text-left text-[12px] py-2 px-2 rounded-xl transition-colors duration-300 ${
-              r.id === selectedBusId ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50 text-foreground'
-            }`}
-          >
-            {r.name}
-          </button>
-        ))}
-      </PopoverContent>
-    </Popover>
-    <div className="text-[11px] text-muted-foreground mt-0.5">{busRoute.direction}</div>
+    <div className="text-[11px] text-muted-foreground">{busRoute.direction}</div>
 
     <div className="flex justify-between items-center mt-4">
       <Popover>
@@ -76,7 +57,7 @@ const SrtaWidget = ({
             {busCountdown}
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-64 p-0 max-h-72 overflow-auto rounded-2xl" align="start">
+        <PopoverContent className="w-72 p-0 max-h-72 overflow-auto rounded-2xl" align="start">
           <div className="p-3 border-b border-border/40">
             <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
               Remaining Departures · {busRoute.name}
@@ -87,9 +68,9 @@ const SrtaWidget = ({
               <div className="text-[12px] text-muted-foreground p-2">No more departures today</div>
             ) : (
               remainingBuses.map((t, i) => (
-                <div key={i} className="flex items-center py-2 px-2 rounded-xl hover:bg-muted/50 transition-colors duration-300">
+                <div key={i} className="flex items-center justify-between py-2 px-2 rounded-xl hover:bg-muted/50 transition-colors duration-300">
                   <span className="mono text-[13px] font-medium text-foreground">{t}</span>
-                  <span className="text-[11px] text-muted-foreground ml-auto">{busRoute.direction}</span>
+                  <span className="text-[11px] text-muted-foreground">{busRoute.direction}</span>
                 </div>
               ))
             )}
