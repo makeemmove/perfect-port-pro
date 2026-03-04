@@ -22,8 +22,29 @@ const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => {
     );
   }
 
+  const severityColor = (severity: string) => {
+    switch (severity.toLowerCase()) {
+      case 'extreme': return 'bg-destructive/15 border-destructive/30 text-destructive';
+      case 'severe': return 'bg-destructive/10 border-destructive/20 text-destructive';
+      case 'moderate': return 'bg-accent/15 border-accent/30 text-accent';
+      default: return 'bg-primary/10 border-primary/20 text-primary';
+    }
+  };
+
   return (
     <div className="glass-card p-6">
+      {/* Alerts */}
+      {weather.alerts && weather.alerts.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {weather.alerts.map((alert, i) => (
+            <div key={i} className={`text-[11px] px-3 py-2 rounded-xl border ${severityColor(alert.severity)}`}>
+              <div className="font-semibold">⚠ {alert.event}</div>
+              {alert.headline && <div className="mt-0.5 opacity-80">{alert.headline}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="flex justify-between items-start">
         <div>
           <div className="text-[10px] font-semibold tracking-widest uppercase text-primary">📍 Fall River, MA</div>

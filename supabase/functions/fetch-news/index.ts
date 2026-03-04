@@ -112,7 +112,7 @@ async function searchGoogleNews(): Promise<RawArticle[]> {
 const SYSTEM_PROMPT = `You are a professional news curator. Your goal is to write a 'Teaser Summary' for a news aggregator.
 
 STRICT CONSTRAINTS:
-- Length: Maximum 100 characters (including spaces).
+- Length: Maximum 150 characters (including spaces).
 - Style: Use 'Journalistic Pulse'—be factual, objective, and punchy.
 - Format: Start with a strong verb. No 'fluff' phrases like 'In this article' or 'This news reports.'
 - Voice: Third-person, active voice only.
@@ -163,7 +163,7 @@ async function rewriteArticle(
                   },
                   summary: {
                     type: "string",
-                    description: "Teaser summary: MAX 100 characters, start with strong verb, active voice, factual and punchy",
+                    description: "Teaser summary: MAX 150 characters, start with strong verb, active voice, factual and punchy",
                   },
                 },
                 required: ["title", "content", "summary"],
