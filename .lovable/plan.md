@@ -1,46 +1,57 @@
 
 
-## Plan: Reorder Mode Toggle + Fall River-Only News
+## Plan: Weather Overhaul, Remove Reorder, Match Transit Cards, Fix Eats Icon, Update News Summaries
 
-### 3 Changes
+### 1. Remove three-dot reorder buttons completely
 
-#### 1. `src/components/dashboard/widgets/StatsWidget.tsx`
-- Replace the "Local Eats" card with a "Reorder" button card
-- Same visual style (glass-card, icon, label) but toggles reorder mode instead of navigating to eats
-- Add prop: `reorderMode: boolean`, `onToggleReorder: () => void`
-- Keep the "Events This Week" card as-is
-- Move the "Local Eats" navigation to the bottom nav (already exists as "Eats" tab)
+**`src/components/dashboard/DraggableWidget.tsx`** — Simplify to a plain wrapper div. Remove all imports (DropdownMenu, ChevronUp/Down, MoreVertical). Remove `onMoveUp`/`onMoveDown` props. Just render `<div className="mb-2">{children}</div>`.
 
-**Wait** — the user said "where local eats is." Let me re-read: "have a button where local eats is that u can press to reorder." So the Local Eats stat card gets replaced with a Reorder toggle button.
+**`src/components/dashboard/HomeTab.tsx`** — Remove `moveWidget` callback and stop passing `onMoveUp`/`onMoveDown` to DraggableWidget. Keep widget order from localStorage (read-only, no reordering UI).
 
-- New card: icon (grid/move icon), label "Reorder", shows "Tap to edit" subtext. When `reorderMode` is true, shows "Done" state with accent highlight
-- Props: add `reorderMode: boolean`, `onToggleReorder: () => void`
+### 2. Fix weather — use edge function to fetch real weather data
 
-#### 2. `src/components/dashboard/HomeTab.tsx`
-- Add `reorderMode` state (boolean, default false)
-- Pass `reorderMode` and toggle callback to `StatsWidget`
-- Only pass `onMoveUp`/`onMoveDown` to `DraggableWidget` when `reorderMode === true`
-- When reorder mode is off, widgets render clean with no controls
+Replace the client-side OpenWeatherMap fetch with a backend edge function that fetches weather + NWS alerts for Fall River every call. The frontend will call this every 5 minutes.
 
-#### 3. `src/components/dashboard/DraggableWidget.tsx`
-- Keep the three-dot menu as-is (it already only shows when `onMoveUp`/`onMoveDown` are provided)
-- No changes needed — it will naturally hide when HomeTab stops passing move callbacks
+**`supabase/functions/fetch-weather/index.ts`** — New edge function:
+- Fetches OpenWeatherMap current + forecast (using the existing API key `c07bd9dae1e05e6549146b718568329b`)
+- Fetches NWS alerts for Fall River from `https://api.weather.gov/alerts/active?point=41.7015,-71.1551`
+- Returns combined weather data + active alerts array
+- Add to `supabase/config.toml` with `verify_jwt = false`
 
-**Actually**, the user wants drag-and-drop when in reorder mode — "all of the cards have their own button to drag and drop up or down." This sounds like they still want up/down controls, just only visible in reorder mode. The three-dot menu approach works, but let me reconsider: they said "button to drag and drop up or down" — this means visible up/down arrows on each card, not a menu. Let me use simple arrow buttons that only appear in reorder mode.
+**`src/data/weather.ts`** — Update `fetchWeather()` to call the edge function via `supabase.functions.invoke('fetch-weather')` instead of direct API calls. Add `alerts` field to `WeatherData` interface.
 
-#### Revised: `src/components/dashboard/DraggableWidget.tsx`
-- Remove the three-dot dropdown menu entirely
-- When `onMoveUp` or `onMoveDown` are provided (reorder mode on), show visible `ChevronUp`/`ChevronDown` arrow buttons on the card (top-right, accent-colored circles)
-- When not provided (reorder mode off), render nothing — clean card
+**`src/components/dashboard/widgets/WeatherWidget.tsx`** — Add alerts display section: if alerts exist, show them as colored banners (yellow/orange/red depending on severity) below the weather info.
 
-#### 4. `supabase/functions/fetch-news/index.ts`
-- Update the system prompt to specify: "Only write about news specifically about Fall River, Massachusetts. Ignore articles about other Massachusetts cities or towns unless they directly impact Fall River."
-- Update the Google News search query to be more specific: `"Fall River" Massachusetts` (with quotes) instead of `Fall+River+Massachusetts`
-- Add a filtering instruction in the rewrite prompt so Gemini skips non-Fall River articles
+### 3. Match MBTA and SRTA cards — same layout and size
+
+**`src/components/dashboard/widgets/SrtaWidget.tsx`** — Restructure to match MbtaWidget exactly:
+- Use `py-[15px]` padding like MBTA (currently just `p-6`)
+- Move route selector below the header row (separate flex-wrap row with Select dropdowns, matching MBTA's two-dropdown layout)
+- Remove the redundant popover route picker (lines 49-69) — the Select dropdown is sufficient
+- Keep direction text, countdown, departs-at, and "tap countdown" hint in the same positions as MBTA
+
+### 4. Update Local Eats icon to match bottom nav (fork in square)
+
+**`src/components/dashboard/widgets/StatsWidget.tsx`** — Replace the current fork SVG (lines 32-36) with the same fork-in-square SVG used in BottomNav's Eats tab:
+```
+<rect x="3" y="3" width="18" height="18" rx="4" />
+<path d="M13 7v4c0 .8-.7 1.5-1.5 1.5S10 11.8 10 11V7" />
+<path d="M11.5 7v4" />
+<path d="M11.5 12.5v4.5" />
+```
+
+### 5. Update news summary prompt to 150 characters
+
+**`supabase/functions/fetch-news/index.ts`** — Change the SYSTEM_PROMPT summary constraint from "Maximum 100 characters" to "Maximum 150 characters". Also update the tool parameter description for `summary` to say "MAX 150 characters". Tighten Fall River geofencing in Google News search query.
 
 ### Files to edit
-1. `src/components/dashboard/widgets/StatsWidget.tsx` — replace Local Eats card with Reorder toggle
-2. `src/components/dashboard/HomeTab.tsx` — add reorderMode state, conditionally pass move props
-3. `src/components/dashboard/DraggableWidget.tsx` — remove three-dot menu, show arrow buttons only when move props provided
-4. `supabase/functions/fetch-news/index.ts` — tighten search query and prompt to Fall River only
+1. `src/components/dashboard/DraggableWidget.tsx` — strip to plain wrapper
+2. `src/components/dashboard/HomeTab.tsx` — remove moveWidget and reorder props
+3. `supabase/functions/fetch-weather/index.ts` — new edge function
+4. `supabase/config.toml` — add fetch-weather function entry
+5. `src/data/weather.ts` — call edge function, add alerts type
+6. `src/components/dashboard/widgets/WeatherWidget.tsx` — add alerts UI
+7. `src/components/dashboard/widgets/SrtaWidget.tsx` — match MBTA layout
+8. `src/components/dashboard/widgets/StatsWidget.tsx` — fork-in-square icon
+9. `supabase/functions/fetch-news/index.ts` — 150 char summaries + Fall River geofence
 
