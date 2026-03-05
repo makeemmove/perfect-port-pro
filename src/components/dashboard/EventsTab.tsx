@@ -8,15 +8,11 @@ const FILTERS = [
   { label: '🎵 Music', sub: 'Music' },
   { label: '🎨 Arts', sub: 'Arts' },
   { label: '👶 Kids', sub: 'Kids' },
-  { label: '🎉 Festival', sub: 'Festival' },
-  { label: '🎄 Holiday', sub: 'Holiday' },
-  { label: '👨‍👩‍👧 Family', sub: 'Family' },
-  { label: '🏘 Community', sub: 'Community' },
   { label: '🎭 Theater', sub: 'Theater' },
   { label: '📚 Education', sub: 'Education' },
-  { label: '🍔 Food', sub: 'Food' },
-  { label: '⚽ Sports', sub: 'Sports' },
-  { label: '🏛 Civic', sub: 'Civic' },
+  { label: '🎉 Festival', sub: 'Festival' },
+  { label: '🎄 Holiday', sub: 'Holiday' },
+  { label: '🏘 Community', sub: 'Community' },
 ];
 
 const tagStyles: Record<string, string> = {
@@ -26,6 +22,8 @@ const tagStyles: Record<string, string> = {
   green: 'bg-emerald-50 text-emerald-600',
   orange: 'bg-orange-50 text-orange-600',
   red: 'bg-red-50 text-red-600',
+  teal: 'bg-teal-50 text-teal-600',
+  pink: 'bg-pink-50 text-pink-600',
 };
 
 const leftBarColors: Record<string, string> = {

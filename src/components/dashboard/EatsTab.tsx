@@ -9,9 +9,12 @@ const CATEGORIES = [
   { label: '☕ Bakery', cat: 'Bakery/Coffee' },
   { label: '🍝 Italian', cat: 'Italian' },
   { label: '🦞 Seafood', cat: 'Seafood' },
+  { label: '🍕 Pizza', cat: 'Pizza' },
+  { label: '🌭 Hot Dogs', cat: 'Hot Dogs' },
   { label: '🍔 Casual', cat: 'Casual Dining' },
-  { label: '✨ Specialty', cat: 'Specialty' },
   { label: '🥢 Asian', cat: 'Asian' },
+  { label: '✨ Specialty', cat: 'Specialty' },
+  { label: '🛒 Market', cat: 'Market/Specialty' },
 ];
 
 const tagStyles: Record<string, string> = {
@@ -19,9 +22,12 @@ const tagStyles: Record<string, string> = {
   'Bakery/Coffee': 'bg-amber-50 text-amber-600',
   Italian: 'bg-emerald-50 text-emerald-600',
   Seafood: 'bg-cyan-50 text-cyan-600',
+  Pizza: 'bg-yellow-50 text-yellow-600',
+  'Hot Dogs': 'bg-rose-50 text-rose-600',
   Asian: 'bg-violet-50 text-violet-600',
   'Casual Dining': 'bg-orange-50 text-orange-600',
   Specialty: 'bg-pink-50 text-pink-600',
+  'Market/Specialty': 'bg-lime-50 text-lime-600',
 };
 
 const leftBarColors: Record<string, string> = {
@@ -29,9 +35,12 @@ const leftBarColors: Record<string, string> = {
   'Bakery/Coffee': '#d97706',
   Italian: '#059669',
   Seafood: '#0891b2',
+  Pizza: '#ca8a04',
+  'Hot Dogs': '#e11d48',
   Asian: '#7c3aed',
   'Casual Dining': '#ea580c',
   Specialty: '#db2777',
+  'Market/Specialty': '#65a30d',
 };
 
 const EatsTab = () => {
@@ -78,15 +87,16 @@ const EatsTab = () => {
             <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[20px]" style={{ background: leftBarColors[r.sub] || '#3b82f6' }} />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold mb-1.5 text-foreground">{r.name}</div>
-              <div className="text-xs text-muted-foreground leading-relaxed">
-                {r.desc.length > 90 ? r.desc.slice(0, 90) + '…' : r.desc}
-              </div>
+              {r.neighborhood && (
+                <div className="text-xs text-muted-foreground leading-relaxed mb-1">📍 {r.loc} · {r.neighborhood}</div>
+              )}
+              {!r.neighborhood && r.loc && (
+                <div className="text-xs text-muted-foreground leading-relaxed mb-1">📍 {r.loc}</div>
+              )}
               <div className="flex items-center gap-2 mt-3 flex-wrap">
                 <span className={`text-[10px] font-semibold tracking-wide uppercase py-1 px-2.5 rounded-full ${tagStyles[r.sub] || 'bg-muted text-muted-foreground'}`}>
                   {r.sub}
                 </span>
-                <span className="text-[11px] text-muted-foreground">{r.hours}</span>
-                <span className="mono text-[11px] text-muted-foreground">{r.price}</span>
                 <button
                   onClick={(ev) => { ev.stopPropagation(); setSelectedRestaurant(r); }}
                   className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-1 px-3 rounded-full bg-muted text-primary hover:bg-muted/80 active:scale-[0.98] transition-all duration-300 ease-in-out"
@@ -103,10 +113,8 @@ const EatsTab = () => {
         open={!!selectedRestaurant}
         onOpenChange={(open) => { if (!open) setSelectedRestaurant(null); }}
         title={selectedRestaurant?.name || ''}
-        description={selectedRestaurant?.desc}
+        description={selectedRestaurant?.neighborhood ? `${selectedRestaurant.loc} · ${selectedRestaurant.neighborhood}` : selectedRestaurant?.loc}
         location={selectedRestaurant?.loc}
-        cost={selectedRestaurant?.price}
-        url={selectedRestaurant?.url}
         category={selectedRestaurant?.sub}
       />
     </div>
