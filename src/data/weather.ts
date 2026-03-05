@@ -17,7 +17,8 @@ export interface WeatherData {
   sunrise: string;
   sunset: string;
   daylight: string;
-  hourly: { time: string; temp: number; rainProb: number; icon: string; isNow: boolean }[];
+  hourly?: { time: string; temp: number; rainProb: number; icon: string; isNow: boolean }[];
+  daily: { day: string; high: number; low: number; icon: string }[];
   alerts: WeatherAlert[];
 }
 
