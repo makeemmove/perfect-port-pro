@@ -179,11 +179,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
     return () => clearInterval(interval);
   }, [tick]);
 
-  useEffect(() => {
-    fetchWeather().then(setWeather);
-    const interval = setInterval(() => fetchWeather().then(setWeather), 300000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
