@@ -127,11 +127,11 @@
 
 /* Jiggle mode animation */
 @keyframes jiggle {
-  0%, 100% { transform: rotate(-1deg); }
-  50% { transform: rotate(1deg); }
+  0%, 100% { transform: rotate(-0.8deg); }
+  50% { transform: rotate(0.8deg); }
 }
 .jiggle {
-  animation: jiggle 0.3s ease-in-out infinite;
+  animation: jiggle 1.2s ease-in-out infinite;
   will-change: transform;
 }
 .jiggle:nth-child(even) {
