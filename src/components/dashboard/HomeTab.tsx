@@ -29,11 +29,14 @@ function loadOrder(): string[] {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved) as string[];
+      // Re-validate against current default order
       if (DEFAULT_ORDER.every(id => parsed.includes(id)) && parsed.length === DEFAULT_ORDER.length) {
         return parsed;
       }
     }
   } catch { /* ignore */ }
+  // Clear stale order
+  localStorage.removeItem(STORAGE_KEY);
   return DEFAULT_ORDER;
 }
 
