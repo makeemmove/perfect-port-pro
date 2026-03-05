@@ -87,11 +87,13 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
             <div className="space-y-4 pt-2">
               {selectedArticle.content ? (
                 <div className="text-sm text-foreground leading-relaxed whitespace-pre-line">
-                  {selectedArticle.content}
+                  {stripMarkdown(selectedArticle.content)}
                 </div>
               ) : selectedArticle.summary ? (
-                <p className="text-sm text-muted-foreground leading-relaxed">{selectedArticle.summary}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{stripMarkdown(selectedArticle.summary)}</p>
               ) : null}
+            </div>
+          )}
             </div>
           )}
         </DialogContent>
