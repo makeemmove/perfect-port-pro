@@ -235,7 +235,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
   };
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-3 relative">
       {/* Edit mode overlay */}
       {editMode && (
         <div className="fixed inset-0 edit-overlay z-10 pointer-events-none" />
