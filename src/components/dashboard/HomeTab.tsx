@@ -87,18 +87,31 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
 
     const ns = nowSec();
 
+    // Build a lookup from predictions: scheduledTime → prediction data
+    const predMap = new Map<string, { predictedTime: string | null; status: string; delayMinutes: number }>();
+    for (const p of mbtaPredictions) {
+      if (p.scheduledTime) {
+        predMap.set(p.scheduledTime, { predictedTime: p.predictedTime, status: p.status, delayMinutes: p.delayMinutes });
+      }
+    }
+
     const trainDeps = trainRoute.departures;
-    let tn: { time: string; dir: string; ds: number } | null = null;
-    let ta: { time: string; dir: string } | null = null;
-    const remTrains: { time: string; dir: string }[] = [];
+    let tn: { time: string; dir: string; ds: number; status?: string; delayMin?: number } | null = null;
+    let ta: { time: string; dir: string; status?: string } | null = null;
+    const remTrains: { time: string; dir: string; status?: string; delayMin?: number }[] = [];
     for (const d of trainDeps) {
       const stationTime = d.stops[selectedStation];
       if (!stationTime) continue;
-      const ds = t2m(stationTime) * 60;
-      if (ds > ns) {
-        remTrains.push({ time: stationTime, dir: d.dir });
-        if (!tn) tn = { time: stationTime, dir: d.dir, ds };
-        else if (!ta) ta = { time: stationTime, dir: d.dir };
+
+      // Use predicted time if available for countdown calculation
+      const pred = predMap.get(stationTime);
+      const effectiveTime = pred?.predictedTime || stationTime;
+      const ds = t2m(effectiveTime) * 60;
+
+      if (ds > ns || pred?.status === 'CANCELLED') {
+        remTrains.push({ time: stationTime, dir: d.dir, status: pred?.status, delayMin: pred?.delayMinutes });
+        if (!tn && pred?.status !== 'CANCELLED') tn = { time: stationTime, dir: d.dir, ds, status: pred?.status, delayMin: pred?.delayMinutes };
+        else if (!ta && pred?.status !== 'CANCELLED') ta = { time: stationTime, dir: d.dir, status: pred?.status };
       }
     }
     setRemainingTrains(remTrains);
@@ -109,12 +122,16 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
       setTrainDepTime(tn.time);
       setTrainDir(tn.dir + ' · ' + selectedStation);
       setTrainAfter(ta ? 'Next after: ' + ta.time : 'No more trains today');
+      setNextTrainStatus(tn.status);
+      setNextTrainDelayMin(tn.delayMin);
     } else {
       setTrainCountdown('Done');
       setTrainUrgent(false);
       setTrainDepTime('—');
       setTrainDir('No departures remaining');
       setTrainAfter('Service resumes tomorrow');
+      setNextTrainStatus(undefined);
+      setNextTrainDelayMin(undefined);
     }
 
     const busDeps = busRoute.departures;
