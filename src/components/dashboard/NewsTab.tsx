@@ -85,19 +85,15 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
           </DialogHeader>
           {selectedArticle && (
             <div className="space-y-4 pt-2">
-              {selectedArticle.content ? (
-                <div className="prose prose-sm max-w-none text-foreground text-sm leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: markdownToHtml(selectedArticle.content) }}
-                />
-              ) : selectedArticle.summary ? (
+              {selectedArticle.summary && (
                 <p className="text-sm text-muted-foreground leading-relaxed">{selectedArticle.summary}</p>
-              ) : null}
+              )}
               {selectedArticle.source_url && (
                 <button
                   onClick={() => window.open(selectedArticle.source_url, '_blank', 'noopener,noreferrer')}
                   className="flex items-center gap-2 text-xs font-medium text-primary hover:underline transition-colors duration-300"
                 >
-                  <ExternalLink className="w-3.5 h-3.5" strokeWidth={2} /> View Original Source
+                  <ExternalLink className="w-3.5 h-3.5" strokeWidth={2} /> Read Full Story
                 </button>
               )}
             </div>

@@ -58,7 +58,10 @@ function parseEvents(): CityEvent[] {
       url: cols[5] || undefined,
     });
   }
-  return events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const today = new Date(new Date().toDateString());
+  return events
+    .filter(e => e.date && new Date(e.date) >= today)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
 
 export const EVENTS: CityEvent[] = parseEvents();
