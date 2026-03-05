@@ -44,13 +44,18 @@ function wmoIcon(code: number, isDay: boolean): [string, string] {
   return [isDay ? entry[0] : entry[1], entry[2]];
 }
 
-function fmtTime(isoStr: string): string {
-  return new Date(isoStr).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone: "America/New_York",
-  });
+// Parse Open-Meteo local time string (e.g. "2026-03-05T06:12") directly
+// without timezone conversion since the API already returns America/New_York times
+function fmtLocalTime(isoLocal: string): string {
+  // isoLocal is like "2026-03-05T06:12" — already in local timezone
+  const match = isoLocal.match(/T(\d{1,2}):(\d{2})/);
+  if (!match) return "";
+  let hour = parseInt(match[1], 10);
+  const min = match[2];
+  const ampm = hour >= 12 ? "PM" : "AM";
+  if (hour === 0) hour = 12;
+  else if (hour > 12) hour -= 12;
+  return `${hour}:${min} ${ampm}`;
 }
 
 serve(async (req) => {
@@ -99,16 +104,21 @@ serve(async (req) => {
     const isDay = cur.is_day === 1;
     const [icon, label] = wmoIcon(cur.weather_code ?? 0, isDay);
 
-    // Sunrise/sunset
-    const sunRise = dailyData?.sunrise?.[0];
-    const sunSet = dailyData?.sunset?.[0];
-    const sunrise = sunRise ? fmtTime(sunRise) : "";
-    const sunset = sunSet ? fmtTime(sunSet) : "";
+    // Sunrise/sunset — parse directly from local time strings
+    const sunRise = dailyData?.sunrise?.[0] || "";
+    const sunSet = dailyData?.sunset?.[0] || "";
+    const sunrise = fmtLocalTime(sunRise);
+    const sunset = fmtLocalTime(sunSet);
     let daylightHrs = "";
     if (sunRise && sunSet) {
-      const riseMs = new Date(sunRise).getTime();
-      const setMs = new Date(sunSet).getTime();
-      daylightHrs = ((setMs - riseMs) / 3600000).toFixed(1) + "h";
+      // Parse hours/minutes directly from local time strings
+      const riseMatch = sunRise.match(/T(\d+):(\d+)/);
+      const setMatch = sunSet.match(/T(\d+):(\d+)/);
+      if (riseMatch && setMatch) {
+        const riseMin = parseInt(riseMatch[1]) * 60 + parseInt(riseMatch[2]);
+        const setMin = parseInt(setMatch[1]) * 60 + parseInt(setMatch[2]);
+        daylightHrs = ((setMin - riseMin) / 60).toFixed(1) + "h";
+      }
     }
 
     // Build hourly (next 8 hours)
