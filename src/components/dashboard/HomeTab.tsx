@@ -157,7 +157,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
       setBusDep('—');
       setBusAfter('Resumes tomorrow');
     }
-  }, [trainRoute, busRoute, selectedStation]);
+  }, [trainRoute, busRoute, selectedStation, mbtaPredictions]);
 
   useEffect(() => {
     tick();
@@ -186,6 +186,9 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
         trainDepTime={trainDepTime}
         trainAfter={trainAfter}
         remainingTrains={remainingTrains}
+        nextTrainStatus={nextTrainStatus}
+        nextTrainDelayMin={nextTrainDelayMin}
+        isLive={mbtaIsLive}
       />
     ),
     stats: <StatsWidget eventsThisWeek={eventsThisWeek} restaurantCount={RESTAURANTS.length} onNavigate={onNavigate} />,
