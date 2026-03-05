@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent, TouchSensor, MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import type { NewsArticle } from '@/hooks/useNews';
@@ -44,6 +44,10 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 0, tolerance: 5 } });
+  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 3 } });
+  const sensors = useSensors(touchSensor, mouseSensor);
 
   const upcomingCount = useMemo(() => EVENTS.filter(e => new Date(e.date) >= new Date()).length, []);
   const [eventOrder, setEventOrder] = useState<number[]>(() => Array.from({ length: Math.min(upcomingCount, 6) }, (_, i) => i));
@@ -242,7 +246,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   };
 
   return (
-    <div className="space-y-6 relative">
+    <div className={`space-y-6 relative ${editMode ? 'is-edit-mode' : ''}`}>
       {/* Edit mode overlay */}
       {editMode && (
         <div className="fixed inset-0 edit-overlay z-10 pointer-events-none" />
@@ -277,6 +281,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
       {/* Widgets */}
       <div className="relative z-20">
         <DndContext
+          sensors={sensors}
           collisionDetection={closestCenter}
           modifiers={[restrictToVerticalAxis]}
           onDragStart={handleDragStart}
