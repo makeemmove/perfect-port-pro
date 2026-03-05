@@ -118,7 +118,7 @@ const Ticker = ({ weather }: { weather?: WeatherData | null }) => {
       </div>
       <div className="flex-1 overflow-hidden">
         <div className="flex whitespace-nowrap text-[11px] text-muted-foreground px-4"
-             style={{ animation: `ticker ${Math.max(30, items.length * 8)}s linear infinite` }}>
+             style={{ animation: `ticker ${Math.max(15, items.length * 4)}s linear infinite` }}>
           {doubled.map((item, i) => (
             <span key={i} className="mr-12 text-foreground/70">
               <span className={`${categoryColors[item.category]} mr-1.5`}>▸</span>{item.text}

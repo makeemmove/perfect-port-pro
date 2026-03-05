@@ -6,32 +6,42 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const API_KEY = "zpka_3a0024ebac7a459c8c90c5c510b17e98_b2a96850";
-const LOCATION_KEY = "329505"; // Fall River, MA
 const LAT = 41.7015;
 const LON = -71.1551;
 
-function accuIcon(iconNum: number): [string, string] {
-  const map: Record<number, [string, string]> = {
-    1: ["☀️", "Sunny"], 2: ["☀️", "Mostly Sunny"], 3: ["🌤", "Partly Sunny"],
-    4: ["🌤", "Intermittent Clouds"], 5: ["🌤", "Hazy Sunshine"],
-    6: ["⛅", "Mostly Cloudy"], 7: ["☁️", "Cloudy"], 8: ["☁️", "Overcast"],
-    11: ["🌫", "Fog"], 12: ["🌧", "Showers"], 13: ["🌦", "Mostly Cloudy w/ Showers"],
-    14: ["🌦", "Partly Sunny w/ Showers"], 15: ["⛈", "Thunderstorms"],
-    16: ["⛈", "Mostly Cloudy w/ T-Storms"], 17: ["⛈", "Partly Sunny w/ T-Storms"],
-    18: ["🌧", "Rain"], 19: ["🌨", "Flurries"], 20: ["🌨", "Mostly Cloudy w/ Flurries"],
-    21: ["🌨", "Partly Sunny w/ Flurries"], 22: ["❄️", "Snow"],
-    23: ["❄️", "Mostly Cloudy w/ Snow"], 24: ["🌨", "Ice"], 25: ["🌧", "Sleet"],
-    26: ["🌨", "Freezing Rain"], 29: ["🌨", "Rain and Snow"],
-    30: ["🥵", "Hot"], 31: ["🥶", "Cold"], 32: ["💨", "Windy"],
-    33: ["🌙", "Clear"], 34: ["🌙", "Mostly Clear"], 35: ["🌙", "Partly Cloudy"],
-    36: ["🌙", "Intermittent Clouds"], 37: ["🌙", "Hazy Moonlight"],
-    38: ["☁️", "Mostly Cloudy"], 39: ["🌧", "Partly Cloudy w/ Showers"],
-    40: ["🌧", "Mostly Cloudy w/ Showers"], 41: ["⛈", "Partly Cloudy w/ T-Storms"],
-    42: ["⛈", "Mostly Cloudy w/ T-Storms"], 43: ["🌨", "Mostly Cloudy w/ Flurries"],
-    44: ["❄️", "Mostly Cloudy w/ Snow"],
+function wmoIcon(code: number, isDay: boolean): [string, string] {
+  const map: Record<number, [string, string, string]> = {
+    0: ["☀️", "🌙", "Clear"],
+    1: ["🌤", "🌙", "Mostly Clear"],
+    2: ["⛅", "☁️", "Partly Cloudy"],
+    3: ["☁️", "☁️", "Overcast"],
+    45: ["🌫", "🌫", "Fog"],
+    48: ["🌫", "🌫", "Freezing Fog"],
+    51: ["🌦", "🌧", "Light Drizzle"],
+    53: ["🌦", "🌧", "Drizzle"],
+    55: ["🌧", "🌧", "Heavy Drizzle"],
+    56: ["🌨", "🌨", "Freezing Drizzle"],
+    57: ["🌨", "🌨", "Heavy Freezing Drizzle"],
+    61: ["🌧", "🌧", "Light Rain"],
+    63: ["🌧", "🌧", "Rain"],
+    65: ["🌧", "🌧", "Heavy Rain"],
+    66: ["🌨", "🌨", "Freezing Rain"],
+    67: ["🌨", "🌨", "Heavy Freezing Rain"],
+    71: ["🌨", "🌨", "Light Snow"],
+    73: ["❄️", "❄️", "Snow"],
+    75: ["❄️", "❄️", "Heavy Snow"],
+    77: ["🌨", "🌨", "Snow Grains"],
+    80: ["🌦", "🌧", "Light Showers"],
+    81: ["🌧", "🌧", "Showers"],
+    82: ["🌧", "🌧", "Heavy Showers"],
+    85: ["🌨", "🌨", "Light Snow Showers"],
+    86: ["❄️", "❄️", "Heavy Snow Showers"],
+    95: ["⛈", "⛈", "Thunderstorm"],
+    96: ["⛈", "⛈", "Thunderstorm w/ Hail"],
+    99: ["⛈", "⛈", "Thunderstorm w/ Heavy Hail"],
   };
-  return map[iconNum] || ["🌤", "Variable"];
+  const entry = map[code] || ["🌤", "🌙", "Variable"];
+  return [isDay ? entry[0] : entry[1], entry[2]];
 }
 
 function fmtTime(isoStr: string): string {
@@ -49,42 +59,26 @@ serve(async (req) => {
   }
 
   try {
-    const CURRENT_URL = `https://dataservice.accuweather.com/currentconditions/v1/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
-    const HOURLY_URL = `https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
-    const DAILY_URL = `https://dataservice.accuweather.com/forecasts/v1/daily/1day/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
+    const METEO_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code,wind_speed_10m,precipitation,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America/New_York&forecast_days=1`;
     const ALERTS_URL = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
 
-    const [curRes, hourlyRes, dailyRes, alertsRes] = await Promise.all([
-      fetch(CURRENT_URL),
-      fetch(HOURLY_URL),
-      fetch(DAILY_URL),
+    const [meteoRes, alertsRes] = await Promise.all([
+      fetch(METEO_URL),
       fetch(ALERTS_URL, {
         headers: { "User-Agent": "FallRiverConnect/1.0 (contact@fallriverconnect.app)" },
       }),
     ]);
 
-    if (!curRes.ok) {
-      const errText = await curRes.text();
-      console.error("AccuWeather current error:", curRes.status, errText);
-      throw new Error(`AccuWeather current conditions error: ${curRes.status}`);
-    }
-    if (!hourlyRes.ok) {
-      const errText = await hourlyRes.text();
-      console.error("AccuWeather hourly error:", hourlyRes.status, errText);
-      throw new Error(`AccuWeather hourly forecast error: ${hourlyRes.status}`);
+    if (!meteoRes.ok) {
+      const errText = await meteoRes.text();
+      console.error("Open-Meteo error:", meteoRes.status, errText);
+      throw new Error(`Open-Meteo error: ${meteoRes.status}`);
     }
 
-    let dailyData: any = null;
-    if (dailyRes.ok) {
-      dailyData = await dailyRes.json();
-    } else {
-      console.error("AccuWeather daily error:", dailyRes.status, await dailyRes.text());
-    }
-
-    const curData = await curRes.json();
-    const hourlyData = await hourlyRes.json();
-
-    const cur = Array.isArray(curData) ? curData[0] : curData;
+    const meteo = await meteoRes.json();
+    const cur = meteo.current;
+    const hourlyData = meteo.hourly;
+    const dailyData = meteo.daily;
 
     // Parse NWS alerts
     let alerts: { event: string; severity: string; headline: string; description: string }[] = [];
@@ -102,12 +96,12 @@ serve(async (req) => {
       }
     }
 
-    const [icon, label] = accuIcon(cur.WeatherIcon ?? 1);
+    const isDay = cur.is_day === 1;
+    const [icon, label] = wmoIcon(cur.weather_code ?? 0, isDay);
 
-    // Sunrise/sunset from daily forecast
-    const dailyForecast = dailyData?.DailyForecasts?.[0];
-    const sunRise = dailyForecast?.Sun?.Rise;
-    const sunSet = dailyForecast?.Sun?.Set;
+    // Sunrise/sunset
+    const sunRise = dailyData?.sunrise?.[0];
+    const sunSet = dailyData?.sunset?.[0];
     const sunrise = sunRise ? fmtTime(sunRise) : "";
     const sunset = sunSet ? fmtTime(sunSet) : "";
     let daylightHrs = "";
@@ -117,27 +111,36 @@ serve(async (req) => {
       daylightHrs = ((setMs - riseMs) / 3600000).toFixed(1) + "h";
     }
 
-    // Build hourly
+    // Build hourly (next 8 hours)
     const now = Date.now();
-    const hourly = hourlyData.slice(0, 8).map((item: any, i: number) => {
-      const t = new Date(item.DateTime);
+    const hourlyTimes: string[] = hourlyData.time || [];
+    const hourly = [];
+    let started = false;
+    for (let i = 0; i < hourlyTimes.length && hourly.length < 8; i++) {
+      const t = new Date(hourlyTimes[i]);
+      if (!started && t.getTime() < now - 3600000) continue;
+      started = true;
       const lbl = t.toLocaleTimeString("en-US", { hour: "numeric", hour12: true, timeZone: "America/New_York" });
-      const [hi] = accuIcon(item.WeatherIcon ?? 1);
-      const isNow = i === 0 && Math.abs(t.getTime() - now) < 3 * 3600 * 1000;
-      return {
+      const hIsDay = (hourlyData.is_day?.[i] ?? 1) === 1;
+      const [hi] = wmoIcon(hourlyData.weather_code?.[i] ?? 0, hIsDay);
+      const isNow = hourly.length === 0;
+      hourly.push({
         time: isNow ? "Now" : lbl,
-        temp: Math.round(item.Temperature?.Value ?? 0),
-        rainProb: item.PrecipitationProbability ?? 0,
+        temp: Math.round(hourlyData.temperature_2m?.[i] ?? 0),
+        rainProb: hourlyData.precipitation_probability?.[i] ?? 0,
         icon: hi,
         isNow,
-      };
-    });
+      });
+    }
+
+    // Rain probability from first hourly entry
+    const rainProb = hourly.length > 0 ? hourly[0].rainProb : 0;
 
     const weather = {
-      temp: Math.round(cur.Temperature?.Imperial?.Value ?? 0),
-      precip: cur.PrecipitationSummary?.Past12Hours?.Imperial?.Value ?? 0,
-      wind: Math.round(cur.Wind?.Speed?.Imperial?.Value ?? 0),
-      rainProb: hourlyData[0]?.PrecipitationProbability ?? 0,
+      temp: Math.round(cur.temperature_2m ?? 0),
+      precip: cur.precipitation ?? 0,
+      wind: Math.round(cur.wind_speed_10m ?? 0),
+      rainProb,
       label,
       icon,
       sunrise,
