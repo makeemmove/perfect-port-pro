@@ -19,6 +19,7 @@ import ComingUpWidget from './widgets/ComingUpWidget';
 import NewsPreviewWidget from './widgets/NewsPreviewWidget';
 import QuickViewModal from './QuickViewModal';
 import { Settings, Check } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 const DEFAULT_ORDER = ['stats', 'coming-up', 'weather', 'srta', 'mbta', 'news'];
 const STORAGE_KEY = 'fr-widget-order';
