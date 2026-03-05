@@ -39,7 +39,6 @@ export function useNews() {
       }
     } catch (e) {
       console.error('Failed to fetch articles from DB:', e);
-      // Fallback: try edge function directly
       try {
         const { data, error } = await supabase.functions.invoke('fetch-news');
         if (!error && data?.articles) {
@@ -52,11 +51,41 @@ export function useNews() {
     }
   }, []);
 
+  const rewriteAll = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-news', {
+        body: null,
+        headers: {},
+      });
+      // Use query param approach via direct fetch
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-news?rewrite=true`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
+      );
+      const result = await res.json();
+      if (result?.articles) {
+        setArticles(result.articles);
+        setLastFetched(result.fetchedAt || new Date().toISOString());
+      }
+    } catch (e) {
+      console.error('Failed to rewrite articles:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchFromDB();
     const interval = setInterval(fetchFromDB, REFRESH_INTERVAL);
     return () => clearInterval(interval);
   }, [fetchFromDB]);
 
-  return { articles, isLoading, lastFetched, refetch: fetchFromDB };
+  return { articles, isLoading, lastFetched, refetch: fetchFromDB, rewriteAll };
 }

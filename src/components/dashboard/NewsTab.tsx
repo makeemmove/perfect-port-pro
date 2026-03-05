@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, RefreshCw, ChevronRight } from 'lucide-react';
+import { RefreshCw, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { NewsArticle } from '@/hooks/useNews';
@@ -85,17 +85,13 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
           </DialogHeader>
           {selectedArticle && (
             <div className="space-y-4 pt-2">
-              {selectedArticle.summary && (
+              {selectedArticle.content ? (
+                <div className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+                  {selectedArticle.content}
+                </div>
+              ) : selectedArticle.summary ? (
                 <p className="text-sm text-muted-foreground leading-relaxed">{selectedArticle.summary}</p>
-              )}
-              {selectedArticle.source_url && (
-                <button
-                  onClick={() => window.open(selectedArticle.source_url, '_blank', 'noopener,noreferrer')}
-                  className="flex items-center gap-2 text-xs font-medium text-primary hover:underline transition-colors duration-300"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" strokeWidth={2} /> Read Full Story
-                </button>
-              )}
+              ) : null}
             </div>
           )}
         </DialogContent>
@@ -136,18 +132,6 @@ function getTimeAgo(dateStr: string): string {
   if (hrs < 24) return `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
   return `${days}d ago`;
-}
-
-function markdownToHtml(md: string): string {
-  return md
-    .replace(/### (.*?)$/gm, '<h3 class="text-base font-bold mt-4 mb-1">$1</h3>')
-    .replace(/## (.*?)$/gm, '<h2 class="text-lg font-bold mt-5 mb-2">$1</h2>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/\n\n/g, '</p><p class="mb-3">')
-    .replace(/\n/g, '<br/>')
-    .replace(/^/, '<p class="mb-3">')
-    .replace(/$/, '</p>');
 }
 
 export default NewsTab;

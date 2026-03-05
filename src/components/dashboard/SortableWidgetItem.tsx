@@ -1,6 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useEffect, useRef, type ReactNode } from 'react';
+import { GripVertical } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 interface SortableWidgetItemProps {
   id: string;
@@ -9,11 +10,11 @@ interface SortableWidgetItemProps {
 }
 
 const SortableWidgetItem = ({ id, children, isEditMode }: SortableWidgetItemProps) => {
-  const ref = useRef<HTMLDivElement>(null);
   const {
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
     isDragging,
@@ -22,45 +23,28 @@ const SortableWidgetItem = ({ id, children, isEditMode }: SortableWidgetItemProp
     disabled: !isEditMode,
   });
 
-  // Hard-kill context menu and touchstart default in edit mode
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !isEditMode) return;
-
-    const killContext = (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-    const killTouch = (e: TouchEvent) => {
-      e.preventDefault();
-    };
-
-    el.addEventListener('contextmenu', killContext, { passive: false });
-    el.addEventListener('touchstart', killTouch, { passive: false });
-
-    return () => {
-      el.removeEventListener('contextmenu', killContext);
-      el.removeEventListener('touchstart', killTouch);
-    };
-  }, [isEditMode]);
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
-  const setRefs = (node: HTMLDivElement | null) => {
-    setNodeRef(node);
-    (ref as any).current = node;
-  };
-
   return (
     <div
-      ref={setRefs}
+      ref={setNodeRef}
       style={style}
-      className={`${isEditMode ? 'jiggle cursor-grab active:cursor-grabbing' : ''} ${isDragging ? 'widget-lifted' : ''}`}
-      {...(isEditMode ? { ...attributes, ...listeners } : {})}
+      className={`relative ${isEditMode ? 'jiggle' : ''} ${isDragging ? 'widget-lifted' : ''}`}
     >
+      {isEditMode && (
+        <div
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          className="drag-handle-tab absolute top-2 right-2 z-30 w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="w-4 h-4 text-muted-foreground" strokeWidth={2.5} />
+        </div>
+      )}
       {children}
     </div>
   );
