@@ -6,27 +6,36 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const API_KEY = "c07bd9dae1e05e6549146b718568329b";
+const API_KEY = "zpka_3a0024ebac7a459c8c90c5c510b17e98_b2a96850";
+const LOCATION_KEY = "329505"; // Fall River, MA
 const LAT = 41.7015;
 const LON = -71.1551;
 
-function owmIcon(id: number): [string, string] {
-  if (id >= 200 && id < 300) return ["⛈", "Thunderstorm"];
-  if (id >= 300 && id < 400) return ["🌦", "Drizzle"];
-  if (id >= 500 && id < 511) return ["🌧", "Rain"];
-  if (id === 511) return ["🌨", "Freezing Rain"];
-  if (id >= 520 && id < 600) return ["🌧", "Showers"];
-  if (id >= 600 && id < 700) return ["❄️", "Snow"];
-  if (id >= 700 && id < 800) return ["🌫", "Hazy"];
-  if (id === 800) return ["☀️", "Clear"];
-  if (id === 801) return ["🌤", "Mostly Clear"];
-  if (id === 802) return ["⛅", "Partly Cloudy"];
-  if (id >= 803) return ["☁️", "Overcast"];
-  return ["🌤", "Variable"];
+function accuIcon(iconNum: number): [string, string] {
+  const map: Record<number, [string, string]> = {
+    1: ["☀️", "Sunny"], 2: ["☀️", "Mostly Sunny"], 3: ["🌤", "Partly Sunny"],
+    4: ["🌤", "Intermittent Clouds"], 5: ["🌤", "Hazy Sunshine"],
+    6: ["⛅", "Mostly Cloudy"], 7: ["☁️", "Cloudy"], 8: ["☁️", "Overcast"],
+    11: ["🌫", "Fog"], 12: ["🌧", "Showers"], 13: ["🌦", "Mostly Cloudy w/ Showers"],
+    14: ["🌦", "Partly Sunny w/ Showers"], 15: ["⛈", "Thunderstorms"],
+    16: ["⛈", "Mostly Cloudy w/ T-Storms"], 17: ["⛈", "Partly Sunny w/ T-Storms"],
+    18: ["🌧", "Rain"], 19: ["🌨", "Flurries"], 20: ["🌨", "Mostly Cloudy w/ Flurries"],
+    21: ["🌨", "Partly Sunny w/ Flurries"], 22: ["❄️", "Snow"],
+    23: ["❄️", "Mostly Cloudy w/ Snow"], 24: ["🌨", "Ice"], 25: ["🌧", "Sleet"],
+    26: ["🌨", "Freezing Rain"], 29: ["🌨", "Rain and Snow"],
+    30: ["🥵", "Hot"], 31: ["🥶", "Cold"], 32: ["💨", "Windy"],
+    33: ["🌙", "Clear"], 34: ["🌙", "Mostly Clear"], 35: ["🌙", "Partly Cloudy"],
+    36: ["🌙", "Intermittent Clouds"], 37: ["🌙", "Hazy Moonlight"],
+    38: ["☁️", "Mostly Cloudy"], 39: ["🌧", "Partly Cloudy w/ Showers"],
+    40: ["🌧", "Mostly Cloudy w/ Showers"], 41: ["⛈", "Partly Cloudy w/ T-Storms"],
+    42: ["⛈", "Mostly Cloudy w/ T-Storms"], 43: ["🌨", "Mostly Cloudy w/ Flurries"],
+    44: ["❄️", "Mostly Cloudy w/ Snow"],
+  };
+  return map[iconNum] || ["🌤", "Variable"];
 }
 
-function fmtUnix(ts: number): string {
-  return new Date(ts * 1000).toLocaleTimeString("en-US", {
+function fmtTime(isoStr: string): string {
+  return new Date(isoStr).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
@@ -40,22 +49,33 @@ serve(async (req) => {
   }
 
   try {
-    const CURRENT_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&units=imperial&appid=${API_KEY}`;
-    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&units=imperial&appid=${API_KEY}`;
+    const CURRENT_URL = `https://dataservice.accuweather.com/currentconditions/v1/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
+    const HOURLY_URL = `https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
     const ALERTS_URL = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
 
-    const [curRes, fcRes, alertsRes] = await Promise.all([
+    const [curRes, hourlyRes, alertsRes] = await Promise.all([
       fetch(CURRENT_URL),
-      fetch(FORECAST_URL),
+      fetch(HOURLY_URL),
       fetch(ALERTS_URL, {
         headers: { "User-Agent": "FallRiverConnect/1.0 (contact@fallriverconnect.app)" },
       }),
     ]);
 
-    if (!curRes.ok || !fcRes.ok) throw new Error("Weather API error");
+    if (!curRes.ok) {
+      const errText = await curRes.text();
+      console.error("AccuWeather current error:", curRes.status, errText);
+      throw new Error(`AccuWeather current conditions error: ${curRes.status}`);
+    }
+    if (!hourlyRes.ok) {
+      const errText = await hourlyRes.text();
+      console.error("AccuWeather hourly error:", hourlyRes.status, errText);
+      throw new Error(`AccuWeather hourly forecast error: ${hourlyRes.status}`);
+    }
 
-    const cur = await curRes.json();
-    const fc = await fcRes.json();
+    const curData = await curRes.json();
+    const hourlyData = await hourlyRes.json();
+
+    const cur = Array.isArray(curData) ? curData[0] : curData;
 
     // Parse NWS alerts
     let alerts: { event: string; severity: string; headline: string; description: string }[] = [];
@@ -73,34 +93,39 @@ serve(async (req) => {
       }
     }
 
-    const [icon, label] = owmIcon(cur.weather?.[0]?.id ?? 800);
-    const sunrise = fmtUnix(cur.sys.sunrise);
-    const sunset = fmtUnix(cur.sys.sunset);
-    const daylightHrs = ((cur.sys.sunset - cur.sys.sunrise) / 3600).toFixed(1) + "h";
+    const [icon, label] = accuIcon(cur.WeatherIcon ?? 1);
 
-    // Build hourly from 3-hour forecast
-    const hourly: any[] = [];
-    const now = Date.now();
-    for (let i = 0; i < Math.min(8, fc.list.length); i++) {
-      const item = fc.list[i];
-      const t = new Date(item.dt * 1000);
-      const lbl = t.toLocaleTimeString("en-US", { hour: "numeric", hour12: true, timeZone: "America/New_York" });
-      const [hi] = owmIcon(item.weather?.[0]?.id ?? 800);
-      const isNow = i === 0 && Math.abs(item.dt * 1000 - now) < 3 * 3600 * 1000;
-      hourly.push({
-        time: isNow ? "Now" : lbl,
-        temp: Math.round(item.main.temp),
-        rainProb: Math.round((item.pop ?? 0) * 100),
-        icon: hi,
-        isNow,
-      });
+    // Sunrise/sunset from cur.Sun if available (detailed response)
+    const sunrise = cur.Sun?.Rise ? fmtTime(cur.Sun.Rise) : "";
+    const sunset = cur.Sun?.Set ? fmtTime(cur.Sun.Set) : "";
+    let daylightHrs = "";
+    if (cur.Sun?.Rise && cur.Sun?.Set) {
+      const riseMs = new Date(cur.Sun.Rise).getTime();
+      const setMs = new Date(cur.Sun.Set).getTime();
+      daylightHrs = ((setMs - riseMs) / 3600000).toFixed(1) + "h";
     }
 
+    // Build hourly
+    const now = Date.now();
+    const hourly = hourlyData.slice(0, 8).map((item: any, i: number) => {
+      const t = new Date(item.DateTime);
+      const lbl = t.toLocaleTimeString("en-US", { hour: "numeric", hour12: true, timeZone: "America/New_York" });
+      const [hi] = accuIcon(item.WeatherIcon ?? 1);
+      const isNow = i === 0 && Math.abs(t.getTime() - now) < 3 * 3600 * 1000;
+      return {
+        time: isNow ? "Now" : lbl,
+        temp: Math.round(item.Temperature?.Value ?? 0),
+        rainProb: item.PrecipitationProbability ?? 0,
+        icon: hi,
+        isNow,
+      };
+    });
+
     const weather = {
-      temp: Math.round(cur.main.temp),
-      precip: cur.rain?.["1h"] ?? cur.snow?.["1h"] ?? 0,
-      wind: Math.round(cur.wind.speed),
-      rainProb: Math.round((fc.list[0]?.pop ?? 0) * 100),
+      temp: Math.round(cur.Temperature?.Imperial?.Value ?? 0),
+      precip: cur.PrecipitationSummary?.Past12Hours?.Imperial?.Value ?? 0,
+      wind: Math.round(cur.Wind?.Speed?.Imperial?.Value ?? 0),
+      rainProb: hourlyData[0]?.PrecipitationProbability ?? 0,
       label,
       icon,
       sunrise,
