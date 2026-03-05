@@ -4,6 +4,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Skeleton } from '@/components/ui/skeleton';
 import type { NewsArticle } from '@/hooks/useNews';
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^[-*]\s+/gm, '')
+    .replace(/^\d+\.\s+/gm, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+}
+
 interface NewsTabProps {
   articles: NewsArticle[];
   isLoading: boolean;
@@ -92,8 +102,6 @@ const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) 
               ) : selectedArticle.summary ? (
                 <p className="text-sm text-muted-foreground leading-relaxed">{stripMarkdown(selectedArticle.summary)}</p>
               ) : null}
-            </div>
-          )}
             </div>
           )}
         </DialogContent>
