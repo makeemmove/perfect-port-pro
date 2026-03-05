@@ -28,6 +28,7 @@ const SortableWidgetItem = ({ id, children, isEditMode }: SortableWidgetItemProp
       ref={setNodeRef}
       style={style}
       className={`${isEditMode ? 'jiggle cursor-grab active:cursor-grabbing' : ''} ${isDragging ? 'widget-lifted' : ''}`}
+      onContextMenu={isEditMode ? (e) => e.preventDefault() : undefined}
       {...(isEditMode ? { ...attributes, ...listeners } : {})}
     >
       {children}
