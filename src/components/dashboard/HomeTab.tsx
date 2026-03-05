@@ -255,7 +255,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
           >
             {editMode ? <Check size={18} strokeWidth={3} /> : <Settings size={16} />}
           </button>
-          <img src={logo} alt="Fall River Connect" className="h-20 w-auto" />
+          <img src={logo} alt="Fall River Connect" className="h-32 w-auto" />
         </div>
         {editMode && (
           <div className="text-[11px] font-semibold text-primary mt-1 animate-fade-in">
