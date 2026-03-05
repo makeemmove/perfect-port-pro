@@ -61,7 +61,7 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
           className={`flex-1 flex flex-col items-center justify-center gap-1 bg-transparent border-none cursor-pointer text-[10px] font-semibold tracking-wider uppercase transition-all duration-300 ease-in-out active:scale-[0.98] ${
             activeTab === tab.id
               ? 'text-secondary'
-              : 'text-muted-foreground hover:text-foreground'
+              : 'text-primary'
           }`}
         >
           {tab.icon}

@@ -33,6 +33,20 @@ function StatusBadge({ status, delayMin }: { status?: string; delayMin?: number 
   return <span className="text-[10px] font-semibold text-green-500">On Time</span>;
 }
 
+function TopStatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
+  if (!status) return null;
+  if (status === 'CANCELLED') {
+    return <span className="text-[10px] font-black uppercase text-white bg-red-700 px-2.5 py-1 rounded-full">CANCELLED</span>;
+  }
+  if (delayMin && delayMin > 0) {
+    return <span className="text-[10px] font-bold text-white bg-red-500 px-2.5 py-1 rounded-full">{delayMin} min Late</span>;
+  }
+  if (delayMin && delayMin < 0) {
+    return <span className="text-[10px] font-bold text-white bg-blue-500 px-2.5 py-1 rounded-full">{Math.abs(delayMin)} min Early</span>;
+  }
+  return <span className="text-[10px] font-semibold text-white bg-green-500 px-2.5 py-1 rounded-full">On Time</span>;
+}
+
 const MbtaWidget = ({
   selectedTrainId, setSelectedTrainId,
   selectedStation, setSelectedStation,
@@ -63,6 +77,9 @@ const MbtaWidget = ({
           LIVE
         </span>
       )}
+      <div className="ml-auto">
+        <TopStatusBadge status={nextTrainStatus} delayMin={nextTrainDelayMin} />
+      </div>
     </div>
 
     <div className="flex flex-wrap gap-2 mb-3">
