@@ -24,12 +24,15 @@ interface MbtaWidgetProps {
 function StatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
   if (!status) return null;
   if (status === 'CANCELLED') {
-    return <span className="text-[10px] font-black uppercase text-red-600 bg-red-100 px-1.5 py-0.5 rounded">CANCELLED</span>;
+    return <span className="text-[10px] font-black uppercase text-destructive bg-destructive/15 px-1.5 py-0.5 rounded">CANCELLED</span>;
+  }
+  if (status === 'Scheduled') {
+    return <span className="text-[10px] font-semibold text-accent">Scheduled</span>;
   }
   if (status.includes('Late')) {
-    return <span className="text-[10px] font-bold text-red-500">{status}</span>;
+    return <span className="text-[10px] font-bold text-destructive">{status}</span>;
   }
-  return <span className="text-[10px] font-semibold text-green-500">On Time</span>;
+  return <span className="text-[10px] font-semibold text-primary">On Time</span>;
 }
 
 function TopStatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
