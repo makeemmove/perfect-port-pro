@@ -95,11 +95,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
 
   const tick = useCallback(() => {
     const n = new Date();
-    setClock(
-      n.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) +
-      ' · ' +
-      n.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    );
 
     const ns = nowSec();
 
