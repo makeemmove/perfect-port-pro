@@ -50,15 +50,21 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const trainRoute = useMemo(() => MBTA_ROUTES.find(r => r.id === selectedTrainId) ?? MBTA_ROUTES[0], [selectedTrainId]);
   const busRoute = useMemo(() => SRTA_ROUTES.find(r => r.id === selectedBusId) ?? SRTA_ROUTES[0], [selectedBusId]);
 
+  // Real-time MBTA predictions
+  const { predictions: mbtaPredictions, isLive: mbtaIsLive } = useMbtaRealtime(selectedStation, selectedTrainId);
+
   const [trainCountdown, setTrainCountdown] = useState('--:--');
   const [trainUrgent, setTrainUrgent] = useState(false);
   const [trainDir, setTrainDir] = useState('Calculating…');
   const [trainDepTime, setTrainDepTime] = useState('--');
   const [trainAfter, setTrainAfter] = useState('Next: --');
+  const [nextTrainStatus, setNextTrainStatus] = useState<string | undefined>();
+  const [nextTrainDelayMin, setNextTrainDelayMin] = useState<number | undefined>();
   const [busCountdown, setBusCountdown] = useState('--:--');
   const [busDep, setBusDep] = useState('--');
   const [busAfter, setBusAfter] = useState('Next: --');
-  const [remainingTrains, setRemainingTrains] = useState<{ time: string; dir: string }[]>([]);
+  const [remainingTrains, setRemainingTrains] = useState<{ time: string; dir: string; status?: string; delayMin?: number }[]>([]);
+  const [remainingBuses, setRemainingBuses] = useState<string[]>([]);
   const [remainingBuses, setRemainingBuses] = useState<string[]>([]);
 
   const eventsThisWeek = useMemo(() => {
