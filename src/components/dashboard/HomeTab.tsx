@@ -65,7 +65,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const [busAfter, setBusAfter] = useState('Next: --');
   const [remainingTrains, setRemainingTrains] = useState<{ time: string; dir: string; status?: string; delayMin?: number }[]>([]);
   const [remainingBuses, setRemainingBuses] = useState<string[]>([]);
-  const [remainingBuses, setRemainingBuses] = useState<string[]>([]);
 
   const eventsThisWeek = useMemo(() => {
     const now = new Date();
