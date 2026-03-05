@@ -133,8 +133,14 @@
 .jiggle {
   animation: jiggle 0.3s ease-in-out infinite;
   will-change: transform;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
 }
 .jiggle:nth-child(even) {
+  animation-delay: 0.15s;
+}
   animation-delay: 0.15s;
 }
 
