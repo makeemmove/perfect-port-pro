@@ -246,7 +246,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={editMode ? handleSave : () => setEditMode(true)}
-            className={`absolute left-0 top-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+            className={`absolute left-0 top-12 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
               editMode
                 ? 'bg-primary text-primary-foreground shadow-lg scale-110'
                 : 'bg-muted/60 text-muted-foreground hover:bg-muted'
