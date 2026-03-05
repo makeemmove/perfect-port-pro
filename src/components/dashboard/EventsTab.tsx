@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { EVENTS, evTagMap, evClassMap } from '@/data/events';
 import type { CityEvent } from '@/data/events';
 import QuickViewModal from './QuickViewModal';
+import { ChevronRight } from 'lucide-react';
 
 const FILTERS = [
   { label: 'All', sub: 'All' },
@@ -15,24 +16,24 @@ const FILTERS = [
   { label: '🏘 Community', sub: 'Community' },
 ];
 
-const tagStyles: Record<string, string> = {
-  purple: 'bg-secondary/10 text-secondary',
-  blue: 'bg-blue-50 text-blue-600',
-  gold: 'bg-amber-50 text-amber-600',
-  green: 'bg-emerald-50 text-emerald-600',
-  orange: 'bg-orange-50 text-orange-600',
-  red: 'bg-red-50 text-red-600',
-  teal: 'bg-teal-50 text-teal-600',
-  pink: 'bg-pink-50 text-pink-600',
+const dateBadgeColors: Record<string, { bg: string; text: string }> = {
+  arts: { bg: 'bg-purple-100', text: 'text-purple-700' },
+  music: { bg: 'bg-blue-100', text: 'text-blue-700' },
+  kids: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
+  family: { bg: 'bg-orange-100', text: 'text-orange-700' },
+  festival: { bg: 'bg-amber-100', text: 'text-amber-700' },
+  holiday: { bg: 'bg-red-100', text: 'text-red-700' },
 };
 
-const leftBarColors: Record<string, string> = {
-  arts: '#8b5cf6',
-  music: '#3b82f6',
-  kids: '#10b981',
-  family: '#f97316',
-  festival: '#d97706',
-  holiday: '#dc2626',
+const tagStyles: Record<string, string> = {
+  purple: 'bg-purple-50 text-purple-600 border border-purple-200/60',
+  blue: 'bg-blue-50 text-blue-600 border border-blue-200/60',
+  gold: 'bg-amber-50 text-amber-600 border border-amber-200/60',
+  green: 'bg-emerald-50 text-emerald-600 border border-emerald-200/60',
+  orange: 'bg-orange-50 text-orange-600 border border-orange-200/60',
+  red: 'bg-red-50 text-red-600 border border-red-200/60',
+  teal: 'bg-teal-50 text-teal-600 border border-teal-200/60',
+  pink: 'bg-pink-50 text-pink-600 border border-pink-200/60',
 };
 
 function groupByMonth(events: CityEvent[]): { month: string; events: CityEvent[] }[] {
@@ -54,84 +55,93 @@ const EventsTab = () => {
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
   const filtered = activeSub === 'All'
     ? EVENTS
-    : EVENTS.filter(e => e.sub === activeSub || (activeSub === 'Kids' && e.sub === 'Kids/Education'));
+    : EVENTS.filter(e => e.sub === activeSub);
 
   const grouped = groupByMonth(filtered);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-foreground">Events</h1>
-          <div className="text-xs text-muted-foreground">Fall River 2026</div>
+          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Events</h1>
+          <div className="text-xs text-muted-foreground mt-0.5">Fall River 2026 · {filtered.length} upcoming</div>
         </div>
-        <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-secondary">
-            <rect x="3" y="4" width="18" height="18" rx="2" />
+        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-primary">
+            <rect x="3" y="4" width="18" height="18" rx="3" />
             <path d="M16 2v4M8 2v4M3 10h18" />
-            <path d="M8 14h.01M12 14h.01M16 14h.01" />
           </svg>
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+      {/* Filter pills */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
         {FILTERS.map(f => (
           <button key={f.sub} onClick={() => setActiveSub(f.sub)}
-            className={`flex-shrink-0 py-2 px-4 rounded-full text-[11px] font-semibold tracking-wide uppercase cursor-pointer transition-all duration-300 ease-in-out active:scale-[0.98] ${
+            className={`flex-shrink-0 py-2 px-4 rounded-2xl text-[11px] font-semibold tracking-wide cursor-pointer transition-all duration-300 ease-in-out active:scale-[0.97] ${
               activeSub === f.sub
-                ? 'bg-foreground text-background shadow-glass'
-                : 'bg-card text-muted-foreground shadow-pill hover:shadow-glass'
+                ? 'bg-foreground text-background shadow-lg'
+                : 'bg-card text-muted-foreground border border-border/50 hover:border-border hover:shadow-sm'
             }`}>
             {f.label}
           </button>
         ))}
       </div>
 
+      {/* Events list */}
       {grouped.length === 0 ? (
-        <div className="text-muted-foreground text-center py-8 text-sm">No events found</div>
+        <div className="text-muted-foreground text-center py-12 text-sm">No upcoming events found</div>
       ) : grouped.map(group => (
         <div key={group.month}>
-          <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-3 mt-4 flex items-center gap-2
-                          before:flex-1 before:h-px before:bg-border
-                          after:flex-1 after:h-px after:bg-border">
-            {group.month}
+          {/* Month header */}
+          <div className="sticky top-0 z-10 py-2 mb-2 mt-3">
+            <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground/70">
+              {group.month}
+            </span>
           </div>
-          <div className="flex flex-col gap-3">
+
+          <div className="flex flex-col gap-2.5">
             {group.events.map((e, i) => {
               const d = new Date(e.date);
               const mo = isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-              const dy = isNaN(d.getTime()) ? '' : d.getDate();
+              const dy = isNaN(d.getTime()) ? '' : String(d.getDate());
               const [cls, lbl] = evTagMap[e.sub] || ['purple', e.sub || 'Event'];
               const cc = evClassMap[e.sub] || 'arts';
+              const badge = dateBadgeColors[cc] || dateBadgeColors.arts;
 
               return (
-                <div key={`${group.month}-${i}`} className="flex gap-4 glass-card p-6 relative overflow-hidden active:scale-[0.98] transition-all duration-300 ease-in-out">
-                  <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[20px]" style={{ background: leftBarColors[cc] || '#8b5cf6' }} />
-                  <div className="flex-shrink-0 w-[52px] text-center flex flex-col items-center justify-center rounded-2xl py-2 px-1 bg-muted/60">
-                    <div className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground">{mo}</div>
-                    <div className="mono text-2xl font-light text-foreground leading-none">{dy}</div>
+                <button
+                  key={`${group.month}-${i}`}
+                  onClick={() => setSelectedEvent(e)}
+                  className="flex items-center gap-3.5 bg-card rounded-2xl p-4 border border-border/40 
+                             hover:shadow-soft hover:border-border/80 hover:-translate-y-[1px]
+                             active:scale-[0.98] transition-all duration-300 ease-in-out text-left w-full group"
+                >
+                  {/* Date badge */}
+                  <div className={`flex-shrink-0 w-[52px] h-[56px] rounded-xl flex flex-col items-center justify-center ${badge.bg}`}>
+                    <div className={`text-[9px] font-bold uppercase tracking-widest ${badge.text} opacity-70`}>{mo}</div>
+                    <div className={`text-xl font-semibold leading-none ${badge.text}`}>{dy}</div>
                   </div>
+
+                  {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold mb-1.5 text-foreground">{e.name}</div>
+                    <div className="text-[13px] font-semibold text-foreground leading-snug truncate">{e.name}</div>
                     {e.location && (
-                      <div className="text-xs text-muted-foreground leading-relaxed">
+                      <div className="text-[11px] text-muted-foreground mt-0.5 truncate">
                         📍 {e.location}
                       </div>
                     )}
-                    <div className="flex items-center gap-2 mt-3 flex-wrap">
-                      <span className={`text-[10px] font-semibold tracking-wide uppercase py-1 px-2.5 rounded-full ${tagStyles[cls] || tagStyles.purple}`}>
+                    <div className="mt-2">
+                      <span className={`text-[9px] font-semibold tracking-wider uppercase py-0.5 px-2 rounded-full ${tagStyles[cls] || tagStyles.purple}`}>
                         {lbl}
                       </span>
-                      <span className="text-[11px] text-muted-foreground">{e.cost}</span>
-                      <button
-                        onClick={(ev) => { ev.stopPropagation(); setSelectedEvent(e); }}
-                        className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-1 px-3 rounded-full bg-muted text-primary hover:bg-muted/80 active:scale-[0.98] transition-all duration-300 ease-in-out"
-                      >
-                        More Info
-                      </button>
                     </div>
                   </div>
-                </div>
+
+                  {/* Chevron */}
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/40 flex-shrink-0 group-hover:text-muted-foreground transition-colors" />
+                </button>
               );
             })}
           </div>

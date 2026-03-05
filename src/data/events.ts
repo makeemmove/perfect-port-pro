@@ -36,13 +36,16 @@ function normalizeEventType(raw: string): string {
   const t = raw.trim().toLowerCase();
   if (t.includes('concert') || t.includes('music')) return 'Music';
   if (t.includes('art') && !t.includes('theater')) return 'Arts';
-  if (t.includes('kids') || t.includes('scouts') || t.includes('steam') || t.includes('reading')) return 'Kids';
-  if (t.includes('education') || t.includes('hobbies')) return 'Education';
+  if (t.includes('kids') || t.includes('scouts') || t.includes('steam') || t.includes('reading') || t.includes('adventure')) return 'Kids';
+  if (t.includes('education') || t.includes('hobbies') || t.includes('workshop')) return 'Education';
   if (t.includes('theater') || t.includes('comedy') || t.includes('musical')) return 'Theater';
   if (t.includes('holiday') || t.includes('easter') || t.includes('parade')) return 'Holiday';
   if (t.includes('festival') || t.includes('cultural')) return 'Festival';
-  if (t.includes('community') || t.includes('family')) return 'Community';
-  if (t.includes('market')) return 'Community';
+  if (t.includes('community') || t.includes('family') || t.includes('market')) return 'Community';
+  if (t.includes('games') || t.includes('pub') || t.includes('sports') || t.includes('wrestling')) return 'Community';
+  if (t.includes('food')) return 'Community';
+  if (t.includes('meetup')) return 'Community';
+  if (t.includes('history')) return 'Education';
   if (t.includes('teens')) return 'Kids';
   if (t.includes('all ages')) return 'Community';
   return 'Arts';
@@ -55,7 +58,6 @@ function parseEvents(): CityEvent[] {
 
   for (let i = 1; i < lines.length; i++) {
     const cols = parseCSVLine(lines[i]);
-    // Columns: Event_Name, Type, Date, Location, Direct_Info_Link
     const name = cols[0] || '';
     const date = cols[2] || '';
     const key = `${name.toLowerCase()}|${date}`;
