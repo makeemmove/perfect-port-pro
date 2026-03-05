@@ -1,27 +1,28 @@
 
 
-## Plan: Replace Arrow Buttons with Three-Dot Menu
+# Plan: Tab Colors, Gear Icon, Info Buttons, Weather Sunrise/Sunset
 
-Option 2 (three-dot menu) is the cleaner choice — it keeps cards completely uncluttered during normal use and only reveals reorder options on tap.
+## 1. Active Tab Orange Color (`src/components/dashboard/BottomNav.tsx`)
+- Change the active tab color from `text-primary` (navy) to `text-secondary` (amber-orange, HSL 25 90% 50%) so the selected tab matches the logo's orange
+- Only the active tab gets the orange; inactive tabs remain `text-muted-foreground`
 
-### Changes
+## 2. Gear Icon Styling (`src/components/dashboard/HomeTab.tsx`)
+- Remove the background from the gear button (no `bg-muted/60` class)
+- Make the gear icon navy blue by using `text-primary` instead of `text-muted-foreground`
+- Keep the edit-mode checkmark button styled as-is (it's a save action)
 
-#### `src/components/dashboard/DraggableWidget.tsx` — Rewrite
-- Remove `ChevronUp` / `ChevronDown` arrow buttons
-- Add a small `MoreVertical` (three-dot) icon button in the top-right corner (`absolute top-2 right-2`)
-- Button: 28x28px, `bg-accent/10 text-muted-foreground`, subtle and unobtrusive
-- On click, open a `DropdownMenu` (already available via `@radix-ui/react-dropdown-menu`) with two items:
-  - "Move Up" (shown only if `onMoveUp` is provided)
-  - "Move Down" (shown only if `onMoveDown` is provided)
-- Each item uses `ChevronUp` / `ChevronDown` as inline icons
-- Menu uses existing `DropdownMenuContent`, `DropdownMenuItem` components from `src/components/ui/dropdown-menu.tsx`
+## 3. Info Button Restyling (`src/components/dashboard/widgets/SortableEventItem.tsx`)
+- Change the Info button from `bg-primary/10 text-primary` to `bg-primary text-white` (navy background, white text)
 
-#### `src/components/dashboard/HomeTab.tsx` — No changes
-- `moveWidget`, `onMoveUp`, `onMoveDown` props all stay exactly as they are
+## 4. Fix Sunrise/Sunset in Weather (`supabase/functions/fetch-weather/index.ts`)
+- The AccuWeather current conditions v1 endpoint does not return `Sun.Rise`/`Sun.Set` even with `details=true`
+- Add a daily forecast API call: `forecasts/v1/daily/1day/{LOCATION_KEY}?apikey={API_KEY}&details=true`
+- Extract `Sun.Rise` and `Sun.Set` from `DailyForecasts[0].Sun`
+- This provides accurate sunrise/sunset and daylight hours
 
-#### Everything else — Untouched
-Layout, fonts, colors, spacing, card content, buttons — all unchanged.
-
-### Result
-Cards look clean by default. A single subtle dot-menu per card gives access to reorder without cluttering the UI.
+### Files to Edit
+1. `src/components/dashboard/BottomNav.tsx` — active tab color to orange
+2. `src/components/dashboard/HomeTab.tsx` — gear icon: no background, navy color
+3. `src/components/dashboard/widgets/SortableEventItem.tsx` — Info button: navy bg, white text
+4. `supabase/functions/fetch-weather/index.ts` — add daily forecast call for sunrise/sunset
 
