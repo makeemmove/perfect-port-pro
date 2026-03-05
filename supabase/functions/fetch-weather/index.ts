@@ -51,11 +51,13 @@ serve(async (req) => {
   try {
     const CURRENT_URL = `https://dataservice.accuweather.com/currentconditions/v1/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
     const HOURLY_URL = `https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
+    const DAILY_URL = `https://dataservice.accuweather.com/forecasts/v1/daily/1day/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
     const ALERTS_URL = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
 
-    const [curRes, hourlyRes, alertsRes] = await Promise.all([
+    const [curRes, hourlyRes, dailyRes, alertsRes] = await Promise.all([
       fetch(CURRENT_URL),
       fetch(HOURLY_URL),
+      fetch(DAILY_URL),
       fetch(ALERTS_URL, {
         headers: { "User-Agent": "FallRiverConnect/1.0 (contact@fallriverconnect.app)" },
       }),
@@ -70,6 +72,13 @@ serve(async (req) => {
       const errText = await hourlyRes.text();
       console.error("AccuWeather hourly error:", hourlyRes.status, errText);
       throw new Error(`AccuWeather hourly forecast error: ${hourlyRes.status}`);
+    }
+
+    let dailyData: any = null;
+    if (dailyRes.ok) {
+      dailyData = await dailyRes.json();
+    } else {
+      console.error("AccuWeather daily error:", dailyRes.status, await dailyRes.text());
     }
 
     const curData = await curRes.json();
@@ -95,13 +104,16 @@ serve(async (req) => {
 
     const [icon, label] = accuIcon(cur.WeatherIcon ?? 1);
 
-    // Sunrise/sunset from cur.Sun if available (detailed response)
-    const sunrise = cur.Sun?.Rise ? fmtTime(cur.Sun.Rise) : "";
-    const sunset = cur.Sun?.Set ? fmtTime(cur.Sun.Set) : "";
+    // Sunrise/sunset from daily forecast
+    const dailyForecast = dailyData?.DailyForecasts?.[0];
+    const sunRise = dailyForecast?.Sun?.Rise;
+    const sunSet = dailyForecast?.Sun?.Set;
+    const sunrise = sunRise ? fmtTime(sunRise) : "";
+    const sunset = sunSet ? fmtTime(sunSet) : "";
     let daylightHrs = "";
-    if (cur.Sun?.Rise && cur.Sun?.Set) {
-      const riseMs = new Date(cur.Sun.Rise).getTime();
-      const setMs = new Date(cur.Sun.Set).getTime();
+    if (sunRise && sunSet) {
+      const riseMs = new Date(sunRise).getTime();
+      const setMs = new Date(sunSet).getTime();
       daylightHrs = ((setMs - riseMs) / 3600000).toFixed(1) + "h";
     }
 

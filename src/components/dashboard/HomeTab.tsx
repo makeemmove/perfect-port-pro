@@ -252,7 +252,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
             className={`absolute left-0 top-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
               editMode
                 ? 'bg-primary text-primary-foreground shadow-lg scale-110'
-                : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+                : 'text-primary hover:text-primary/80'
             }`}
             aria-label={editMode ? 'Save layout' : 'Edit layout'}
           >
