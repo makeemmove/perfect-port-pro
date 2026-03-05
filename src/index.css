@@ -138,26 +138,20 @@
   animation-delay: 0.15s;
 }
 
-/* Nuclear touch prevention for edit mode */
-.is-edit-mode {
-  -webkit-user-select: none !important;
-  -webkit-touch-callout: none !important;
-  -webkit-user-drag: none !important;
-  user-select: none !important;
-  touch-action: none !important;
-}
-.is-edit-mode * {
-  -webkit-user-select: none !important;
-  -webkit-touch-callout: none !important;
-  -webkit-user-drag: none !important;
-  user-select: none !important;
-}
-
 /* Edit mode overlay */
 .edit-overlay {
   background: hsla(var(--foreground) / 0.15);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
+}
+
+/* Drag handle tab */
+.drag-handle-tab {
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+  touch-action: none !important;
 }
 
 /* Dragging card lifted */

@@ -108,25 +108,29 @@ async function searchGoogleNews(): Promise<RawArticle[]> {
   }
 }
 
-// ── AI summary with Gemini 3 Flash ─────────────────────────
-const SYSTEM_PROMPT = `You are a professional news curator for a Fall River, Massachusetts news aggregator.
+// ── AI full article writer with Gemini 3 Flash ─────────────
+const SYSTEM_PROMPT = `You are a senior journalist writing for a Fall River, Massachusetts local news platform called "Fall River Connect."
 
-Your ONLY job is to write a short teaser summary for each article. Do NOT write a full article.
+Your job is to write an ORIGINAL full-length news article based on the facts provided. You are NOT summarizing — you are writing a complete story in your own words.
 
-STRICT CONSTRAINTS:
-- Length: Maximum 150 characters (including spaces). This is a HARD limit.
-- Style: Factual, objective, punchy wire-service bulletin style.
-- Format: Start with a strong verb. No fluff.
-- Voice: Third-person, active voice only.
-- Tone: Neutral and professional.
-- ONLY include news that directly involves Fall River, MA. Ignore stories about other cities.
+STRICT RULES:
+- Write a strong, attention-grabbing headline (max 80 characters).
+- Write a full article between 300-500 words.
+- Write in your own words. Do NOT copy or closely paraphrase the original source.
+- Do NOT include any external links or URLs.
+- Do NOT use direct quotes unless you fabricate a plausible attributed quote.
+- Write in third-person, professional news style with an engaging lead paragraph.
+- Include relevant context about Fall River when appropriate.
+- ONLY cover stories that directly involve Fall River, MA. Ignore anything about other cities.
+- Structure: Lead paragraph → body with details → context/impact → closing.
+- Tone: Authoritative, local, community-focused.
 
-Output using the write_summary tool.`;
+Output using the write_article tool.`;
 
 async function rewriteArticle(
   raw: RawArticle,
   apiKey: string
-): Promise<{ title: string; summary: string } | null> {
+): Promise<{ title: string; article: string } | null> {
   try {
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -140,34 +144,34 @@ async function rewriteArticle(
           { role: "system", content: SYSTEM_PROMPT },
           {
             role: "user",
-            content: `Write a short teaser summary for this news:\n\nHeadline: ${raw.title}\nSource: ${raw.source}\nDescription: ${raw.description || "No description available"}`,
+            content: `Write a full original news article based on these facts:\n\nOriginal Headline: ${raw.title}\nSource: ${raw.source}\nDescription: ${raw.description || "No description available"}\nPublished: ${raw.publishedAt}`,
           },
         ],
         tools: [
           {
             type: "function",
             function: {
-              name: "write_summary",
-              description: "Save the news teaser summary",
+              name: "write_article",
+              description: "Save the full news article",
               parameters: {
                 type: "object",
                 properties: {
                   title: {
                     type: "string",
-                    description: "Clean, concise headline",
+                    description: "Strong, attention-grabbing headline, max 80 characters",
                   },
-                  summary: {
+                  article: {
                     type: "string",
-                    description: "Teaser summary: MAX 150 characters, start with strong verb, active voice",
+                    description: "Full original news article, 300-500 words, no external links, written in own words",
                   },
                 },
-                required: ["title", "summary"],
+                required: ["title", "article"],
                 additionalProperties: false,
               },
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "write_summary" } },
+        tool_choice: { type: "function", function: { name: "write_article" } },
       }),
     });
 
@@ -181,11 +185,7 @@ async function rewriteArticle(
     if (!toolCall) return null;
 
     const result = JSON.parse(toolCall.function.arguments);
-    // Enforce 150 char limit
-    if (result.summary && result.summary.length > 150) {
-      result.summary = result.summary.slice(0, 147) + "...";
-    }
-    return result;
+    return { title: result.title, article: result.article };
   } catch (e) {
     console.error("AI rewrite error:", e);
     return null;
@@ -204,6 +204,16 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Check for rewrite=true param
+    const url = new URL(req.url);
+    const rewriteAll = url.searchParams.get("rewrite") === "true";
+
+    if (rewriteAll) {
+      // Delete all existing articles for fresh rewrite
+      await supabase.from("articles").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      console.log("Cleared all articles for full rewrite");
+    }
 
     // 1. Scrape RSS feeds in parallel
     const [reporterArticles, heraldArticles, googleArticles] = await Promise.all([
@@ -235,17 +245,19 @@ serve(async (req) => {
 
     console.log(`Found ${allRaw.length} scraped, ${existingUrls.size} exist, ${newArticles.length} new`);
 
-    // 3. Generate summaries for new articles and insert into DB
+    // 3. Generate full articles for new items and insert into DB
     if (LOVABLE_API_KEY && newArticles.length > 0) {
       for (const raw of newArticles.slice(0, 5)) {
         const rewritten = await rewriteArticle(raw, LOVABLE_API_KEY);
         if (rewritten) {
+          // First sentence as summary
+          const firstSentence = rewritten.article.split(/(?<=[.!?])\s+/)[0] || rewritten.article.slice(0, 150);
           const { error: insertError } = await supabase.from("articles").insert({
             source_url: raw.url,
             source_name: raw.source,
             title: rewritten.title,
-            content: rewritten.summary,
-            summary: rewritten.summary,
+            content: rewritten.article,
+            summary: firstSentence,
             original_title: raw.title,
             image_url: raw.imageUrl || null,
             status: "published",
@@ -261,7 +273,7 @@ serve(async (req) => {
             source_url: raw.url,
             source_name: raw.source,
             title: raw.title,
-            content: fallbackSummary,
+            content: raw.description || raw.title,
             summary: fallbackSummary,
             original_title: raw.title,
             image_url: raw.imageUrl || null,
