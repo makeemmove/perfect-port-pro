@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { NewsArticle } from '@/hooks/useNews';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MBTA_ROUTES, MBTA_STATIONS, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
+import { useMbtaRealtime } from '@/hooks/useMbtaRealtime';
 import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
 import type { CityEvent } from '@/data/events';
@@ -49,15 +50,20 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const trainRoute = useMemo(() => MBTA_ROUTES.find(r => r.id === selectedTrainId) ?? MBTA_ROUTES[0], [selectedTrainId]);
   const busRoute = useMemo(() => SRTA_ROUTES.find(r => r.id === selectedBusId) ?? SRTA_ROUTES[0], [selectedBusId]);
 
+  // Real-time MBTA predictions
+  const { predictions: mbtaPredictions, isLive: mbtaIsLive } = useMbtaRealtime(selectedStation, selectedTrainId);
+
   const [trainCountdown, setTrainCountdown] = useState('--:--');
   const [trainUrgent, setTrainUrgent] = useState(false);
   const [trainDir, setTrainDir] = useState('Calculating…');
   const [trainDepTime, setTrainDepTime] = useState('--');
   const [trainAfter, setTrainAfter] = useState('Next: --');
+  const [nextTrainStatus, setNextTrainStatus] = useState<string | undefined>();
+  const [nextTrainDelayMin, setNextTrainDelayMin] = useState<number | undefined>();
   const [busCountdown, setBusCountdown] = useState('--:--');
   const [busDep, setBusDep] = useState('--');
   const [busAfter, setBusAfter] = useState('Next: --');
-  const [remainingTrains, setRemainingTrains] = useState<{ time: string; dir: string }[]>([]);
+  const [remainingTrains, setRemainingTrains] = useState<{ time: string; dir: string; status?: string; delayMin?: number }[]>([]);
   const [remainingBuses, setRemainingBuses] = useState<string[]>([]);
 
   const eventsThisWeek = useMemo(() => {
@@ -81,18 +87,31 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
 
     const ns = nowSec();
 
+    // Build a lookup from predictions: scheduledTime → prediction data
+    const predMap = new Map<string, { predictedTime: string | null; status: string; delayMinutes: number }>();
+    for (const p of mbtaPredictions) {
+      if (p.scheduledTime) {
+        predMap.set(p.scheduledTime, { predictedTime: p.predictedTime, status: p.status, delayMinutes: p.delayMinutes });
+      }
+    }
+
     const trainDeps = trainRoute.departures;
-    let tn: { time: string; dir: string; ds: number } | null = null;
-    let ta: { time: string; dir: string } | null = null;
-    const remTrains: { time: string; dir: string }[] = [];
+    let tn: { time: string; dir: string; ds: number; status?: string; delayMin?: number } | null = null;
+    let ta: { time: string; dir: string; status?: string } | null = null;
+    const remTrains: { time: string; dir: string; status?: string; delayMin?: number }[] = [];
     for (const d of trainDeps) {
       const stationTime = d.stops[selectedStation];
       if (!stationTime) continue;
-      const ds = t2m(stationTime) * 60;
-      if (ds > ns) {
-        remTrains.push({ time: stationTime, dir: d.dir });
-        if (!tn) tn = { time: stationTime, dir: d.dir, ds };
-        else if (!ta) ta = { time: stationTime, dir: d.dir };
+
+      // Use predicted time if available for countdown calculation
+      const pred = predMap.get(stationTime);
+      const effectiveTime = pred?.predictedTime || stationTime;
+      const ds = t2m(effectiveTime) * 60;
+
+      if (ds > ns || pred?.status === 'CANCELLED') {
+        remTrains.push({ time: stationTime, dir: d.dir, status: pred?.status, delayMin: pred?.delayMinutes });
+        if (!tn && pred?.status !== 'CANCELLED') tn = { time: stationTime, dir: d.dir, ds, status: pred?.status, delayMin: pred?.delayMinutes };
+        else if (!ta && pred?.status !== 'CANCELLED') ta = { time: stationTime, dir: d.dir, status: pred?.status };
       }
     }
     setRemainingTrains(remTrains);
@@ -103,12 +122,16 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
       setTrainDepTime(tn.time);
       setTrainDir(tn.dir + ' · ' + selectedStation);
       setTrainAfter(ta ? 'Next after: ' + ta.time : 'No more trains today');
+      setNextTrainStatus(tn.status);
+      setNextTrainDelayMin(tn.delayMin);
     } else {
       setTrainCountdown('Done');
       setTrainUrgent(false);
       setTrainDepTime('—');
       setTrainDir('No departures remaining');
       setTrainAfter('Service resumes tomorrow');
+      setNextTrainStatus(undefined);
+      setNextTrainDelayMin(undefined);
     }
 
     const busDeps = busRoute.departures;
@@ -134,7 +157,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
       setBusDep('—');
       setBusAfter('Resumes tomorrow');
     }
-  }, [trainRoute, busRoute, selectedStation]);
+  }, [trainRoute, busRoute, selectedStation, mbtaPredictions]);
 
   useEffect(() => {
     tick();
@@ -163,6 +186,9 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
         trainDepTime={trainDepTime}
         trainAfter={trainAfter}
         remainingTrains={remainingTrains}
+        nextTrainStatus={nextTrainStatus}
+        nextTrainDelayMin={nextTrainDelayMin}
+        isLive={mbtaIsLive}
       />
     ),
     stats: <StatsWidget eventsThisWeek={eventsThisWeek} restaurantCount={RESTAURANTS.length} onNavigate={onNavigate} />,
