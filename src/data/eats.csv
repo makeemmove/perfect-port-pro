@@ -1,91 +1,206 @@
-Name,Type,Address,Neighborhood
-Christopher's,American Diner,1285 S Main St,South End
-Leddy's Bakery & Coffee Shop,Bakery/Cafe,1481 S Main St,South End
-Marzilli's Bakery,Bakery/Deli,944 Bedford St,The Flint
-New Boston Bakery,Bakery/Cafe,279 New Boston Rd,Highlands
-Barcelos Bakery,Portuguese Bakery,695 Bedford St,The Flint
-Nick's Coney Island,Hot Dogs,534 S Main St,South End
-Roger's Coney Island,Hot Dogs,1518 N Main St,North End
-Patti's Pierogis,Polish,1019 S Main St,South End
-Sam's Bakery,Bakery,256 Flint St,The Flint
-Marcucci's Bakery,Bakery/Deli,1075 Stafford Rd,South End
-Portugalia Marketplace,Specialty Food,489 Bedford St,The Flint
-Amaral's Central Market,Deli/Market,872 Globe St,South End
-Mee Sum Restaurant,Chinese/American,1819 S Main St,South End
-Hartley's Pork Pies,Bakery,1729 S Main St,South End
-T.A. Restaurant,Portuguese,408 Pleasant St,Downtown
-The Cove Restaurant & Marina,Seafood,392 Davol St,Waterfront
-The Tipsy Toboggan,Gastropub,75 Ferry St,Waterfront
-Waterstreet Cafe,Eclectic/Mid-East,36 Water St,Waterfront
-Al-Mac's Diner,Diner,135 President Ave,North End
-J&J's Coney Island,Hot Dogs,1308 County St,East End
-Sagres Restaurant,Portuguese,177 Columbia St,Columbia Street
-Estoril,Portuguese,1577 Pleasant St,The Flint
-Europa Pastries,Bakery/Cafe,65 Columbia St,Columbia Street
-A&M Bakery,Portuguese Bakery,146 Columbia St,Columbia Street
-Standard Pharmacy Counter,Diner,246 E Main St,South End
-Main State Market,Deli,946 S Main St,South End
-Taqueria la Familia,Mexican,917 Bedford St,The Flint
-Acadia Seafood,Seafood,1402 Pleasant St,The Flint
-Graham’s Hot Dogs,Hot Dogs,931 Bedford St,The Flint
-Thatcher’s Restaurant,American,10 Thatcher St,South End
-Red's Kitchen,American,130 Rock St,Downtown
-AJ's Bar and Grill,Pub/Grill,472 E Main St,South End
-Alice's Diner,Diner,2663 S Main St,South End
-Aspara Restaurant,Cambodian,418 Quequechan St,The Flint
-Aroma Grill,Mediterranean,1345 Pleasant St,The Flint
-Asia One Bistro,Asian Fusion,1355 S Main St,South End
-Beira Alta,Portuguese,826 Plymouth Ave,South End
-Billy's Café,Portuguese/Amer,663 Bedford St,The Flint
-Boondocks Bar & Grill,Pub/Seafood,46 Water St,Waterfront
-Brasil Coffee Shop,Cafe,1501 Pleasant St,The Flint
-Carvalho's Coffee,Cafe,608 Bedford St,The Flint
-Chaves Market,Deli/Market,49 Columbia St,Columbia Street
-Dunny's BBQ,BBQ,291 Harrison St,The Flint
-Fall River Grill,Portuguese,1130 Bedford St,The Flint
-Flint Grill,American,1332 Pleasant St,The Flint
-Gus's Pizza,Pizza,1194 Robeson St,Highlands
-Jerry’s Seafood,Seafood,120 President Ave,North End
-Jimmy’s Pizza,Pizza,1427 S Main St,South End
-Joe's Shish-Kabob,Middle Eastern,275 Martine St,South End
-Juice’d Cafe,Cafe/Healthy,1475 Plymouth Ave,South End
-Mendes Bakery,Bakery,483 County St,East End
-Miss Lorraine Diner,Diner,1560 N Main St,North End
-O Gil's Restaurant,Portuguese,915 County St,East End
-Ocean Grove Pizza,Pizza,317 Ocean Grove Ave,South End
-Palacio do Marisco,Seafood,637 Bedford St,The Flint
-Patio de Maria,Portuguese,1288 Pleasant St,The Flint
-Phoenix Restaurant,American/Diner,1478 Pleasant St,The Flint
-Pier 52,Seafood/Bar,52 Ferry St,Waterfront
-Pinky's Famous Pizza,Pizza,360 Second St,Downtown
-Riverside Coney Island,Hot Dogs,1310 Davol St,Waterfront
-Scottie’s Pub,Pub/Grill,202 Pleasant St,The Flint
-Shorty’s Diner,Diner,1285 S Main St,South End
-Simply Simons,American/Diner,840 Bedford St,The Flint
-The Coffee Bar,Cafe,608 Bedford St,The Flint
-Troy City Brewing,Brewery,16 Anawan St,Downtown
-Yankee Spirits (Deli),Deli,Local Specialty,South End
-Z’s Kitchen,American,1577 Pleasant St,The Flint
-Alianca Restaurant,Portuguese,652 Bedford St,The Flint
-The Clipper Restaurant,Portuguese,14 Prospect St,Highlands
-Caldeiras,Portuguese,990 Pleasant St,The Flint
-Atlas Pizza,Pizza,761 Eastern Ave,The Flint
-Battleship Brewhouse,Pub/Burgers,101 President Ave,North End
-The Liberal Club,Seafood/Club,20 Star St,South End
-St. John's Restaurant,Portuguese,1365 Rodman St,South End
-Horta’s Restaurant,Portuguese,145 Columbia St,Columbia Street
-Mark's Gyros,Greek,10 Thatcher St,South End
-Mesa 21,Portuguese/Pizza,21 Lindsey St,North End
-Avo's Feast,Portuguese/Fast,1236 Pleasant St,The Flint
-The Pasta House,Italian,300 Mill Rd,North End
-Townhouse Pizza,Pizza,1229 Stafford Rd,South End
-Quality Bakery,Bakery,122 Rock St,Downtown
-Primo on Water St,Contemporary,38 Water St,Waterfront
-Hong Mea,Asian/Pho,1147 Pleasant St,The Flint
-Bun Buds,Burgers/Creative,121 Purchase St,Downtown
-Black Olive,Greek,Local Specialty,Highlands
-Marcucci's,Deli/Bakery,1075 Stafford Rd,South End
-The Galley,Seafood/Takeout,738 Sharps Lot Rd,West Side
-Filipe's Bakery,Bakery,1234 Pleasant St,The Flint
-South End Pizza,Pizza,1500 S Main St,South End
-Highland Pizza,Pizza,141 Highland Ave,Highlands
+Name,Address,Category,Website
+Sagres Restaurant,177 Columbia St,Portuguese/Seafood,https://sagresfr.com
+Caldeiras Restaurant,990 Pleasant St,Portuguese/European,https://www.caldeirasrestaurant.com
+The Cove Restaurant & Marina,392 Davol St,Seafood/American,https://cove392.com
+Patti's Pierogis,1019 S Main St,Polish,https://www.pattispierogis.com
+LePage's Seafood & Grille,439 Martine St,Seafood,https://www.lepagesseafood.com
+Al Mac's Diner,135 President Ave,Diner/Breakfast,https://www.almacsdinertogo.com
+Hartley's Original Pork Pies,1729 S Main St,Bakery/Pork Pies,https://www.hartleysporkpies.com
+Sam's Bakery,256 Flint St,Bakery/Pizza,
+Barcelos Bakery,695 Bedford St,Bakery/Portuguese,
+Leddy's Bakery,1481 S Main St,Bakery/Coffee,
+New Boston Bakery,279 New Boston Rd,Bakery/Cafe,
+Europa Pastries & Coffee Shop,65 Columbia St,Bakery/Cafe,
+Sam's Pizza,144 Rodman St,Pizza,
+Atlas Pizza,1424 S Main St,Pizza,
+Highland Pizza,797 Robeson St,Pizza,
+Boston Pizza & Seafood,210 Tucker St,Pizza/Seafood,
+Fiorentina Italian Kitchen,1833 N Main St,Italian/Pizza,https://www.myfiorentinaitaliankitchen.com
+Twisted Griddle,757 Robeson St,Breakfast/Brunch,
+Toast N Jam,"2331 Acushnet Ave, New Bedford, MA",Breakfast/Brunch,https://toastnjamnb.com
+Rosaria's Diner,443 Plymouth Ave,Diner/Breakfast,
+Cornerstone Bakery & Restaurant,"1713 G.A.R. Hwy, Swansea, MA",Bakery/American,https://cornerstonebakery.net
+Daou Market,1248 Pleasant St,Market/Deli,
+Amaral's Central Market,872 Globe St,Market/Deli,
+Portugalia Marketplace,489 Bedford St,Market/Deli,https://www.portugalia.com
+Jillian's Sports Pub & Grille,"1876 Wilbur Ave, Somerset, MA",Pub/Grille,https://jillianssomerset.com
+Douro Steakhouse,37 Purchase St,Steakhouse,https://www.dourosteakhouse.com
+Barca Restaurant,85 Columbia St,Portuguese,https://www.barcarestaurant.com
+Silver Stone Castle,"150 G.A.R. Hwy, Swansea, MA",American,https://www.silverstonecastle.com
+Casino Cafe & Grille,"104 G.A.R. Hwy, Swansea, MA",American,
+Boat House Waterfront Dining,"227 Schooner Dr, Tiverton, RI",Seafood/American,https://www.boathousetiverton.com
+Avenue Ice Cream,"1876 Wilbur Ave, Somerset, MA",Ice Cream,
+Bakery Central,695 Bedford St,Bakery,
+Bite Me Cupcake Bakery,1458 N Main St,Bakery,https://www.bitemecupcakery.com
+Blount Market,"380 Water St, Warren, RI",Seafood/Soup,https://blountretail.com/fall-river/home
+Brogies Pizza,1535 S Main St,Pizza,
+Caravela Restaurant,637 S Main St,Portuguese,https://www.caravelafallriver.com
+China Royal,800 Purchase St,Chinese,
+Chun Kyu,407 S Main St,Chinese,
+Cinderella's,85 Columbia St,Portuguese/Pizza,
+City Pizza,332 Rodman St,Pizza,
+Comfort Zone,1445 S Main St,American,
+Cunha Bakery,433 Mulberry St,Bakery,
+D & D Diner,"53 Belleville Rd, New Bedford, MA",Diner,
+Dave's Beach,Davol St,Seafood,
+Day's End,Pleasant St,Pub,
+Duke's Bakery,1082 Davol St,Bakery (Gluten-Free),
+East Coast Cafe,1082 Davol St,Cafe,
+Estoril,1577 Pleasant St,Portuguese,https://www.estorilrestaurant.com
+Fall River House of Pizza,1219 Pleasant St,Pizza,
+Fanny's,"104 G.A.R. Hwy, Swansea, MA",Pub,
+Festa,Columbia St,Portuguese,
+G & S Pizza,1219 Pleasant St,Pizza,
+Geno's,South Main St,Pub,
+George's Restaurant,270 S Main St,American,
+Golden House,1782 S Main St,Chinese,
+Graham's Hot Dogs,931 Bedford St,Hot Dogs,
+Happy Dragon,1782 S Main St,Chinese,
+Hong Kong Restaurant,407 S Main St,Chinese,
+Ideal Restaurant,177 Columbia St,Portuguese,
+J & J Seafood,439 Martine St,Seafood,
+Java House,139 S Main St,Coffee,
+Jeremiah's,Rhode Island Ave,Pub,
+Jerry Remy's,1082 Davol St,Sports Bar/American,https://www.jerryremys.com
+JJ's Hot Dogs,534 S Main St,Hot Dogs,
+John's Pizza,144 Rodman St,Pizza,
+King Philip,822 King Philip St,Portuguese,
+Kozy Nook,"2242 G.A.R. Hwy, Swansea, MA",Diner,
+La Familia,110 Lindsey St,Italian,
+Leone's,1065 S Main St,Italian,
+Liberty Restaurant,160 Alden St,American,
+Little Pizza Palace,1219 Pleasant St,Pizza,
+Main Street Cafe,408 S Main St,Cafe,
+Marcucci's Bakery & Grinder Shop,1270 Pleasant St,Bakery/Deli,
+Marzilli's Bakery,944 Bedford St,Bakery/Deli,
+Matthews,South Main St,Pub,
+Mee Sum Restaurant & Cocktail,1819 S Main St,Chinese,
+Minerva's,1219 Pleasant St,Pizza,
+Modern Diner,"364 East Ave, Pawtucket, RI",Diner,
+New China,407 S Main St,Chinese,
+New England Pizza,1219 Pleasant St,Pizza,
+Nick's Hot Dogs,534 S Main St,Hot Dogs,
+Nite Owl,Flint Neighborhood,Diner,
+North End Pizza,3020 N Main St,Pizza,
+Old School,South Main St,Pub,
+Oriental Chow Mein Co.,42 8th St,Chinese/Noodles,https://www.orientalchowmein.com
+Paddy's,Rhode Island Ave,Pub,
+Palace Pizza,1219 Pleasant St,Pizza,
+Park Pizza,1219 Pleasant St,Pizza,
+Pickles,3.6 mi,Deli,
+Pizza Hollow,1219 Pleasant St,Pizza,
+Pizza Time,1219 Pleasant St,Pizza,
+Polaris,North Main St,Pub,
+Portas Da Cidade,"231 State Rd, Westport, MA",Portuguese,https://www.portasdacidade.com
+Primavera,Columbia St,Portuguese,
+Red's,South Main St,Pub,
+Rib & Die,Rodman St,BBQ,
+Riverside,Davol St,Seafood,
+Roger's Coney Island Hot Dogs,Fall River,Hot Dogs,
+Roma,1065 S Main St,Italian,
+S & S,South Main St,Pub,
+Seabra,440 Stafford Rd,Market/Deli,https://www.seabrasupermarkets.com
+Shorty's Pub,South Main St,Pub,
+Siam,1065 S Main St,Thai,
+Simply Simons,1065 S Main St,American,
+South End Pizza,1065 S Main St,Pizza,
+Sparky's,South Main St,Pub,
+T & R,South Main St,Pub,
+Taphouse,South Main St,Pub,
+Teapot,South Main St,Chinese,
+The Grill,South Main St,American,
+The Hub,South Main St,Pub,
+The Kitchen,South Main St,American,
+The Ledge,North Main St,American,
+The Pub,South Main St,Pub,
+Town Pizza,South Main St,Pizza,
+Twin Dragon,1065 S Main St,Chinese,
+Two Brothers,1065 S Main St,Portuguese,
+Venus,1065 S Main St,Portuguese,
+Village Pizza,1065 S Main St,Pizza,
+Waterstreet,36 Water St,American,
+Wendell's,South Main St,Pub,
+Winghawk,1065 S Main St,Chicken Wings,
+Wok,South Main St,Chinese,
+Yesterdays,South Main St,Pub,
+Zia's,1065 S Main St,Italian,
+Black Salt,"481 Wilbur Ave, Swansea, MA",American/Seafood,https://blacksaltswansea.com
+Railway Pie,1458 N Main St,Pizza,
+Bun Buds,1458 N Main St,Burgers,
+Marisqueira Azores Restaurant,1445 S Main St,Portuguese,
+The Tipsy Toboggan,75 Ferry St,Gastropub,https://www.thetipsytoboggan.com
+Monalessa's Kitchen,756 Brayton Ave,Italian,https://monalessakitchenusa.com
+Christopher's Cafe,1816 S Main St,Cafe,
+Corner Stone Lounge,Rodman St,Pub/Grille,
+Barrett's Alehouse,4171 N Main St,Sports Bar,https://www.barrettsalehouse.com
+T.A. Restaurant,408 S Main St,Portuguese,https://tarestaurant.us
+Caravela,637 S Main St,Portuguese,https://www.caravelafallriver.com
+Fall River Grill,363 2nd St,Portuguese/BBQ,https://www.fallrivergrill.com
+Clipper Restaurant,Bridge St,Seafood,
+Cindy's Breakfast & Lunch,N Main St,Breakfast,
+Barrett's Waterfront,1082 Davol St,Seafood/American,https://www.barrettswaterfront.com
+Sweet Rose Cafe,N Main St,Cafe/Bakery,
+Royal Pizza,4263 N Main St,Pizza,
+Dunk & Munch,4263 N Main St,Breakfast,
+Aladdin's Pizza,4171 N Main St,Pizza,
+Hong Meas Restaurant,1535 S Main St,Cambodian/Chinese,https://www.hongmeasrestaurant.net
+Imperial Steak House,Pleasant St,Steakhouse,
+St James Irish Pub,N Main St,Irish Pub,
+Stingy Alley,N Main St,Pub,
+River Bar,N Main St,Bar/Tacos,
+Janet's Country Store and Deli,N Main St,Deli,
+Pickled Deli,N Main St,Deli,
+White Rose Bakery,Bedford St,Bakery,
+Flavorybox,Bedford St,Bakery/Desserts,
+Ice 'N' Roll,Bedford St,Ice Cream,
+Modern Pontes Bakery,Bedford St,Bakery,
+Mad Good Cookie,Bedford St,Bakery/Cookies,
+Confections,Bedford St,Bakery/Cakes,
+Wingate's Cake Design,Bedford St,Bakery/Cakes,
+Nancy's Bakery,Bedford St,Bakery,
+The Rescue Cafe,Quarry St,Cafe,
+Mission Cold Brew,Quarry St,Coffee,
+Chicken Story,S Main St,Chicken,
+Andrews Fruit & Produce,Specialty Food,Market,
+Juiced,S Main St,Juice Bar,
+Boneheads,S Main St,Wings/Burgers,
+Higsons,S Main St,Seafood,
+Joe's shish kebab,S Main St,Middle Eastern,
+Primo on Water Street,36 Water St,Italian,https://www.primoonwaterstreet.com
+The Liberal Club Restaurant,20 Star St,American/Portuguese,https://www.liberalclub1915.com
+Backyard,S Main St,American,
+Mee Sum,1819 S Main St,Chinese,
+China Star,S Main St,Chinese,
+Asian House,S Main St,Asian,
+Mr. Chen,S Main St,Chinese,
+Little Chopsticks III,S Main St,Chinese,
+China Sails,S Main St,Chinese,
+Jade Garden,S Main St,Chinese,
+US Pizza & Grill,President Ave,Pizza,
+Eastern Pizza,S Main St,Pizza,
+Dave's Pizza,S Main St,Pizza,
+Brick Pizzeria,S Main St,Pizza,
+Vazoni's Family Pizzaria,144 Rodman St,Pizza,
+Sheri's Place,S Main St,Breakfast,
+Gina's Restaurant,101 President Ave,Breakfast/Lunch,
+The Pink Bean Coffee,S Main St,Coffee,
+AJ's Bar and Grill,472 E Main St,Pub/Grille,https://ajsbarandgrillcc.com
+Flint Village Restaurant,1270 Pleasant St,Portuguese,
+Christopher's Dunnys,1065 S Main St,Pub,
+Cousin Mike's,1065 S Main St,Pub,
+J.T. Commons,1065 S Main St,American,
+Morgan's Cantina,1 Ferry St,Mexican,https://www.morganscantina.com
+Anchor & Stone,439 Martine St,American/Nautical,
+Real Brazil Restaurant and Market,"17 Tremont St, Taunton, MA",Brazilian,
+New Beige,"39 Union St, New Bedford, MA",American,
+Macray's Seafood,"116 Main Rd, Tiverton, RI",Seafood,https://www.macraysseafood.com
+Cafe Water Street,Water St,Cafe,
+Chaves Market,Columbia St,Market/Deli,
+The Burger Den,243 William S Canning Blvd,Burgers,https://www.theburgerden.com
+Leni's Catch,"818 Ashley Blvd, New Bedford, MA",Seafood,
+Whitny's Restaurant,1065 S Main St,American,
+Booondocks Bar And Grill,46 Water St,Pub/Grille,https://www.myboondocks.com
+Boston Coffee & Bagel,122 Allen St,Coffee/Bagel,
+Alice's Diner,2663 S Main St,Diner,
+Canned Heat,52 Ferry St,Brewery/Food,https://www.cannedheatcraftbeer.com
+Endzone Sports Pub,"218 Coggeshall St, New Bedford, MA",Pub/Sports Bar,
