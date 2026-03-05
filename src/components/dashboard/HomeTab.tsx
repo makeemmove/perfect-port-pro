@@ -242,7 +242,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
       )}
 
       {/* Header */}
-      <div className="text-center -mt-10 pb-2 relative z-20">
+      <div className="text-center -mt-10 pb-0 relative z-20">
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={editMode ? handleSave : () => setEditMode(true)}
