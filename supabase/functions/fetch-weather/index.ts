@@ -51,11 +51,13 @@ serve(async (req) => {
   try {
     const CURRENT_URL = `https://dataservice.accuweather.com/currentconditions/v1/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
     const HOURLY_URL = `https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
+    const DAILY_URL = `https://dataservice.accuweather.com/forecasts/v1/daily/1day/${LOCATION_KEY}?apikey=${API_KEY}&details=true`;
     const ALERTS_URL = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
 
-    const [curRes, hourlyRes, alertsRes] = await Promise.all([
+    const [curRes, hourlyRes, dailyRes, alertsRes] = await Promise.all([
       fetch(CURRENT_URL),
       fetch(HOURLY_URL),
+      fetch(DAILY_URL),
       fetch(ALERTS_URL, {
         headers: { "User-Agent": "FallRiverConnect/1.0 (contact@fallriverconnect.app)" },
       }),
