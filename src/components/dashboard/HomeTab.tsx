@@ -19,6 +19,7 @@ import ComingUpWidget from './widgets/ComingUpWidget';
 import NewsPreviewWidget from './widgets/NewsPreviewWidget';
 import QuickViewModal from './QuickViewModal';
 import { Settings, Check } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 const DEFAULT_ORDER = ['stats', 'coming-up', 'weather', 'srta', 'mbta', 'news'];
 const STORAGE_KEY = 'fr-widget-order';
@@ -38,7 +39,6 @@ function loadOrder(): string[] {
 
 const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigate?: (tab: 'eats' | 'events') => void; newsArticles?: NewsArticle[]; onNewsClick?: () => void; weather?: WeatherData | null }) => {
   const isMobile = useIsMobile();
-  const [clock, setClock] = useState('Loading…');
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -95,11 +95,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
 
   const tick = useCallback(() => {
     const n = new Date();
-    setClock(
-      n.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) +
-      ' · ' +
-      n.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    );
 
     const ns = nowSec();
 
@@ -247,11 +242,11 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
       )}
 
       {/* Header */}
-      <div className="text-center pt-4 pb-2 relative z-20">
+      <div className="text-center pt-2 pb-2 relative z-20">
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={editMode ? handleSave : () => setEditMode(true)}
-            className={`absolute left-0 top-4 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+            className={`absolute left-0 top-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
               editMode
                 ? 'bg-primary text-primary-foreground shadow-lg scale-110'
                 : 'bg-muted/60 text-muted-foreground hover:bg-muted'
@@ -260,16 +255,13 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
           >
             {editMode ? <Check size={18} strokeWidth={3} /> : <Settings size={16} />}
           </button>
-          <h1 className="text-4xl font-extrabold text-foreground" style={{ letterSpacing: '-0.03em' }}>
-            Fall River <span className="text-primary">Connect</span>
-          </h1>
+          <img src={logo} alt="Fall River Connect" className="h-20 w-auto" />
         </div>
         {editMode && (
           <div className="text-[11px] font-semibold text-primary mt-1 animate-fade-in">
             Drag to reorder · Tap ✓ to save
           </div>
         )}
-        <div className="mono text-[11px] text-muted-foreground mt-2">{clock}</div>
       </div>
 
       {/* Widgets */}
