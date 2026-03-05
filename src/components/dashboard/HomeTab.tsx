@@ -246,7 +246,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   };
 
   return (
-    <div className="space-y-6 relative">
+    <div className={`space-y-6 relative ${editMode ? 'is-edit-mode' : ''}`}>
       {/* Edit mode overlay */}
       {editMode && (
         <div className="fixed inset-0 edit-overlay z-10 pointer-events-none" />
@@ -281,6 +281,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
       {/* Widgets */}
       <div className="relative z-20">
         <DndContext
+          sensors={sensors}
           collisionDetection={closestCenter}
           modifiers={[restrictToVerticalAxis]}
           onDragStart={handleDragStart}
