@@ -24,26 +24,32 @@ interface MbtaWidgetProps {
 function StatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
   if (!status) return null;
   if (status === 'CANCELLED') {
-    return <span className="text-[10px] font-black uppercase text-red-600 bg-red-100 px-1.5 py-0.5 rounded">CANCELLED</span>;
+    return <span className="text-[10px] font-black uppercase text-destructive bg-destructive/15 px-1.5 py-0.5 rounded">CANCELLED</span>;
+  }
+  if (status === 'Scheduled') {
+    return <span className="text-[10px] font-semibold text-accent">Scheduled</span>;
   }
   if (status.includes('Late')) {
-    return <span className="text-[10px] font-bold text-red-500">{status}</span>;
+    return <span className="text-[10px] font-bold text-destructive">{status}</span>;
   }
-  return <span className="text-[10px] font-semibold text-green-500">On Time</span>;
+  return <span className="text-[10px] font-semibold text-primary">On Time</span>;
 }
 
 function TopStatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
   if (!status) return null;
   if (status === 'CANCELLED') {
-    return <span className="text-[10px] font-black uppercase text-white bg-red-700 px-2.5 py-1 rounded-full">CANCELLED</span>;
+    return <span className="text-[10px] font-black uppercase text-destructive-foreground bg-destructive px-2.5 py-1 rounded-full">CANCELLED</span>;
+  }
+  if (status === 'Scheduled') {
+    return <span className="text-[10px] font-semibold text-foreground bg-accent/30 px-2.5 py-1 rounded-full">Scheduled</span>;
   }
   if (delayMin && delayMin > 0) {
-    return <span className="text-[10px] font-bold text-white bg-red-500 px-2.5 py-1 rounded-full">{delayMin} min Late</span>;
+    return <span className="text-[10px] font-bold text-destructive-foreground bg-destructive px-2.5 py-1 rounded-full">{delayMin} min Late</span>;
   }
   if (delayMin && delayMin < 0) {
-    return <span className="text-[10px] font-bold text-white bg-blue-500 px-2.5 py-1 rounded-full">{Math.abs(delayMin)} min Early</span>;
+    return <span className="text-[10px] font-bold text-primary-foreground bg-primary px-2.5 py-1 rounded-full">{Math.abs(delayMin)} min Early</span>;
   }
-  return <span className="text-[10px] font-semibold text-white bg-green-500 px-2.5 py-1 rounded-full">On Time</span>;
+  return <span className="text-[10px] font-semibold text-primary-foreground bg-primary px-2.5 py-1 rounded-full">On Time</span>;
 }
 
 const MbtaWidget = ({

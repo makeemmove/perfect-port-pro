@@ -42,7 +42,7 @@ serve(async (req) => {
 
   try {
     const CURRENT_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=imperial`;
-    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=imperial&cnt=3`;
+    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=imperial&cnt=40`;
     const ALERTS_URL = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
 
     const [currentRes, forecastRes, alertsRes] = await Promise.all([
@@ -78,7 +78,8 @@ serve(async (req) => {
       }
     }
 
-    const icon = owmIcon(current.weather?.[0]?.icon || "01d");
+    const iconCode = current.weather?.[0]?.icon || "01d";
+    const icon = owmIcon(iconCode);
     const label = current.weather?.[0]?.description
       ? current.weather[0].description.charAt(0).toUpperCase() + current.weather[0].description.slice(1)
       : "Clear";
@@ -86,37 +87,35 @@ serve(async (req) => {
     const sunrise = fmtTime(current.sys?.sunrise || 0);
     const sunset = fmtTime(current.sys?.sunset || 0);
 
-    // Daylight calculation
     let daylightHrs = "";
     if (current.sys?.sunrise && current.sys?.sunset) {
       const diff = (current.sys.sunset - current.sys.sunrise) / 3600;
       daylightHrs = diff.toFixed(1) + "h";
     }
 
-    // Build hourly forecast from 3-hour intervals (OpenWeather free gives 3h intervals)
-    // We get up to 3 entries = 9 hours of forecast
-    const hourly: { time: string; temp: number; rainProb: number; icon: string; isNow: boolean }[] = [];
-    
-    // First entry is "Now" with current conditions
-    hourly.push({
-      time: "Now",
-      temp: Math.round(current.main?.temp ?? 0),
-      rainProb: current.clouds?.all ?? 0,
-      icon,
-      isNow: true,
-    });
-
-    // Add forecast entries
+    // Build 5-day forecast from 3-hour intervals
+    const daily: { day: string; high: number; low: number; icon: string }[] = [];
     if (forecast?.list) {
-      for (let i = 0; i < forecast.list.length && hourly.length < 7; i++) {
-        const entry = forecast.list[i];
-        hourly.push({
-          time: fmtHour(entry.dt),
-          temp: Math.round(entry.main?.temp ?? 0),
-          rainProb: Math.round((entry.pop ?? 0) * 100),
-          icon: owmIcon(entry.weather?.[0]?.icon || "01d"),
-          isNow: false,
-        });
+      const dayMap: Record<string, { temps: number[]; icons: string[] }> = {};
+      for (const entry of forecast.list) {
+        const date = new Date(entry.dt * 1000);
+        const dayKey = date.toLocaleDateString("en-US", { weekday: "short", timeZone: "America/New_York" });
+        const dateKey = date.toISOString().split("T")[0];
+        const key = `${dateKey}|${dayKey}`;
+        if (!dayMap[key]) dayMap[key] = { temps: [], icons: [] };
+        dayMap[key].temps.push(entry.main?.temp ?? 0);
+        dayMap[key].icons.push(entry.weather?.[0]?.icon || "01d");
+      }
+      for (const [key, val] of Object.entries(dayMap)) {
+        if (daily.length >= 5) break;
+        const dayName = key.split("|")[1];
+        const high = Math.round(Math.max(...val.temps));
+        const low = Math.round(Math.min(...val.temps));
+        // Pick most common icon
+        const iconCounts: Record<string, number> = {};
+        for (const ic of val.icons) { iconCounts[ic] = (iconCounts[ic] || 0) + 1; }
+        const topIcon = Object.entries(iconCounts).sort((a, b) => b[1] - a[1])[0][0];
+        daily.push({ day: dayName, high, low, icon: owmIcon(topIcon) });
       }
     }
 
@@ -132,7 +131,7 @@ serve(async (req) => {
       sunrise,
       sunset,
       daylight: daylightHrs,
-      hourly,
+      daily,
       alerts,
     };
 
