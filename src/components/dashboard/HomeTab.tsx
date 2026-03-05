@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import type { NewsArticle } from '@/hooks/useNews';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MBTA_ROUTES, MBTA_STATIONS, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
@@ -7,7 +10,7 @@ import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
 import type { CityEvent } from '@/data/events';
 import { fetchWeather, WeatherData } from '@/data/weather';
-import DraggableWidget from './DraggableWidget';
+import SortableWidgetItem from './SortableWidgetItem';
 import WeatherWidget from './widgets/WeatherWidget';
 import MbtaWidget from './widgets/MbtaWidget';
 import SrtaWidget from './widgets/SrtaWidget';
@@ -15,6 +18,7 @@ import StatsWidget from './widgets/StatsWidget';
 import ComingUpWidget from './widgets/ComingUpWidget';
 import NewsPreviewWidget from './widgets/NewsPreviewWidget';
 import QuickViewModal from './QuickViewModal';
+import { Settings, Check } from 'lucide-react';
 
 const DEFAULT_ORDER = ['stats', 'coming-up', 'weather', 'srta', 'mbta', 'news'];
 const STORAGE_KEY = 'fr-widget-order';
@@ -36,8 +40,10 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const isMobile = useIsMobile();
   const [clock, setClock] = useState('Loading…');
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [widgetOrder] = useState(loadOrder);
+  const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   const upcomingCount = useMemo(() => EVENTS.filter(e => new Date(e.date) >= new Date()).length, []);
   const [eventOrder, setEventOrder] = useState<number[]>(() => Array.from({ length: Math.min(upcomingCount, 6) }, (_, i) => i));
@@ -50,7 +56,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const trainRoute = useMemo(() => MBTA_ROUTES.find(r => r.id === selectedTrainId) ?? MBTA_ROUTES[0], [selectedTrainId]);
   const busRoute = useMemo(() => SRTA_ROUTES.find(r => r.id === selectedBusId) ?? SRTA_ROUTES[0], [selectedBusId]);
 
-  // Real-time MBTA predictions
   const { predictions: mbtaPredictions, isLive: mbtaIsLive } = useMbtaRealtime(selectedStation, selectedTrainId);
 
   const [trainCountdown, setTrainCountdown] = useState('--:--');
@@ -77,6 +82,14 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
     EVENTS.filter(e => new Date(e.date) >= new Date()).slice(0, 6),
   []);
 
+  // Disable scrolling while dragging
+  useEffect(() => {
+    if (activeId) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [activeId]);
+
   const tick = useCallback(() => {
     const n = new Date();
     setClock(
@@ -87,7 +100,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
 
     const ns = nowSec();
 
-    // Build a lookup from predictions: scheduledTime → prediction data
     const predMap = new Map<string, { predictedTime: string | null; status: string; delayMinutes: number }>();
     for (const p of mbtaPredictions) {
       if (p.scheduledTime) {
@@ -103,7 +115,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
       const stationTime = d.stops[selectedStation];
       if (!stationTime) continue;
 
-      // Use predicted time if available for countdown calculation
       const pred = predMap.get(stationTime);
       const effectiveTime = pred?.predictedTime || stationTime;
       const ds = t2m(effectiveTime) * 60;
@@ -171,6 +182,29 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
     return () => clearInterval(interval);
   }, []);
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+    try { navigator.vibrate?.(10); } catch {}
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+    if (over && active.id !== over.id) {
+      try { navigator.vibrate?.(10); } catch {}
+      setWidgetOrder(prev => {
+        const oldIndex = prev.indexOf(active.id as string);
+        const newIndex = prev.indexOf(over.id as string);
+        return arrayMove(prev, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const handleSave = () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(widgetOrder));
+    setEditMode(false);
+  };
+
   const widgetMap: Record<string, React.ReactNode> = {
     weather: <WeatherWidget weather={weather} />,
     mbta: (
@@ -208,21 +242,57 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Edit mode overlay */}
+      {editMode && (
+        <div className="fixed inset-0 edit-overlay z-10 pointer-events-none" />
+      )}
+
       {/* Header */}
-      <div className="text-center pt-4 pb-2">
-        <h1 className="text-4xl font-extrabold text-foreground" style={{ letterSpacing: '-0.03em' }}>
-          Fall River <span className="text-primary">Connect</span>
-        </h1>
+      <div className="text-center pt-4 pb-2 relative z-20">
+        <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={editMode ? handleSave : () => setEditMode(true)}
+            className={`absolute left-0 top-4 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+              editMode
+                ? 'bg-primary text-primary-foreground shadow-lg scale-110'
+                : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+            }`}
+            aria-label={editMode ? 'Save layout' : 'Edit layout'}
+          >
+            {editMode ? <Check size={18} strokeWidth={3} /> : <Settings size={16} />}
+          </button>
+          <h1 className="text-4xl font-extrabold text-foreground" style={{ letterSpacing: '-0.03em' }}>
+            Fall River <span className="text-primary">Connect</span>
+          </h1>
+        </div>
+        {editMode && (
+          <div className="text-[11px] font-semibold text-primary mt-1 animate-fade-in">
+            Drag to reorder · Tap ✓ to save
+          </div>
+        )}
         <div className="mono text-[11px] text-muted-foreground mt-2">{clock}</div>
       </div>
 
       {/* Widgets */}
-      {widgetOrder.map((id) => (
-        <DraggableWidget key={id} id={id}>
-          {widgetMap[id]}
-        </DraggableWidget>
-      ))}
+      <div className="relative z-20">
+        <DndContext
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={widgetOrder} strategy={verticalListSortingStrategy}>
+            <div className="space-y-4">
+              {widgetOrder.map((id) => (
+                <SortableWidgetItem key={id} id={id} isEditMode={editMode}>
+                  {widgetMap[id]}
+                </SortableWidgetItem>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </div>
 
       <QuickViewModal
         open={!!selectedEvent}
