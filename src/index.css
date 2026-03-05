@@ -6,59 +6,59 @@
 
 @layer base {
   :root {
-    --background: 0 0% 96%;
-    --foreground: 210 100% 20%;
+    --background: 220 14% 96%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 100% 20%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 100% 20%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 210 100% 20%;
+    --primary: 222 47% 11%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 170 100% 37%;
+    --secondary: 245 58% 51%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 170 100% 37%;
+    --accent: 245 58% 51%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 14% 89%;
-    --input: 214 14% 89%;
-    --ring: 210 100% 20%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 222 47% 11%;
 
     --radius: 1.25rem;
 
     /* Custom palette */
     --gold: 39 100% 50%;
     --crimson: 0 70% 50%;
-    --blue: 210 100% 20%;
-    --purple: 170 100% 37%;
-    --emerald: 170 100% 37%;
-    --orange: 39 100% 50%;
+    --blue: 222 47% 11%;
+    --purple: 245 58% 51%;
+    --emerald: 160 84% 39%;
+    --orange: 25 95% 53%;
 
     /* Glass surface tokens */
-    --glass-bg: 0 0% 100% / 0.95;
-    --glass-blur: 15px;
-    --glass-border: 214 14% 89%;
-    --glass-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
-    --glass-shadow-hover: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    --glass-bg: 0 0% 100% / 0.92;
+    --glass-blur: 20px;
+    --glass-border: 220 13% 91%;
+    --glass-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.05), 0 20px 25px -5px rgba(0,0,0,0.03);
+    --glass-shadow-hover: 0 10px 15px -3px rgba(0,0,0,0.08), 0 20px 25px -5px rgba(0,0,0,0.05), 0 25px 50px -12px rgba(0,0,0,0.04);
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 210 100% 20%;
-    --sidebar-primary: 210 100% 20%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 222 47% 11%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 170 100% 37%;
+    --sidebar-accent: 245 58% 51%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 214 14% 89%;
-    --sidebar-ring: 210 100% 20%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 222 47% 11%;
   }
 }
 
@@ -164,10 +164,10 @@
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(215 16% 85%); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: hsl(220 13% 85%); border-radius: 4px; }
 
 /* Leaflet overrides */
-.leaflet-container { background: hsl(210 20% 98%) !important; }
+.leaflet-container { background: hsl(220 14% 98%) !important; }
 .leaflet-popup-content-wrapper {
   background: hsla(var(--glass-bg)) !important;
   backdrop-filter: blur(var(--glass-blur)) !important;
