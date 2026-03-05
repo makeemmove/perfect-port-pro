@@ -8,15 +8,11 @@ const FILTERS = [
   { label: '🎵 Music', sub: 'Music' },
   { label: '🎨 Arts', sub: 'Arts' },
   { label: '👶 Kids', sub: 'Kids' },
-  { label: '🎉 Festival', sub: 'Festival' },
-  { label: '🎄 Holiday', sub: 'Holiday' },
-  { label: '👨‍👩‍👧 Family', sub: 'Family' },
-  { label: '🏘 Community', sub: 'Community' },
   { label: '🎭 Theater', sub: 'Theater' },
   { label: '📚 Education', sub: 'Education' },
-  { label: '🍔 Food', sub: 'Food' },
-  { label: '⚽ Sports', sub: 'Sports' },
-  { label: '🏛 Civic', sub: 'Civic' },
+  { label: '🎉 Festival', sub: 'Festival' },
+  { label: '🎄 Holiday', sub: 'Holiday' },
+  { label: '🏘 Community', sub: 'Community' },
 ];
 
 const tagStyles: Record<string, string> = {
