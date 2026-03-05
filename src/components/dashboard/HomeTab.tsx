@@ -21,7 +21,7 @@ import QuickViewModal from './QuickViewModal';
 import { Settings, Check } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
-const DEFAULT_ORDER = ['stats', 'coming-up', 'weather', 'srta', 'mbta', 'news'];
+const DEFAULT_ORDER = ['news', 'stats', 'coming-up', 'weather', 'srta', 'mbta'];
 const STORAGE_KEY = 'fr-widget-order';
 
 function loadOrder(): string[] {
