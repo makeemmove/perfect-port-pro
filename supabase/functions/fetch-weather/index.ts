@@ -104,13 +104,16 @@ serve(async (req) => {
 
     const [icon, label] = accuIcon(cur.WeatherIcon ?? 1);
 
-    // Sunrise/sunset from cur.Sun if available (detailed response)
-    const sunrise = cur.Sun?.Rise ? fmtTime(cur.Sun.Rise) : "";
-    const sunset = cur.Sun?.Set ? fmtTime(cur.Sun.Set) : "";
+    // Sunrise/sunset from daily forecast
+    const dailyForecast = dailyData?.DailyForecasts?.[0];
+    const sunRise = dailyForecast?.Sun?.Rise;
+    const sunSet = dailyForecast?.Sun?.Set;
+    const sunrise = sunRise ? fmtTime(sunRise) : "";
+    const sunset = sunSet ? fmtTime(sunSet) : "";
     let daylightHrs = "";
-    if (cur.Sun?.Rise && cur.Sun?.Set) {
-      const riseMs = new Date(cur.Sun.Rise).getTime();
-      const setMs = new Date(cur.Sun.Set).getTime();
+    if (sunRise && sunSet) {
+      const riseMs = new Date(sunRise).getTime();
+      const setMs = new Date(sunSet).getTime();
       daylightHrs = ((setMs - riseMs) / 3600000).toFixed(1) + "h";
     }
 
