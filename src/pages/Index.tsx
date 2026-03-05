@@ -27,7 +27,7 @@ const Index = () => {
           <div
             key={tab}
             className={`absolute inset-0 overflow-y-auto ${activeTab === tab ? 'block' : 'hidden'}`}
-            style={{ padding: '16px 24px 84px' }}
+            style={{ padding: '4px 24px 84px' }}
           >
             <div className="max-w-lg mx-auto">
               {tab === 'home' && <HomeTab onNavigate={(t) => setActiveTab(t as any)} newsArticles={articles} onNewsClick={() => setActiveTab('news')} weather={weather} />}
