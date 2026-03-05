@@ -8,17 +8,20 @@ const corsHeaders = {
 
 const MBTA_API_KEY = "fe3a3623d0524813a4c47c16828bf84a";
 const MBTA_BASE = "https://api-v3.mbta.com";
+const ROUTE_ID = "CR-NewBedford";
 
-// Map display station names to MBTA stop IDs
+// Correct MBTA stop IDs for the Fall River / New Bedford line
 const STOP_ID_MAP: Record<string, string> = {
-  "Fall River Depot": "place-FR-0064",
-  "Freetown": "place-FR-0137",
-  "East Taunton": "place-PB-0356",
-  "Bridgewater": "place-PB-0281",
-  "Campello": "place-PB-0245",
-  "Brockton": "place-PB-0212",
-  "Holbrook/Randolph": "place-PB-0158",
-  "Braintree": "place-PB-0116",
+  "Fall River Depot": "place-FRS-0109",
+  "Freetown": "place-FRS-0054",
+  "East Taunton": "place-NBM-0374",
+  "Middleborough": "place-MBS-0350",
+  "Bridgewater": "place-MM-0277",
+  "Campello": "place-MM-0219",
+  "Brockton": "place-MM-0200",
+  "Montello": "place-MM-0186",
+  "Holbrook/Randolph": "place-MM-0150",
+  "Braintree": "place-brntn",
   "Quincy Center": "place-qnctr",
   "JFK/UMass": "place-jfk",
   "South Station": "place-sstat",
@@ -61,85 +64,114 @@ serve(async (req) => {
       );
     }
 
-    let apiUrl = `${MBTA_BASE}/predictions?filter[route]=CR-Fall+River&filter[stop]=${stopId}&include=schedule&sort=departure_time`;
+    // Fetch predictions and schedules in parallel
+    let predUrl = `${MBTA_BASE}/predictions?filter[route]=${ROUTE_ID}&filter[stop]=${stopId}&include=schedule&sort=departure_time`;
     if (directionId !== null && directionId !== undefined) {
-      apiUrl += `&filter[direction_id]=${directionId}`;
+      predUrl += `&filter[direction_id]=${directionId}`;
     }
 
-    const response = await fetch(apiUrl, {
-      headers: { "x-api-key": MBTA_API_KEY },
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("MBTA API error:", response.status, text);
-      return new Response(
-        JSON.stringify({ error: "MBTA API error", predictions: [] }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Also fetch today's schedule as fallback
+    const today = new Date().toISOString().split("T")[0];
+    let schedUrl = `${MBTA_BASE}/schedules?filter[route]=${ROUTE_ID}&filter[stop]=${stopId}&filter[date]=${today}&sort=departure_time`;
+    if (directionId !== null && directionId !== undefined) {
+      schedUrl += `&filter[direction_id]=${directionId}`;
     }
 
-    const data = await response.json();
-    const predictions = data.data || [];
-    const included = data.included || [];
-
-    // Build schedule lookup by trip ID
-    const scheduleMap = new Map<string, any>();
-    for (const inc of included) {
-      if (inc.type === "schedule") {
-        const tripId = inc.relationships?.trip?.data?.id;
-        if (tripId) {
-          scheduleMap.set(tripId, inc);
-        }
-      }
-    }
+    const [predResponse, schedResponse] = await Promise.all([
+      fetch(predUrl, { headers: { "x-api-key": MBTA_API_KEY } }),
+      fetch(schedUrl, { headers: { "x-api-key": MBTA_API_KEY } }),
+    ]);
 
     const results: PredictionResult[] = [];
 
-    for (const pred of predictions) {
-      const attrs = pred.attributes;
-      const tripId = pred.relationships?.trip?.data?.id || "";
-      const dirId = attrs.direction_id;
+    // Process predictions first (real-time data)
+    if (predResponse.ok) {
+      const data = await predResponse.json();
+      const predictions = data.data || [];
+      const included = data.included || [];
 
-      // Check for cancellation
-      if (attrs.schedule_relationship === "CANCELLED") {
+      const scheduleMap = new Map<string, any>();
+      for (const inc of included) {
+        if (inc.type === "schedule") {
+          const tripId = inc.relationships?.trip?.data?.id;
+          if (tripId) scheduleMap.set(tripId, inc);
+        }
+      }
+
+      for (const pred of predictions) {
+        const attrs = pred.attributes;
+        const tripId = pred.relationships?.trip?.data?.id || "";
+        const dirId = attrs.direction_id;
+
+        if (attrs.schedule_relationship === "CANCELLED") {
+          const schedule = scheduleMap.get(tripId);
+          results.push({
+            scheduledTime: fmtTime(schedule?.attributes?.departure_time || attrs.departure_time),
+            predictedTime: null,
+            delayMinutes: 0,
+            status: "CANCELLED",
+            direction: dirId === 1 ? "Inbound → South Station" : "Outbound → Fall River",
+            tripId,
+          });
+          continue;
+        }
+
+        const predictedDep = attrs.departure_time || attrs.arrival_time;
         const schedule = scheduleMap.get(tripId);
+        const scheduledDep = schedule?.attributes?.departure_time || schedule?.attributes?.arrival_time;
+
+        let delayMinutes = 0;
+        if (predictedDep && scheduledDep) {
+          const diffMs = new Date(predictedDep).getTime() - new Date(scheduledDep).getTime();
+          delayMinutes = Math.round(diffMs / 60000);
+        }
+
+        let status: string;
+        if (delayMinutes > 1) {
+          status = `${delayMinutes} min Late`;
+        } else if (delayMinutes < -1) {
+          status = `${Math.abs(delayMinutes)} min Early`;
+        } else {
+          status = "On Time";
+        }
+
         results.push({
-          scheduledTime: fmtTime(schedule?.attributes?.departure_time || attrs.departure_time),
-          predictedTime: null,
-          delayMinutes: 0,
-          status: "CANCELLED",
+          scheduledTime: fmtTime(scheduledDep || predictedDep),
+          predictedTime: fmtTime(predictedDep),
+          delayMinutes,
+          status,
           direction: dirId === 1 ? "Inbound → South Station" : "Outbound → Fall River",
           tripId,
         });
-        continue;
       }
+    }
 
-      const predictedDep = attrs.departure_time || attrs.arrival_time;
-      const schedule = scheduleMap.get(tripId);
-      const scheduledDep = schedule?.attributes?.departure_time || schedule?.attributes?.arrival_time;
+    // If no predictions, fall back to schedule data
+    if (results.length === 0 && schedResponse.ok) {
+      const schedData = await schedResponse.json();
+      const schedules = schedData.data || [];
+      const now = new Date();
 
-      let delayMinutes = 0;
-      if (predictedDep && scheduledDep) {
-        const diffMs = new Date(predictedDep).getTime() - new Date(scheduledDep).getTime();
-        delayMinutes = Math.round(diffMs / 60000);
+      for (const sched of schedules) {
+        const attrs = sched.attributes;
+        const depTime = attrs.departure_time || attrs.arrival_time;
+        if (!depTime) continue;
+
+        // Only show future departures
+        if (new Date(depTime) < now) continue;
+
+        const dirId = attrs.direction_id;
+        const tripId = sched.relationships?.trip?.data?.id || "";
+
+        results.push({
+          scheduledTime: fmtTime(depTime),
+          predictedTime: null,
+          delayMinutes: 0,
+          status: "Scheduled",
+          direction: dirId === 1 ? "Inbound → South Station" : "Outbound → Fall River",
+          tripId,
+        });
       }
-
-      let status: string;
-      if (delayMinutes > 1) {
-        status = `${delayMinutes} min Late`;
-      } else {
-        status = "On Time";
-      }
-
-      results.push({
-        scheduledTime: fmtTime(scheduledDep),
-        predictedTime: fmtTime(predictedDep),
-        delayMinutes,
-        status,
-        direction: dirId === 1 ? "Inbound → South Station" : "Outbound → Fall River",
-        tripId,
-      });
     }
 
     return new Response(JSON.stringify({ predictions: results }), {
