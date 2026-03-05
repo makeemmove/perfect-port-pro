@@ -45,6 +45,10 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
   const [editMode, setEditMode] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 0, tolerance: 5 } });
+  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 3 } });
+  const sensors = useSensors(touchSensor, mouseSensor);
+
   const upcomingCount = useMemo(() => EVENTS.filter(e => new Date(e.date) >= new Date()).length, []);
   const [eventOrder, setEventOrder] = useState<number[]>(() => Array.from({ length: Math.min(upcomingCount, 6) }, (_, i) => i));
 
