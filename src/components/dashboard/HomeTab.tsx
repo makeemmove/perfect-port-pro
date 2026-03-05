@@ -245,11 +245,11 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
       )}
 
       {/* Header */}
-      <div className="text-center -mt-4 -mb-4 pb-0 relative z-20">
+      <div className="text-center -mt-4 -mb-12 pb-0 relative z-20">
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={editMode ? handleSave : () => setEditMode(true)}
-            className={`absolute left-0 top-12 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+            className={`absolute left-0 top-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
               editMode
                 ? 'bg-primary text-primary-foreground shadow-lg scale-110'
                 : 'bg-muted/60 text-muted-foreground hover:bg-muted'
@@ -258,7 +258,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
           >
             {editMode ? <Check size={18} strokeWidth={3} /> : <Settings size={16} />}
           </button>
-          <img src={logo} alt="Fall River Connect" className="h-64 w-auto" />
+          <img src={logo} alt="Fall River Connect" className="h-48 w-auto" />
         </div>
         {editMode && (
           <div className="text-[11px] font-semibold text-primary mt-1 animate-fade-in">

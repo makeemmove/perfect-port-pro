@@ -50,7 +50,7 @@ export default {
         gold: "hsl(var(--gold))",
         crimson: "hsl(var(--crimson))",
         blue: "hsl(var(--blue))",
-        purple: "hsl(var(--purple))",
+        amber: "hsl(var(--amber))",
         emerald: "hsl(var(--emerald))",
         orange: "hsl(var(--orange))",
         sidebar: {
