@@ -74,6 +74,13 @@ serve(async (req) => {
       throw new Error(`AccuWeather hourly forecast error: ${hourlyRes.status}`);
     }
 
+    let dailyData: any = null;
+    if (dailyRes.ok) {
+      dailyData = await dailyRes.json();
+    } else {
+      console.error("AccuWeather daily error:", dailyRes.status, await dailyRes.text());
+    }
+
     const curData = await curRes.json();
     const hourlyData = await hourlyRes.json();
 
