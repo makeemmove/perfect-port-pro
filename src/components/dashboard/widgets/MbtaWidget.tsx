@@ -16,7 +16,21 @@ interface MbtaWidgetProps {
   trainDir: string;
   trainDepTime: string;
   trainAfter: string;
-  remainingTrains: {time: string;dir: string;}[];
+  remainingTrains: {time: string; dir: string; status?: string; delayMin?: number}[];
+  nextTrainStatus?: string;
+  nextTrainDelayMin?: number;
+  isLive?: boolean;
+}
+
+function StatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
+  if (!status) return null;
+  if (status === 'CANCELLED') {
+    return <span className="text-[10px] font-black uppercase text-red-600 bg-red-100 px-1.5 py-0.5 rounded">CANCELLED</span>;
+  }
+  if (status.includes('Late')) {
+    return <span className="text-[10px] font-bold text-red-500">{status}</span>;
+  }
+  return <span className="text-[10px] font-semibold text-green-500">On Time</span>;
 }
 
 const MbtaWidget = ({
@@ -24,7 +38,10 @@ const MbtaWidget = ({
   selectedStation, setSelectedStation,
   trainRoute,
   trainCountdown, trainUrgent, trainDir, trainDepTime, trainAfter,
-  remainingTrains
+  remainingTrains,
+  nextTrainStatus,
+  nextTrainDelayMin,
+  isLive,
 }: MbtaWidgetProps) =>
 <div className="glass-card p-6 py-[15px]">
     <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -40,6 +57,12 @@ const MbtaWidget = ({
       <span className="text-[9px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full bg-primary/[0.06] text-primary">
         MBTA Commuter Rail
       </span>
+      {isLive && (
+        <span className="flex items-center gap-1 text-[9px] font-medium text-green-500">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+          LIVE
+        </span>
+      )}
     </div>
 
     <div className="flex flex-wrap gap-2 mb-3">
@@ -76,7 +99,7 @@ const MbtaWidget = ({
             {trainCountdown}
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-72 p-0 max-h-72 overflow-auto rounded-2xl" align="start">
+        <PopoverContent className="w-80 p-0 max-h-72 overflow-auto rounded-2xl" align="start">
           <div className="p-3 border-b border-border/40">
             <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
               Remaining at {selectedStation} · {trainRoute.name}
@@ -87,18 +110,22 @@ const MbtaWidget = ({
           <div className="text-[12px] text-muted-foreground p-2">No more departures today</div> :
 
           remainingTrains.map((d, i) =>
-          <div key={i} className="flex items-center justify-between py-2 px-2 rounded-xl hover:bg-muted/50 transition-colors duration-300">
+          <div key={i} className="flex items-center justify-between py-2 px-2 rounded-xl hover:bg-muted/50 transition-colors duration-300 gap-2">
                   <span className="mono text-[13px] font-medium text-foreground">{d.time}</span>
-                  <span className="text-[11px] text-muted-foreground">{d.dir}</span>
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={d.status} delayMin={d.delayMin} />
+                    <span className="text-[11px] text-muted-foreground">{d.dir}</span>
+                  </div>
                 </div>
           )
           }
           </div>
         </PopoverContent>
       </Popover>
-      <div className="text-right">
+      <div className="text-right space-y-1">
         <div className="text-[10px] text-muted-foreground font-medium">Departs at</div>
         <div className="mono text-base text-foreground">{trainDepTime}</div>
+        <StatusBadge status={nextTrainStatus} delayMin={nextTrainDelayMin} />
       </div>
     </div>
     <div className="text-[11px] text-muted-foreground mt-2">{trainAfter}</div>
