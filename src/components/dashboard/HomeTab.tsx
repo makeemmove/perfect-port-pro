@@ -9,7 +9,7 @@ import { useMbtaRealtime } from '@/hooks/useMbtaRealtime';
 import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
 import type { CityEvent } from '@/data/events';
-import { fetchWeather, WeatherData } from '@/data/weather';
+import type { WeatherData } from '@/data/weather';
 import SortableWidgetItem from './SortableWidgetItem';
 import WeatherWidget from './widgets/WeatherWidget';
 import MbtaWidget from './widgets/MbtaWidget';
