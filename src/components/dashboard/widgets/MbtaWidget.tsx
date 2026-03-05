@@ -19,7 +19,6 @@ interface MbtaWidgetProps {
   remainingTrains: {time: string; dir: string; status?: string; delayMin?: number}[];
   nextTrainStatus?: string;
   nextTrainDelayMin?: number;
-  isLive?: boolean;
 }
 
 function StatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
@@ -55,7 +54,6 @@ const MbtaWidget = ({
   remainingTrains,
   nextTrainStatus,
   nextTrainDelayMin,
-  isLive,
 }: MbtaWidgetProps) =>
 <div className="glass-card p-6 py-[15px]">
     <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -71,12 +69,6 @@ const MbtaWidget = ({
       <span className="text-[9px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full bg-primary/[0.06] text-primary">
         MBTA Commuter Rail
       </span>
-      {isLive && (
-        <span className="flex items-center gap-1 text-[9px] font-medium text-green-500">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          LIVE
-        </span>
-      )}
       <div className="ml-auto">
         <TopStatusBadge status={nextTrainStatus} delayMin={nextTrainDelayMin} />
       </div>

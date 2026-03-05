@@ -6,56 +6,33 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const API_KEY = "c07bd9dae1e05e6549146b718568329b";
 const LAT = 41.7015;
-const LON = -71.1551;
+const LON = -71.1550;
 
-function wmoIcon(code: number, isDay: boolean): [string, string] {
-  const map: Record<number, [string, string, string]> = {
-    0: ["☀️", "🌙", "Clear"],
-    1: ["🌤", "🌙", "Mostly Clear"],
-    2: ["⛅", "☁️", "Partly Cloudy"],
-    3: ["☁️", "☁️", "Overcast"],
-    45: ["🌫", "🌫", "Fog"],
-    48: ["🌫", "🌫", "Freezing Fog"],
-    51: ["🌦", "🌧", "Light Drizzle"],
-    53: ["🌦", "🌧", "Drizzle"],
-    55: ["🌧", "🌧", "Heavy Drizzle"],
-    56: ["🌨", "🌨", "Freezing Drizzle"],
-    57: ["🌨", "🌨", "Heavy Freezing Drizzle"],
-    61: ["🌧", "🌧", "Light Rain"],
-    63: ["🌧", "🌧", "Rain"],
-    65: ["🌧", "🌧", "Heavy Rain"],
-    66: ["🌨", "🌨", "Freezing Rain"],
-    67: ["🌨", "🌨", "Heavy Freezing Rain"],
-    71: ["🌨", "🌨", "Light Snow"],
-    73: ["❄️", "❄️", "Snow"],
-    75: ["❄️", "❄️", "Heavy Snow"],
-    77: ["🌨", "🌨", "Snow Grains"],
-    80: ["🌦", "🌧", "Light Showers"],
-    81: ["🌧", "🌧", "Showers"],
-    82: ["🌧", "🌧", "Heavy Showers"],
-    85: ["🌨", "🌨", "Light Snow Showers"],
-    86: ["❄️", "❄️", "Heavy Snow Showers"],
-    95: ["⛈", "⛈", "Thunderstorm"],
-    96: ["⛈", "⛈", "Thunderstorm w/ Hail"],
-    99: ["⛈", "⛈", "Thunderstorm w/ Heavy Hail"],
+function owmIcon(code: string): string {
+  const map: Record<string, string> = {
+    "01d": "☀️", "01n": "🌙",
+    "02d": "🌤", "02n": "☁️",
+    "03d": "⛅", "03n": "☁️",
+    "04d": "☁️", "04n": "☁️",
+    "09d": "🌧", "09n": "🌧",
+    "10d": "🌦", "10n": "🌧",
+    "11d": "⛈", "11n": "⛈",
+    "13d": "❄️", "13n": "❄️",
+    "50d": "🌫", "50n": "🌫",
   };
-  const entry = map[code] || ["🌤", "🌙", "Variable"];
-  return [isDay ? entry[0] : entry[1], entry[2]];
+  return map[code] || "🌤";
 }
 
-// Parse Open-Meteo local time string (e.g. "2026-03-05T06:12") directly
-// without timezone conversion since the API already returns America/New_York times
-function fmtLocalTime(isoLocal: string): string {
-  // isoLocal is like "2026-03-05T06:12" — already in local timezone
-  const match = isoLocal.match(/T(\d{1,2}):(\d{2})/);
-  if (!match) return "";
-  let hour = parseInt(match[1], 10);
-  const min = match[2];
-  const ampm = hour >= 12 ? "PM" : "AM";
-  if (hour === 0) hour = 12;
-  else if (hour > 12) hour -= 12;
-  return `${hour}:${min} ${ampm}`;
+function fmtTime(unix: number): string {
+  const d = new Date(unix * 1000);
+  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/New_York" });
+}
+
+function fmtHour(unix: number): string {
+  const d = new Date(unix * 1000);
+  return d.toLocaleTimeString("en-US", { hour: "numeric", hour12: true, timeZone: "America/New_York" });
 }
 
 serve(async (req) => {
@@ -64,26 +41,26 @@ serve(async (req) => {
   }
 
   try {
-    const METEO_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code,wind_speed_10m,precipitation,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America/New_York&forecast_days=1`;
+    const CURRENT_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=imperial`;
+    const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=imperial&cnt=3`;
     const ALERTS_URL = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
 
-    const [meteoRes, alertsRes] = await Promise.all([
-      fetch(METEO_URL),
+    const [currentRes, forecastRes, alertsRes] = await Promise.all([
+      fetch(CURRENT_URL),
+      fetch(FORECAST_URL),
       fetch(ALERTS_URL, {
         headers: { "User-Agent": "FallRiverConnect/1.0 (contact@fallriverconnect.app)" },
       }),
     ]);
 
-    if (!meteoRes.ok) {
-      const errText = await meteoRes.text();
-      console.error("Open-Meteo error:", meteoRes.status, errText);
-      throw new Error(`Open-Meteo error: ${meteoRes.status}`);
+    if (!currentRes.ok) {
+      const errText = await currentRes.text();
+      console.error("OpenWeather current error:", currentRes.status, errText);
+      throw new Error(`OpenWeather error: ${currentRes.status}`);
     }
 
-    const meteo = await meteoRes.json();
-    const cur = meteo.current;
-    const hourlyData = meteo.hourly;
-    const dailyData = meteo.daily;
+    const current = await currentRes.json();
+    const forecast = forecastRes.ok ? await forecastRes.json() : null;
 
     // Parse NWS alerts
     let alerts: { event: string; severity: string; headline: string; description: string }[] = [];
@@ -101,55 +78,54 @@ serve(async (req) => {
       }
     }
 
-    const isDay = cur.is_day === 1;
-    const [icon, label] = wmoIcon(cur.weather_code ?? 0, isDay);
+    const icon = owmIcon(current.weather?.[0]?.icon || "01d");
+    const label = current.weather?.[0]?.description
+      ? current.weather[0].description.charAt(0).toUpperCase() + current.weather[0].description.slice(1)
+      : "Clear";
 
-    // Sunrise/sunset — parse directly from local time strings
-    const sunRise = dailyData?.sunrise?.[0] || "";
-    const sunSet = dailyData?.sunset?.[0] || "";
-    const sunrise = fmtLocalTime(sunRise);
-    const sunset = fmtLocalTime(sunSet);
+    const sunrise = fmtTime(current.sys?.sunrise || 0);
+    const sunset = fmtTime(current.sys?.sunset || 0);
+
+    // Daylight calculation
     let daylightHrs = "";
-    if (sunRise && sunSet) {
-      // Parse hours/minutes directly from local time strings
-      const riseMatch = sunRise.match(/T(\d+):(\d+)/);
-      const setMatch = sunSet.match(/T(\d+):(\d+)/);
-      if (riseMatch && setMatch) {
-        const riseMin = parseInt(riseMatch[1]) * 60 + parseInt(riseMatch[2]);
-        const setMin = parseInt(setMatch[1]) * 60 + parseInt(setMatch[2]);
-        daylightHrs = ((setMin - riseMin) / 60).toFixed(1) + "h";
+    if (current.sys?.sunrise && current.sys?.sunset) {
+      const diff = (current.sys.sunset - current.sys.sunrise) / 3600;
+      daylightHrs = diff.toFixed(1) + "h";
+    }
+
+    // Build hourly forecast from 3-hour intervals (OpenWeather free gives 3h intervals)
+    // We get up to 3 entries = 9 hours of forecast
+    const hourly: { time: string; temp: number; rainProb: number; icon: string; isNow: boolean }[] = [];
+    
+    // First entry is "Now" with current conditions
+    hourly.push({
+      time: "Now",
+      temp: Math.round(current.main?.temp ?? 0),
+      rainProb: current.clouds?.all ?? 0,
+      icon,
+      isNow: true,
+    });
+
+    // Add forecast entries
+    if (forecast?.list) {
+      for (let i = 0; i < forecast.list.length && hourly.length < 7; i++) {
+        const entry = forecast.list[i];
+        hourly.push({
+          time: fmtHour(entry.dt),
+          temp: Math.round(entry.main?.temp ?? 0),
+          rainProb: Math.round((entry.pop ?? 0) * 100),
+          icon: owmIcon(entry.weather?.[0]?.icon || "01d"),
+          isNow: false,
+        });
       }
     }
 
-    // Build hourly (next 8 hours)
-    const now = Date.now();
-    const hourlyTimes: string[] = hourlyData.time || [];
-    const hourly = [];
-    let started = false;
-    for (let i = 0; i < hourlyTimes.length && hourly.length < 8; i++) {
-      const t = new Date(hourlyTimes[i]);
-      if (!started && t.getTime() < now - 3600000) continue;
-      started = true;
-      const lbl = t.toLocaleTimeString("en-US", { hour: "numeric", hour12: true, timeZone: "America/New_York" });
-      const hIsDay = (hourlyData.is_day?.[i] ?? 1) === 1;
-      const [hi] = wmoIcon(hourlyData.weather_code?.[i] ?? 0, hIsDay);
-      const isNow = hourly.length === 0;
-      hourly.push({
-        time: isNow ? "Now" : lbl,
-        temp: Math.round(hourlyData.temperature_2m?.[i] ?? 0),
-        rainProb: hourlyData.precipitation_probability?.[i] ?? 0,
-        icon: hi,
-        isNow,
-      });
-    }
-
-    // Rain probability from first hourly entry
-    const rainProb = hourly.length > 0 ? hourly[0].rainProb : 0;
+    const rainProb = forecast?.list?.[0] ? Math.round((forecast.list[0].pop ?? 0) * 100) : 0;
 
     const weather = {
-      temp: Math.round(cur.temperature_2m ?? 0),
-      precip: cur.precipitation ?? 0,
-      wind: Math.round(cur.wind_speed_10m ?? 0),
+      temp: Math.round(current.main?.temp ?? 0),
+      precip: current.rain?.["1h"] ?? 0,
+      wind: Math.round(current.wind?.speed ?? 0),
       rainProb,
       label,
       icon,
