@@ -9,7 +9,7 @@ import { useMbtaRealtime } from '@/hooks/useMbtaRealtime';
 import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
 import type { CityEvent } from '@/data/events';
-import { fetchWeather, WeatherData } from '@/data/weather';
+import type { WeatherData } from '@/data/weather';
 import SortableWidgetItem from './SortableWidgetItem';
 import WeatherWidget from './widgets/WeatherWidget';
 import MbtaWidget from './widgets/MbtaWidget';
@@ -36,10 +36,9 @@ function loadOrder(): string[] {
   return DEFAULT_ORDER;
 }
 
-const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab: 'eats' | 'events') => void; newsArticles?: NewsArticle[]; onNewsClick?: () => void }) => {
+const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigate?: (tab: 'eats' | 'events') => void; newsArticles?: NewsArticle[]; onNewsClick?: () => void; weather?: WeatherData | null }) => {
   const isMobile = useIsMobile();
   const [clock, setClock] = useState('Loading…');
-  const [weather, setWeather] = useState<WeatherData | null>(null);
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -180,11 +179,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab:
     return () => clearInterval(interval);
   }, [tick]);
 
-  useEffect(() => {
-    fetchWeather().then(setWeather);
-    const interval = setInterval(() => fetchWeather().then(setWeather), 300000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
