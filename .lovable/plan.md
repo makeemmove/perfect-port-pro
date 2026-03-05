@@ -1,27 +1,38 @@
 
 
-## Plan: Replace Arrow Buttons with Three-Dot Menu
+## Plan: Switch to AccuWeather API + Modernize Color Palette
 
-Option 2 (three-dot menu) is the cleaner choice — it keeps cards completely uncluttered during normal use and only reveals reorder options on tap.
+### 1. Switch Weather to AccuWeather API
 
-### Changes
+**`supabase/functions/fetch-weather/index.ts`** — Complete rewrite to use AccuWeather endpoints:
 
-#### `src/components/dashboard/DraggableWidget.tsx` — Rewrite
-- Remove `ChevronUp` / `ChevronDown` arrow buttons
-- Add a small `MoreVertical` (three-dot) icon button in the top-right corner (`absolute top-2 right-2`)
-- Button: 28x28px, `bg-accent/10 text-muted-foreground`, subtle and unobtrusive
-- On click, open a `DropdownMenu` (already available via `@radix-ui/react-dropdown-menu`) with two items:
-  - "Move Up" (shown only if `onMoveUp` is provided)
-  - "Move Down" (shown only if `onMoveDown` is provided)
-- Each item uses `ChevronUp` / `ChevronDown` as inline icons
-- Menu uses existing `DropdownMenuContent`, `DropdownMenuItem` components from `src/components/ui/dropdown-menu.tsx`
+- **Location Key**: Fall River, MA location key = `329505` (AccuWeather's key for Fall River)
+- **API Key**: `zpka_3a0024ebac7a459c8c90c5c510b17e98_b2a96850`
+- **Endpoints**:
+  - Current conditions: `https://dataservice.accuweather.com/currentconditions/v1/329505?apikey=...&details=true`
+  - 12-hour hourly forecast: `https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/329505?apikey=...&details=true`
+  - NWS alerts stay the same (free, no key needed)
+- **Data mapping**: Map AccuWeather's `WeatherIcon` numbers to emoji icons, extract temp, wind, precip, rain probability, sunrise/sunset from the detailed response
+- **Output shape**: Keep the same `WeatherData` interface so no frontend changes needed for data structure
 
-#### `src/components/dashboard/HomeTab.tsx` — No changes
-- `moveWidget`, `onMoveUp`, `onMoveDown` props all stay exactly as they are
+**No changes to `src/data/weather.ts`** — the interface and fetch function stay identical.
 
-#### Everything else — Untouched
-Layout, fonts, colors, spacing, card content, buttons — all unchanged.
+### 2. Modernize Color Palette — "Billion Dollar" Feel
 
-### Result
-Cards look clean by default. A single subtle dot-menu per card gives access to reorder without cluttering the UI.
+**`src/index.css`** — Update CSS custom properties for a more premium, modern aesthetic:
+
+- **Background**: Shift from flat gray `0 0% 96%` to a warmer, softer off-white `220 14% 96%`
+- **Primary**: Move from pure dark navy `210 100% 20%` to a richer, deeper charcoal-blue `222 47% 11%` (near-black with blue undertone — think Linear/Vercel)
+- **Secondary/Accent**: Replace teal `170 100% 37%` with a modern electric indigo-violet `245 58% 51%` for pops of color
+- **Muted foreground**: Soften from `0 0% 40%` to `220 9% 46%` for warmer grays
+- **Border**: Shift to `220 13% 91%` for subtler card edges
+- **Gold accent**: Keep as warm amber `39 100% 50%`
+- **Glass surface**: Increase blur to 20px, add subtle gradient tint
+- **Shadows**: More diffused, layered shadows for depth
+
+**`tailwind.config.ts`** — No structural changes needed (it reads from CSS vars).
+
+### Files to edit
+1. `supabase/functions/fetch-weather/index.ts` — Rewrite for AccuWeather API
+2. `src/index.css` — Modern color palette refresh
 
