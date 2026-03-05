@@ -180,14 +180,14 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-    try { navigator.vibrate?.(10); } catch {}
+    try { navigator.vibrate?.(40); } catch {}
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
     if (over && active.id !== over.id) {
-      try { navigator.vibrate?.(10); } catch {}
+      try { navigator.vibrate?.(50); } catch {}
       setWidgetOrder(prev => {
         const oldIndex = prev.indexOf(active.id as string);
         const newIndex = prev.indexOf(over.id as string);
@@ -258,7 +258,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
           >
             {editMode ? <Check size={18} strokeWidth={3} /> : <Settings size={16} />}
           </button>
-          <img src={logo} alt="Fall River Connect" className="h-48 w-auto" />
+          <img src={logo} alt="Fall River Connect" className="h-64 w-auto" />
         </div>
         {editMode && (
           <div className="text-[11px] font-semibold text-primary mt-1 animate-fade-in">

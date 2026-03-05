@@ -1,27 +1,27 @@
 
 
-## Plan: Clickable Map Pins, Bigger Logo, Slower Jiggle, Drag Vibration
+## Plan: Replace Arrow Buttons with Three-Dot Menu
 
-### 1. Clickable Map Pin on Eats Tab (`src/components/dashboard/EatsTab.tsx`)
-- Make the `📍` location text a clickable link that opens Google Maps with the restaurant address
-- Wrap the pin + address in an `<a>` tag with `href="https://www.google.com/maps/search/?api=1&query={encoded address}"` and `target="_blank"`
-- Style it with an underline on hover and a subtle color change to indicate it's tappable
+Option 2 (three-dot menu) is the cleaner choice — it keeps cards completely uncluttered during normal use and only reveals reorder options on tap.
 
-### 2. Bigger Logo (`src/components/dashboard/HomeTab.tsx`)
-- Change logo from `h-48` to `h-56` or `h-64` on line 261
+### Changes
 
-### 3. Slower Jiggle Animation (`src/index.css`)
-- Change jiggle animation duration from `0.3s` to `1.2s` (line 134) for a slower, more gentle wobble
-- Reduce rotation from `±1deg` to `±0.8deg` for subtlety
+#### `src/components/dashboard/DraggableWidget.tsx` — Rewrite
+- Remove `ChevronUp` / `ChevronDown` arrow buttons
+- Add a small `MoreVertical` (three-dot) icon button in the top-right corner (`absolute top-2 right-2`)
+- Button: 28x28px, `bg-accent/10 text-muted-foreground`, subtle and unobtrusive
+- On click, open a `DropdownMenu` (already available via `@radix-ui/react-dropdown-menu`) with two items:
+  - "Move Up" (shown only if `onMoveUp` is provided)
+  - "Move Down" (shown only if `onMoveDown` is provided)
+- Each item uses `ChevronUp` / `ChevronDown` as inline icons
+- Menu uses existing `DropdownMenuContent`, `DropdownMenuItem` components from `src/components/ui/dropdown-menu.tsx`
 
-### 4. Continuous Vibration During Drag (`src/components/dashboard/HomeTab.tsx`)
-- Already vibrates on drag start (line 183) and on swap (line 190)
-- Increase vibration duration from `10ms` to `30-50ms` on drag start and swap so it's more noticeable
-- The swap vibration at line 190 confirms movement — make it stronger (e.g., `50ms`)
+#### `src/components/dashboard/HomeTab.tsx` — No changes
+- `moveWidget`, `onMoveUp`, `onMoveDown` props all stay exactly as they are
 
-### Files to Edit
-1. `src/components/dashboard/EatsTab.tsx` — clickable map pin links
-2. `src/components/dashboard/HomeTab.tsx` — bigger logo
-3. `src/index.css` — slower jiggle animation
-4. `src/components/dashboard/HomeTab.tsx` — stronger vibration feedback
+#### Everything else — Untouched
+Layout, fonts, colors, spacing, card content, buttons — all unchanged.
+
+### Result
+Cards look clean by default. A single subtle dot-menu per card gives access to reorder without cluttering the UI.
 

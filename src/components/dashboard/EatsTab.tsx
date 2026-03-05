@@ -87,11 +87,16 @@ const EatsTab = () => {
             <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[20px]" style={{ background: leftBarColors[r.sub] || '#3b82f6' }} />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold mb-1.5 text-foreground">{r.name}</div>
-              {r.neighborhood && (
-                <div className="text-xs text-muted-foreground leading-relaxed mb-1">📍 {r.loc} · {r.neighborhood}</div>
-              )}
-              {!r.neighborhood && r.loc && (
-                <div className="text-xs text-muted-foreground leading-relaxed mb-1">📍 {r.loc}</div>
+              {r.loc && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.loc + ', Fall River, MA')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(ev) => ev.stopPropagation()}
+                  className="text-xs text-muted-foreground leading-relaxed mb-1 inline-block hover:text-primary hover:underline transition-colors"
+                >
+                  📍 {r.loc}{r.neighborhood ? ` · ${r.neighborhood}` : ''}
+                </a>
               )}
               <div className="flex items-center gap-2 mt-3 flex-wrap">
                 <span className={`text-[10px] font-semibold tracking-wide uppercase py-1 px-2.5 rounded-full ${tagStyles[r.sub] || 'bg-muted text-muted-foreground'}`}>
