@@ -124,6 +124,8 @@ STRICT RULES:
 - ONLY cover stories that directly involve Fall River, MA. Ignore anything about other cities.
 - Structure: Lead paragraph → body with details → context/impact → closing.
 - Tone: Authoritative, local, community-focused.
+- NEVER use markdown formatting. No ### headers, no ** bold **, no bullet points, no numbered lists. Write in plain prose paragraphs only.
+- Use paragraph breaks (newlines) to separate sections, not headers or special formatting.
 
 Output using the write_article tool.`;
 
