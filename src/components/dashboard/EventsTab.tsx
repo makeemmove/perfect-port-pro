@@ -22,6 +22,8 @@ const tagStyles: Record<string, string> = {
   green: 'bg-emerald-50 text-emerald-600',
   orange: 'bg-orange-50 text-orange-600',
   red: 'bg-red-50 text-red-600',
+  teal: 'bg-teal-50 text-teal-600',
+  pink: 'bg-pink-50 text-pink-600',
 };
 
 const leftBarColors: Record<string, string> = {
