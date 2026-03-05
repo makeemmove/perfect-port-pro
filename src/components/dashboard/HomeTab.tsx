@@ -62,7 +62,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
   const trainRoute = useMemo(() => MBTA_ROUTES.find(r => r.id === selectedTrainId) ?? MBTA_ROUTES[0], [selectedTrainId]);
   const busRoute = useMemo(() => SRTA_ROUTES.find(r => r.id === selectedBusId) ?? SRTA_ROUTES[0], [selectedBusId]);
 
-  const { predictions: mbtaPredictions, isLive: mbtaIsLive } = useMbtaRealtime(selectedStation, selectedTrainId);
+  const { predictions: mbtaPredictions } = useMbtaRealtime(selectedStation, selectedTrainId);
 
   const [trainCountdown, setTrainCountdown] = useState('--:--');
   const [trainUrgent, setTrainUrgent] = useState(false);
@@ -218,7 +218,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
         remainingTrains={remainingTrains}
         nextTrainStatus={nextTrainStatus}
         nextTrainDelayMin={nextTrainDelayMin}
-        isLive={mbtaIsLive}
+        
       />
     ),
     stats: <StatsWidget eventsThisWeek={eventsThisWeek} restaurantCount={RESTAURANTS.length} onNavigate={onNavigate} />,

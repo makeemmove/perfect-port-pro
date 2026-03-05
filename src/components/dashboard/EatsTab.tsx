@@ -13,6 +13,11 @@ const CATEGORIES = [
   { label: '🌭 Hot Dogs', cat: 'Hot Dogs' },
   { label: '🍔 Casual', cat: 'Casual Dining' },
   { label: '🥢 Asian', cat: 'Asian' },
+  { label: '🥩 Steakhouse', cat: 'Steakhouse' },
+  { label: '🍳 Breakfast', cat: 'Breakfast' },
+  { label: '🍗 Chicken', cat: 'Chicken/Wings' },
+  { label: '🍦 Desserts', cat: 'Ice Cream/Desserts' },
+  { label: '🥤 Juice', cat: 'Juice/Healthy' },
   { label: '✨ Specialty', cat: 'Specialty' },
   { label: '🛒 Market', cat: 'Market/Specialty' },
 ];
@@ -28,6 +33,11 @@ const tagStyles: Record<string, string> = {
   'Casual Dining': 'bg-orange-50 text-orange-600',
   Specialty: 'bg-pink-50 text-pink-600',
   'Market/Specialty': 'bg-lime-50 text-lime-600',
+  Steakhouse: 'bg-stone-100 text-stone-700',
+  Breakfast: 'bg-sky-50 text-sky-600',
+  'Chicken/Wings': 'bg-red-50 text-red-500',
+  'Ice Cream/Desserts': 'bg-fuchsia-50 text-fuchsia-600',
+  'Juice/Healthy': 'bg-green-50 text-green-600',
 };
 
 const leftBarColors: Record<string, string> = {
@@ -41,6 +51,11 @@ const leftBarColors: Record<string, string> = {
   'Casual Dining': '#ea580c',
   Specialty: '#db2777',
   'Market/Specialty': '#65a30d',
+  Steakhouse: '#78716c',
+  Breakfast: '#0284c7',
+  'Chicken/Wings': '#ef4444',
+  'Ice Cream/Desserts': '#c026d3',
+  'Juice/Healthy': '#16a34a',
 };
 
 const EatsTab = () => {
@@ -89,19 +104,30 @@ const EatsTab = () => {
               <div className="text-sm font-semibold mb-1.5 text-foreground">{r.name}</div>
               {r.loc && (
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.loc + ', Fall River, MA')}`}
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.loc + (r.loc.includes(',') ? '' : ', Fall River, MA'))}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(ev) => ev.stopPropagation()}
                   className="text-xs text-muted-foreground leading-relaxed mb-1 inline-block hover:text-primary hover:underline transition-colors"
                 >
-                  📍 {r.loc}{r.neighborhood ? ` · ${r.neighborhood}` : ''}
+                  📍 {r.loc}
                 </a>
               )}
               <div className="flex items-center gap-2 mt-3 flex-wrap">
                 <span className={`text-[10px] font-semibold tracking-wide uppercase py-1 px-2.5 rounded-full ${tagStyles[r.sub] || 'bg-muted text-muted-foreground'}`}>
                   {r.sub}
                 </span>
+                {r.url && (
+                  <a
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(ev) => ev.stopPropagation()}
+                    className="text-[10px] font-semibold tracking-wide uppercase py-1 px-3 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all duration-300"
+                  >
+                    🌐 Website
+                  </a>
+                )}
                 <button
                   onClick={(ev) => { ev.stopPropagation(); setSelectedRestaurant(r); }}
                   className="ml-auto text-[10px] font-semibold tracking-wide uppercase py-1 px-3 rounded-full bg-muted text-primary hover:bg-muted/80 active:scale-[0.98] transition-all duration-300 ease-in-out"
@@ -118,9 +144,10 @@ const EatsTab = () => {
         open={!!selectedRestaurant}
         onOpenChange={(open) => { if (!open) setSelectedRestaurant(null); }}
         title={selectedRestaurant?.name || ''}
-        description={selectedRestaurant?.neighborhood ? `${selectedRestaurant.loc} · ${selectedRestaurant.neighborhood}` : selectedRestaurant?.loc}
+        description={selectedRestaurant?.loc}
         location={selectedRestaurant?.loc}
         category={selectedRestaurant?.sub}
+        url={selectedRestaurant?.url}
       />
     </div>
   );

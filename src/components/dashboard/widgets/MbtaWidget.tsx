@@ -19,7 +19,7 @@ interface MbtaWidgetProps {
   remainingTrains: {time: string; dir: string; status?: string; delayMin?: number}[];
   nextTrainStatus?: string;
   nextTrainDelayMin?: number;
-  isLive?: boolean;
+  
 }
 
 function StatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {

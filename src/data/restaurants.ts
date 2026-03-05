@@ -11,19 +11,26 @@ export interface Restaurant {
   neighborhood?: string;
 }
 
-/** Normalize CSV "Type" into display-friendly categories */
+/** Normalize CSV "Category" into display-friendly categories */
 function normalizeType(raw: string): string {
   const t = raw.trim().toLowerCase();
+  if (t.includes('steakhouse')) return 'Steakhouse';
+  if (t.includes('breakfast') || t.includes('brunch')) return 'Breakfast';
+  if (t.includes('ice cream')) return 'Ice Cream/Desserts';
+  if (t.includes('cookie') || t.includes('cake') || t.includes('dessert')) return 'Ice Cream/Desserts';
   if (t.includes('portuguese') && !t.includes('bakery')) return 'Portuguese';
-  if (t.includes('bakery') || t.includes('cafe') || t === 'cafe/healthy') return 'Bakery/Coffee';
-  if (t.includes('italian') || t === 'contemporary') return 'Italian';
-  if (t.includes('seafood')) return 'Seafood';
+  if (t.includes('bakery') || t.includes('cafe') || t.includes('coffee') || t.includes('bagel')) return 'Bakery/Coffee';
+  if (t.includes('italian')) return 'Italian';
+  if (t.includes('seafood') && !t.includes('american')) return 'Seafood';
   if (t.includes('pizza')) return 'Pizza';
   if (t.includes('hot dog')) return 'Hot Dogs';
-  if (t.includes('diner') || t.includes('american') || t.includes('pub') || t.includes('gastropub') || t.includes('brewery') || t.includes('grill')) return 'Casual Dining';
-  if (t.includes('asian') || t.includes('chinese') || t.includes('cambodian') || t.includes('pho')) return 'Asian';
-  if (t.includes('mexican') || t.includes('mediterranean') || t.includes('middle eastern') || t.includes('greek') || t.includes('eclectic') || t.includes('polish') || t.includes('bbq')) return 'Specialty';
+  if (t.includes('chicken') || t.includes('wings')) return 'Chicken/Wings';
+  if (t.includes('juice')) return 'Juice/Healthy';
+  if (t.includes('diner') || t.includes('american') || t.includes('pub') || t.includes('gastropub') || t.includes('brewery') || t.includes('grill') || t.includes('sports bar') || t.includes('nautical') || t.includes('bar') || t.includes('lounge')) return 'Casual Dining';
+  if (t.includes('asian') || t.includes('chinese') || t.includes('cambodian') || t.includes('pho') || t.includes('thai') || t.includes('noodle')) return 'Asian';
+  if (t.includes('mexican') || t.includes('mediterranean') || t.includes('middle eastern') || t.includes('greek') || t.includes('eclectic') || t.includes('polish') || t.includes('bbq') || t.includes('irish') || t.includes('brazilian')) return 'Specialty';
   if (t.includes('deli') || t.includes('market') || t.includes('specialty food')) return 'Market/Specialty';
+  if (t.includes('seafood')) return 'Seafood';
   return 'Casual Dining';
 }
 
@@ -54,20 +61,22 @@ function parseRestaurants(): Restaurant[] {
 
   for (let i = 1; i < lines.length; i++) {
     const cols = parseCSVLine(lines[i]);
-    // Columns: Name, Type, Address, Neighborhood
+    // Columns: Name, Address, Category, Website
     const name = cols[0] || '';
     const nameKey = name.toLowerCase().replace(/['']/g, "'").replace(/\s+/g, ' ').trim();
     if (seen.has(nameKey)) continue;
     seen.add(nameKey);
 
+    const url = (cols[3] || '').trim();
+
     restaurants.push({
       name,
-      sub: normalizeType(cols[1] || ''),
+      sub: normalizeType(cols[2] || ''),
       hours: '',
-      loc: cols[2] || 'Fall River, MA',
+      loc: cols[1] || 'Fall River, MA',
       price: '',
       desc: '',
-      neighborhood: cols[3] || undefined,
+      url: url || undefined,
     });
   }
 
