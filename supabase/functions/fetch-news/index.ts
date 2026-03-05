@@ -69,7 +69,7 @@ async function fetchRSS(sourceUrl: string, sourceName: string): Promise<RawArtic
 async function searchGoogleNews(): Promise<RawArticle[]> {
   try {
     const url =
-      "https://news.google.com/rss/search?q=Fall+River+Massachusetts&hl=en-US&gl=US&ceid=US:en";
+      'https://news.google.com/rss/search?q=%22Fall+River%22+Massachusetts&hl=en-US&gl=US&ceid=US:en';
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 FallRiverDashboard/1.0" },
     });
@@ -108,25 +108,25 @@ async function searchGoogleNews(): Promise<RawArticle[]> {
   }
 }
 
-// ── AI rewrite with Gemini 3 Flash ─────────────────────────
-const SYSTEM_PROMPT = `You are a professional news curator. Your goal is to write a 'Teaser Summary' for a news aggregator.
+// ── AI summary with Gemini 3 Flash ─────────────────────────
+const SYSTEM_PROMPT = `You are a professional news curator for a Fall River, Massachusetts news aggregator.
+
+Your ONLY job is to write a short teaser summary for each article. Do NOT write a full article.
 
 STRICT CONSTRAINTS:
-- Length: Maximum 150 characters (including spaces).
-- Style: Use 'Journalistic Pulse'—be factual, objective, and punchy.
-- Format: Start with a strong verb. No 'fluff' phrases like 'In this article' or 'This news reports.'
+- Length: Maximum 150 characters (including spaces). This is a HARD limit.
+- Style: Factual, objective, punchy wire-service bulletin style.
+- Format: Start with a strong verb. No fluff.
 - Voice: Third-person, active voice only.
 - Tone: Neutral and professional.
-- The Hook: Summarize the primary 'Who' and 'What,' then stop. Leave the 'Why' for the user to find by clicking the link.
+- ONLY include news that directly involves Fall River, MA. Ignore stories about other cities.
 
-You must also rewrite the article body into a professional news article (400-800 words) with ## and ### subheadings.
-
-Output the rewritten article using the write_article tool.`;
+Output using the write_summary tool.`;
 
 async function rewriteArticle(
   raw: RawArticle,
   apiKey: string
-): Promise<{ title: string; content: string; summary: string } | null> {
+): Promise<{ title: string; summary: string } | null> {
   try {
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -140,39 +140,34 @@ async function rewriteArticle(
           { role: "system", content: SYSTEM_PROMPT },
           {
             role: "user",
-            content: `Rewrite this article:\n\nHeadline: ${raw.title}\nSource: ${raw.source}\nDescription: ${raw.description || "No description available"}\n\nCreate a full professional news article from this.`,
+            content: `Write a short teaser summary for this news:\n\nHeadline: ${raw.title}\nSource: ${raw.source}\nDescription: ${raw.description || "No description available"}`,
           },
         ],
         tools: [
           {
             type: "function",
             function: {
-              name: "write_article",
-              description: "Save the rewritten news article",
+              name: "write_summary",
+              description: "Save the news teaser summary",
               parameters: {
                 type: "object",
                 properties: {
                   title: {
                     type: "string",
-                    description: "Catchy, SEO-friendly headline",
-                  },
-                  content: {
-                    type: "string",
-                    description:
-                      "Full article body, 400-800 words, with markdown ## and ### subheadings",
+                    description: "Clean, concise headline",
                   },
                   summary: {
                     type: "string",
-                    description: "Teaser summary: MAX 150 characters, start with strong verb, active voice, factual and punchy",
+                    description: "Teaser summary: MAX 150 characters, start with strong verb, active voice",
                   },
                 },
-                required: ["title", "content", "summary"],
+                required: ["title", "summary"],
                 additionalProperties: false,
               },
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "write_article" } },
+        tool_choice: { type: "function", function: { name: "write_summary" } },
       }),
     });
 
@@ -185,7 +180,12 @@ async function rewriteArticle(
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) return null;
 
-    return JSON.parse(toolCall.function.arguments);
+    const result = JSON.parse(toolCall.function.arguments);
+    // Enforce 150 char limit
+    if (result.summary && result.summary.length > 150) {
+      result.summary = result.summary.slice(0, 147) + "...";
+    }
+    return result;
   } catch (e) {
     console.error("AI rewrite error:", e);
     return null;
@@ -235,9 +235,8 @@ serve(async (req) => {
 
     console.log(`Found ${allRaw.length} scraped, ${existingUrls.size} exist, ${newArticles.length} new`);
 
-    // 3. Rewrite new articles with AI and insert into DB
+    // 3. Generate summaries for new articles and insert into DB
     if (LOVABLE_API_KEY && newArticles.length > 0) {
-      // Process up to 5 new articles per run to stay within rate limits
       for (const raw of newArticles.slice(0, 5)) {
         const rewritten = await rewriteArticle(raw, LOVABLE_API_KEY);
         if (rewritten) {
@@ -245,7 +244,7 @@ serve(async (req) => {
             source_url: raw.url,
             source_name: raw.source,
             title: rewritten.title,
-            content: rewritten.content,
+            content: rewritten.summary,
             summary: rewritten.summary,
             original_title: raw.title,
             image_url: raw.imageUrl || null,
@@ -256,13 +255,14 @@ serve(async (req) => {
             console.error("Insert error:", insertError.message);
           }
         } else {
-          // Fallback: insert without AI rewrite
+          // Fallback: insert without AI
+          const fallbackSummary = raw.description?.slice(0, 150) || raw.title;
           await supabase.from("articles").insert({
             source_url: raw.url,
             source_name: raw.source,
             title: raw.title,
-            content: raw.description || "",
-            summary: raw.description?.slice(0, 200) || "",
+            content: fallbackSummary,
+            summary: fallbackSummary,
             original_title: raw.title,
             image_url: raw.imageUrl || null,
             status: "published",
