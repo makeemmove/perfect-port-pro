@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { NewsArticle } from '@/hooks/useNews';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MBTA_ROUTES, MBTA_STATIONS, SRTA_ROUTES, t2m, nowSec, fmtCD } from '@/data/transit';
+import { useMbtaRealtime } from '@/hooks/useMbtaRealtime';
 import { RESTAURANTS } from '@/data/restaurants';
 import { EVENTS } from '@/data/events';
 import type { CityEvent } from '@/data/events';
