@@ -36,10 +36,9 @@ function loadOrder(): string[] {
   return DEFAULT_ORDER;
 }
 
-const HomeTab = ({ onNavigate, newsArticles, onNewsClick }: { onNavigate?: (tab: 'eats' | 'events') => void; newsArticles?: NewsArticle[]; onNewsClick?: () => void }) => {
+const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigate?: (tab: 'eats' | 'events') => void; newsArticles?: NewsArticle[]; onNewsClick?: () => void; weather?: WeatherData | null }) => {
   const isMobile = useIsMobile();
   const [clock, setClock] = useState('Loading…');
-  const [weather, setWeather] = useState<WeatherData | null>(null);
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
   const [editMode, setEditMode] = useState(false);
