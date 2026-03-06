@@ -100,10 +100,10 @@ export const evClassMap: Record<string, string> = {
   'Arts': 'arts',
   'Music': 'music',
   'Kids': 'kids',
-  'Education': 'kids',
-  'Theater': 'arts',
+  'Education': 'education',
+  'Theater': 'theater',
   'Holiday': 'holiday',
   'Festival': 'festival',
-  'Community': 'family',
+  'Community': 'community',
   'Family': 'family',
 };

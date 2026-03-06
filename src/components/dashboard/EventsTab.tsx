@@ -23,6 +23,9 @@ const dateBadgeColors: Record<string, { bg: string; text: string }> = {
   family: { bg: 'bg-orange-100', text: 'text-orange-700' },
   festival: { bg: 'bg-amber-100', text: 'text-amber-700' },
   holiday: { bg: 'bg-red-100', text: 'text-red-700' },
+  community: { bg: 'bg-orange-100', text: 'text-orange-700' },
+  education: { bg: 'bg-teal-100', text: 'text-teal-700' },
+  theater: { bg: 'bg-pink-100', text: 'text-pink-700' },
 };
 
 const tagStyles: Record<string, string> = {
