@@ -104,7 +104,7 @@ const EatsTab = () => {
               <div className="text-sm font-semibold mb-1.5 text-foreground">{r.name}</div>
               {r.loc && (
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.loc + (r.loc.includes(',') ? '' : ', Fall River, MA'))}`}
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(r.loc + (r.loc.includes(',') ? '' : ', Fall River, MA'))}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(ev) => ev.stopPropagation()}

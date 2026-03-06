@@ -1,33 +1,27 @@
 
 
-# Plan: Clickable GPS Addresses + Event Color Coordination
+## Plan: Replace Arrow Buttons with Three-Dot Menu
 
-## 1. Eats Addresses — GPS Navigation Links
+Option 2 (three-dot menu) is the cleaner choice — it keeps cards completely uncluttered during normal use and only reveals reorder options on tap.
 
-The addresses are already clickable Google Maps links, but they use the **search** endpoint. To enable actual GPS navigation on mobile, change them to use Google Maps **directions** URL (`https://www.google.com/maps/dir/?api=1&destination=...`). This opens turn-by-turn navigation on mobile devices.
+### Changes
 
-**File:** `src/components/dashboard/EatsTab.tsx` (line 107)
-- Change from `maps/search/?api=1&query=` to `maps/dir/?api=1&destination=`
-- This triggers navigation mode on mobile (Google Maps app opens with directions)
+#### `src/components/dashboard/DraggableWidget.tsx` — Rewrite
+- Remove `ChevronUp` / `ChevronDown` arrow buttons
+- Add a small `MoreVertical` (three-dot) icon button in the top-right corner (`absolute top-2 right-2`)
+- Button: 28x28px, `bg-accent/10 text-muted-foreground`, subtle and unobtrusive
+- On click, open a `DropdownMenu` (already available via `@radix-ui/react-dropdown-menu`) with two items:
+  - "Move Up" (shown only if `onMoveUp` is provided)
+  - "Move Down" (shown only if `onMoveDown` is provided)
+- Each item uses `ChevronUp` / `ChevronDown` as inline icons
+- Menu uses existing `DropdownMenuContent`, `DropdownMenuItem` components from `src/components/ui/dropdown-menu.tsx`
 
-## 2. Event Date Badge Colors — Full Coverage
+#### `src/components/dashboard/HomeTab.tsx` — No changes
+- `moveWidget`, `onMoveUp`, `onMoveDown` props all stay exactly as they are
 
-The `dateBadgeColors` map only has 6 entries (arts, music, kids, family, festival, holiday) and relies on an indirect `evClassMap` lookup. Some categories map correctly but the indirection is fragile. Fix: add explicit entries for **every** category so all events get proper color-coordinated date badges.
+#### Everything else — Untouched
+Layout, fonts, colors, spacing, card content, buttons — all unchanged.
 
-**File:** `src/components/dashboard/EventsTab.tsx` (lines 19-26)
-- Add missing `dateBadgeColors` entries: `community`, `education`, `theater`
-- Map them to distinct colors:
-  - `community` → orange (currently mapped via `evClassMap` → `family` but `family` key missing)
-  - `education` → teal
-  - `theater` → pink
-
-Also update `evClassMap` in `src/data/events.ts` to use direct category keys that match `dateBadgeColors`:
-- Education → `'education'` (was `'kids'`)
-- Theater → `'theater'` (was `'arts'`)
-- Community → `'community'` (was `'family'`)
-
-## Files to Edit
-1. `src/components/dashboard/EatsTab.tsx` — change Maps search to Maps directions URL
-2. `src/components/dashboard/EventsTab.tsx` — add missing `dateBadgeColors` entries
-3. `src/data/events.ts` — fix `evClassMap` to use direct category keys
+### Result
+Cards look clean by default. A single subtle dot-menu per card gives access to reorder without cluttering the UI.
 
