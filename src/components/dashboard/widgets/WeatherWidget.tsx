@@ -72,7 +72,7 @@ const WeatherWidget = ({ weather }: { weather: WeatherData | null }) => {
       {/* 5-Day Forecast */}
       {weather.daily && weather.daily.length > 0 && (
         <div className="mt-4 pt-4 border-t border-border/30">
-          <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">5-Day Forecast</div>
+          <div className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-2">Forecast</div>
           <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {weather.daily.map((d, i) => (
               <div key={i} className={`flex-shrink-0 flex flex-col items-center gap-0.5 py-2 px-3 rounded-2xl min-w-[56px] ${

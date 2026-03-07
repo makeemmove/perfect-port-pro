@@ -96,26 +96,23 @@ serve(async (req) => {
     // Build 5-day forecast from 3-hour intervals
     const daily: { day: string; high: number; low: number; icon: string }[] = [];
     if (forecast?.list) {
-      const dayMap: Record<string, { temps: number[]; icons: string[] }> = {};
+      const dayMap: Record<string, { dayName: string; temps: number[]; icons: string[] }> = {};
       for (const entry of forecast.list) {
         const date = new Date(entry.dt * 1000);
-        const dayKey = date.toLocaleDateString("en-US", { weekday: "short", timeZone: "America/New_York" });
-        const dateKey = date.toISOString().split("T")[0];
-        const key = `${dateKey}|${dayKey}`;
-        if (!dayMap[key]) dayMap[key] = { temps: [], icons: [] };
-        dayMap[key].temps.push(entry.main?.temp ?? 0);
-        dayMap[key].icons.push(entry.weather?.[0]?.icon || "01d");
+        const dateKey = date.toLocaleDateString("en-US", { timeZone: "America/New_York" });
+        const dayName = date.toLocaleDateString("en-US", { weekday: "short", timeZone: "America/New_York" });
+        if (!dayMap[dateKey]) dayMap[dateKey] = { dayName, temps: [], icons: [] };
+        dayMap[dateKey].temps.push(entry.main?.temp ?? 0);
+        dayMap[dateKey].icons.push(entry.weather?.[0]?.icon || "01d");
       }
-      for (const [key, val] of Object.entries(dayMap)) {
-        if (daily.length >= 5) break;
-        const dayName = key.split("|")[1];
+      for (const [, val] of Object.entries(dayMap)) {
+        if (daily.length >= 7) break;
         const high = Math.round(Math.max(...val.temps));
         const low = Math.round(Math.min(...val.temps));
-        // Pick most common icon
         const iconCounts: Record<string, number> = {};
         for (const ic of val.icons) { iconCounts[ic] = (iconCounts[ic] || 0) + 1; }
         const topIcon = Object.entries(iconCounts).sort((a, b) => b[1] - a[1])[0][0];
-        daily.push({ day: dayName, high, low, icon: owmIcon(topIcon) });
+        daily.push({ day: val.dayName, high, low, icon: owmIcon(topIcon) });
       }
     }
 
