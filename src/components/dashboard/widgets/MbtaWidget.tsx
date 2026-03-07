@@ -36,20 +36,20 @@ function StatusBadge({ status, delayMin }: { status?: string; delayMin?: number 
 }
 
 function TopStatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
-  if (!status) return null;
+  const base = "text-[13px] font-bold px-3.5 py-1.5 rounded-full shadow-sm";
   if (status === 'CANCELLED') {
-    return <span className="text-[10px] font-black uppercase text-destructive-foreground bg-destructive px-2.5 py-1 rounded-full">CANCELLED</span>;
-  }
-  if (status === 'Scheduled') {
-    return <span className="text-[10px] font-semibold text-foreground bg-accent/30 px-2.5 py-1 rounded-full">Scheduled</span>;
+    return <span className={`${base} uppercase text-destructive-foreground bg-destructive`}>CANCELLED</span>;
   }
   if (delayMin && delayMin > 0) {
-    return <span className="text-[10px] font-bold text-destructive-foreground bg-destructive px-2.5 py-1 rounded-full">{delayMin} min Late</span>;
+    return <span className={`${base} text-destructive-foreground bg-destructive`}>{delayMin} min Late</span>;
   }
   if (delayMin && delayMin < 0) {
-    return <span className="text-[10px] font-bold text-primary-foreground bg-primary px-2.5 py-1 rounded-full">{Math.abs(delayMin)} min Early</span>;
+    return <span className={`${base} text-primary-foreground bg-primary`}>{Math.abs(delayMin)} min Early</span>;
   }
-  return <span className="text-[10px] font-semibold text-primary-foreground bg-primary px-2.5 py-1 rounded-full">On Time</span>;
+  if (status === 'On Time') {
+    return <span className={`${base} text-primary-foreground bg-primary`}>On Time</span>;
+  }
+  return <span className={`${base} text-foreground bg-accent/30`}>Scheduled</span>;
 }
 
 const MbtaWidget = ({
