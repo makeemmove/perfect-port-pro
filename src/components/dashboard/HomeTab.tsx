@@ -87,7 +87,11 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
   const upcomingEvents = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return EVENTS.filter(e => new Date(e.date + 'T00:00:00') >= today).slice(0, 6);
+    return EVENTS.filter(e => {
+      const d = new Date(e.date);
+      d.setHours(0, 0, 0, 0);
+      return d >= today;
+    }).slice(0, 6);
   }, []);
 
   // Disable scrolling while dragging

@@ -76,19 +76,17 @@ function parseEvents(): CityEvent[] {
     });
   }
 
-  // Get today's date string in local timezone (YYYY-MM-DD) for reliable comparison
   const now = new Date();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  now.setHours(0, 0, 0, 0);
 
   return events
     .filter(e => {
       if (!e.date) return false;
-      // Normalize event date to YYYY-MM-DD for comparison
-      const d = new Date(e.date + 'T00:00:00');
-      const eventStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      return eventStr >= todayStr;
+      const d = new Date(e.date);
+      d.setHours(0, 0, 0, 0);
+      return d >= now;
     })
-    .sort((a, b) => new Date(a.date + 'T00:00:00').getTime() - new Date(b.date + 'T00:00:00').getTime());
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
 
 export const EVENTS: CityEvent[] = parseEvents();
