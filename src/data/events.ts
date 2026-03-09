@@ -94,7 +94,7 @@ export const EVENTS: CityEvent[] = parseEvents();
 export const evTagMap: Record<string, [string, string]> = {
   'Arts': ['purple', '🎨 Arts'],
   'Music': ['blue', '🎵 Music'],
-  'Kids': ['green', '👶 Kids'],
+  'Kids': ['blue', '👶 Kids'],
   'Education': ['teal', '📚 Education'],
   'Theater': ['pink', '🎭 Theater'],
   'Holiday': ['red', '🎄 Holiday'],
