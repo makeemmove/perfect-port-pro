@@ -33,11 +33,11 @@ function StatusPill({ status, delayMin }: { status: string; delayMin?: number })
     colorClasses = 'bg-destructive/15 text-destructive';
     label = 'CANCELLED';
   } else if (status === 'On Time') {
-    colorClasses = 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400';
+    colorClasses = 'bg-foreground/10 text-foreground';
   } else if (status.includes('late')) {
     colorClasses = 'bg-destructive/15 text-destructive';
   } else if (status.includes('early')) {
-    colorClasses = 'bg-blue-500/15 text-blue-600 dark:text-blue-400';
+    colorClasses = 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400';
   } else {
     colorClasses = 'bg-muted text-muted-foreground';
     label = 'Scheduled';
