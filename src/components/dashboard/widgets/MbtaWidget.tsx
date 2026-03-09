@@ -61,10 +61,8 @@ function TopStatusBadge({ status, delayMin }: { status?: string; delayMin?: numb
   if (delayMin && delayMin < 0) {
     return <span className={`${base} text-primary-foreground bg-primary`}>{Math.abs(delayMin)} min Early</span>;
   }
-  if (status === 'On Time') {
-    return <span className={`${base} text-primary-foreground bg-primary`}>On Time</span>;
-  }
-  return <span className={`${base} text-foreground bg-accent/30`}>Scheduled</span>;
+  // Default to "On Time" — never show "Scheduled" in the top badge
+  return <span className={`${base} text-primary-foreground bg-primary`}>On Time</span>;
 }
 
 // Group predictions by trip to show route-level stop list
