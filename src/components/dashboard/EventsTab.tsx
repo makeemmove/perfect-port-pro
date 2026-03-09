@@ -17,15 +17,15 @@ const FILTERS = [
 ];
 
 const dateBadgeColors: Record<string, { bg: string; text: string }> = {
-  arts:      { bg: 'bg-purple-100', text: 'text-purple-700' },
-  music:     { bg: 'bg-indigo-100', text: 'text-indigo-700' },
-  kids:      { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-  family:    { bg: 'bg-orange-100', text: 'text-orange-700' },
-  festival:  { bg: 'bg-amber-100', text: 'text-amber-700' },
-  holiday:   { bg: 'bg-red-100', text: 'text-red-700' },
-  community: { bg: 'bg-orange-100', text: 'text-orange-700' },
-  education: { bg: 'bg-teal-100', text: 'text-teal-700' },
-  theater:   { bg: 'bg-pink-100', text: 'text-pink-700' },
+  arts:      { bg: 'bg-pink-200',    text: 'text-pink-800' },
+  music:     { bg: 'bg-indigo-200',  text: 'text-indigo-800' },
+  kids:      { bg: 'bg-emerald-200', text: 'text-emerald-800' },
+  family:    { bg: 'bg-orange-200',  text: 'text-orange-800' },
+  festival:  { bg: 'bg-amber-200',   text: 'text-amber-800' },
+  holiday:   { bg: 'bg-red-200',     text: 'text-red-800' },
+  community: { bg: 'bg-orange-200',  text: 'text-orange-800' },
+  education: { bg: 'bg-teal-200',    text: 'text-teal-800' },
+  theater:   { bg: 'bg-purple-200',  text: 'text-purple-800' },
 };
 
 const tagStyles: Record<string, string> = {
