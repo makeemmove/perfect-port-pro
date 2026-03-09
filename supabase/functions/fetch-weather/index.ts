@@ -86,11 +86,28 @@ serve(async (req) => {
       ? current.weather[0].description.charAt(0).toUpperCase() + current.weather[0].description.slice(1)
       : "Clear";
 
-    const sunrise = fmtTime(current.sys?.sunrise || 0);
-    const sunset = fmtTime(current.sys?.sunset || 0);
-
+    // Use sunrise-sunset.org for accurate times, fallback to OWM
+    let sunrise = fmtTime(current.sys?.sunrise || 0);
+    let sunset = fmtTime(current.sys?.sunset || 0);
     let daylightHrs = "";
-    if (current.sys?.sunrise && current.sys?.sunset) {
+
+    if (sunRes.ok) {
+      try {
+        const sunData = await sunRes.json();
+        if (sunData.status === "OK" && sunData.results) {
+          const srDate = new Date(sunData.results.sunrise);
+          const ssDate = new Date(sunData.results.sunset);
+          sunrise = srDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/New_York" });
+          sunset = ssDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/New_York" });
+          const diffSec = (ssDate.getTime() - srDate.getTime()) / 1000 / 3600;
+          daylightHrs = diffSec.toFixed(1) + "h";
+        }
+      } catch {
+        console.error("Failed to parse sunrise-sunset.org data");
+      }
+    }
+
+    if (!daylightHrs && current.sys?.sunrise && current.sys?.sunset) {
       const diff = (current.sys.sunset - current.sys.sunrise) / 3600;
       daylightHrs = diff.toFixed(1) + "h";
     }
