@@ -17,15 +17,15 @@ const FILTERS = [
 ];
 
 const dateBadgeColors: Record<string, { bg: string; text: string }> = {
-  arts: { bg: 'bg-purple-100', text: 'text-purple-700' },
-  music: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  kids: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-  family: { bg: 'bg-orange-100', text: 'text-orange-700' },
-  festival: { bg: 'bg-amber-100', text: 'text-amber-700' },
-  holiday: { bg: 'bg-red-100', text: 'text-red-700' },
+  arts:      { bg: 'bg-purple-100', text: 'text-purple-700' },
+  music:     { bg: 'bg-indigo-100', text: 'text-indigo-700' },
+  kids:      { bg: 'bg-emerald-100', text: 'text-emerald-700' },
+  family:    { bg: 'bg-orange-100', text: 'text-orange-700' },
+  festival:  { bg: 'bg-amber-100', text: 'text-amber-700' },
+  holiday:   { bg: 'bg-red-100', text: 'text-red-700' },
   community: { bg: 'bg-orange-100', text: 'text-orange-700' },
   education: { bg: 'bg-teal-100', text: 'text-teal-700' },
-  theater: { bg: 'bg-pink-100', text: 'text-pink-700' },
+  theater:   { bg: 'bg-pink-100', text: 'text-pink-700' },
 };
 
 const tagStyles: Record<string, string> = {
