@@ -114,6 +114,11 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
       }
     }
 
+    // Determine top badge status directly from the first active real-time prediction
+    const firstActivePred = mbtaPredictions.find(p => p.status !== 'CANCELLED');
+    const liveStatus = firstActivePred?.status;
+    const liveDelayMin = firstActivePred?.delayMinutes;
+
     const trainDeps = trainRoute.departures;
     let tn: { time: string; dir: string; ds: number; status?: string; delayMin?: number } | null = null;
     let ta: { time: string; dir: string; status?: string } | null = null;
@@ -127,9 +132,9 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
       const ds = t2m(effectiveTime) * 60;
 
       if (ds > ns || pred?.status === 'CANCELLED') {
-        remTrains.push({ time: stationTime, dir: d.dir, status: pred?.status, delayMin: pred?.delayMinutes });
-        if (!tn && pred?.status !== 'CANCELLED') tn = { time: stationTime, dir: d.dir, ds, status: pred?.status, delayMin: pred?.delayMinutes };
-        else if (!ta && pred?.status !== 'CANCELLED') ta = { time: stationTime, dir: d.dir, status: pred?.status };
+        remTrains.push({ time: stationTime, dir: d.dir, status: pred?.status || liveStatus, delayMin: pred?.delayMinutes ?? liveDelayMin });
+        if (!tn && pred?.status !== 'CANCELLED') tn = { time: stationTime, dir: d.dir, ds, status: pred?.status || liveStatus, delayMin: pred?.delayMinutes ?? liveDelayMin };
+        else if (!ta && pred?.status !== 'CANCELLED') ta = { time: stationTime, dir: d.dir, status: pred?.status || liveStatus };
       }
     }
     setRemainingTrains(remTrains);
@@ -140,8 +145,9 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
       setTrainDepTime(tn.time);
       setTrainDir(tn.dir + ' · ' + selectedStation);
       setTrainAfter(ta ? 'Next after: ' + ta.time : 'No more trains today');
-      setNextTrainStatus(tn.status);
-      setNextTrainDelayMin(tn.delayMin);
+      // Use direct API status for badge, falling back to matched prediction
+      setNextTrainStatus(tn.status || liveStatus);
+      setNextTrainDelayMin(tn.delayMin ?? liveDelayMin);
     } else {
       setTrainCountdown('Done');
       setTrainUrgent(false);
