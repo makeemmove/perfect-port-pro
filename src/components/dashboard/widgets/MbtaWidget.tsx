@@ -169,10 +169,9 @@ const MbtaWidget = ({
             </div>
           </PopoverContent>
         </Popover>
-        <div className="text-right space-y-1">
+      <div className="text-right space-y-1">
           <div className="text-[10px] text-muted-foreground font-medium">Departs at</div>
           <div className="mono text-base text-foreground">{trainDepTime}</div>
-          <StatusPill status={nextTrainStatus || 'Scheduled'} delayMin={nextTrainDelayMin} />
         </div>
       </div>
       <div className="text-[11px] text-muted-foreground mt-2">{trainAfter}</div>

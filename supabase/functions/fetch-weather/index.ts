@@ -44,13 +44,15 @@ serve(async (req) => {
     const CURRENT_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=imperial`;
     const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=imperial&cnt=40`;
     const ALERTS_URL = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
+    const SUNRISESUNSET_URL = `https://api.sunrise-sunset.org/json?lat=${LAT}&lng=${LON}&formatted=0`;
 
-    const [currentRes, forecastRes, alertsRes] = await Promise.all([
+    const [currentRes, forecastRes, alertsRes, sunRes] = await Promise.all([
       fetch(CURRENT_URL),
       fetch(FORECAST_URL),
       fetch(ALERTS_URL, {
         headers: { "User-Agent": "FallRiverConnect/1.0 (contact@fallriverconnect.app)" },
       }),
+      fetch(SUNRISESUNSET_URL),
     ]);
 
     if (!currentRes.ok) {
@@ -84,11 +86,28 @@ serve(async (req) => {
       ? current.weather[0].description.charAt(0).toUpperCase() + current.weather[0].description.slice(1)
       : "Clear";
 
-    const sunrise = fmtTime(current.sys?.sunrise || 0);
-    const sunset = fmtTime(current.sys?.sunset || 0);
-
+    // Use sunrise-sunset.org for accurate times, fallback to OWM
+    let sunrise = fmtTime(current.sys?.sunrise || 0);
+    let sunset = fmtTime(current.sys?.sunset || 0);
     let daylightHrs = "";
-    if (current.sys?.sunrise && current.sys?.sunset) {
+
+    if (sunRes.ok) {
+      try {
+        const sunData = await sunRes.json();
+        if (sunData.status === "OK" && sunData.results) {
+          const srDate = new Date(sunData.results.sunrise);
+          const ssDate = new Date(sunData.results.sunset);
+          sunrise = srDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/New_York" });
+          sunset = ssDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/New_York" });
+          const diffSec = (ssDate.getTime() - srDate.getTime()) / 1000 / 3600;
+          daylightHrs = diffSec.toFixed(1) + "h";
+        }
+      } catch {
+        console.error("Failed to parse sunrise-sunset.org data");
+      }
+    }
+
+    if (!daylightHrs && current.sys?.sunrise && current.sys?.sunset) {
       const diff = (current.sys.sunset - current.sys.sunrise) / 3600;
       daylightHrs = diff.toFixed(1) + "h";
     }
