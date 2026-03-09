@@ -19,7 +19,7 @@ const FILTERS = [
 const dateBadgeColors: Record<string, { bg: string; text: string }> = {
   arts:      { bg: 'bg-pink-200',    text: 'text-pink-800' },
   music:     { bg: 'bg-indigo-200',  text: 'text-indigo-800' },
-  kids:      { bg: 'bg-emerald-200', text: 'text-emerald-800' },
+  kids:      { bg: 'bg-blue-200',    text: 'text-blue-800' },
   family:    { bg: 'bg-orange-200',  text: 'text-orange-800' },
   festival:  { bg: 'bg-amber-200',   text: 'text-amber-800' },
   holiday:   { bg: 'bg-red-200',     text: 'text-red-800' },

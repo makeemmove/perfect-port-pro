@@ -8,7 +8,7 @@ const genreColors: Record<string, { bg: string; text: string }> = {
   Theater:   { bg: 'bg-pink-600',    text: 'text-white' },
   Community: { bg: 'bg-orange-500',  text: 'text-white' },
   Family:    { bg: 'bg-orange-400',  text: 'text-white' },
-  Kids:      { bg: 'bg-amber-500',   text: 'text-white' },
+  Kids:      { bg: 'bg-blue-500',    text: 'text-white' },
   Education: { bg: 'bg-teal-500',    text: 'text-white' },
   Festival:  { bg: 'bg-yellow-500',  text: 'text-yellow-950' },
   Holiday:   { bg: 'bg-red-500',     text: 'text-white' },
