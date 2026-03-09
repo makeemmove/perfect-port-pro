@@ -55,11 +55,11 @@ function TopStatusBadge({ status, delayMin }: { status?: string; delayMin?: numb
   if (status === 'CANCELLED') {
     return <span className={`${base} uppercase text-destructive-foreground bg-destructive`}>CANCELLED</span>;
   }
-  if (delayMin && delayMin > 0) {
+  if (delayMin !== undefined && delayMin > 0) {
     return <span className={`${base} text-destructive-foreground bg-destructive`}>{delayMin} min Late</span>;
   }
-  if (delayMin && delayMin < 0) {
-    return <span className={`${base} text-emerald-50 bg-emerald-600`}>{Math.abs(delayMin)} min Early</span>;
+  if ((delayMin !== undefined && delayMin < 0) || status?.toLowerCase().includes('early')) {
+    return <span className={`${base} text-emerald-50 bg-emerald-600`}>{delayMin ? Math.abs(delayMin) : ''} min Early</span>;
   }
   return <span className={`${base} text-foreground bg-foreground/10 border border-foreground/20`}>On Time</span>;
 }

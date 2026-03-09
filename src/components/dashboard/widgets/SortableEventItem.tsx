@@ -2,6 +2,19 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { CityEvent } from '@/data/events';
 
+const genreColors: Record<string, { bg: string; text: string }> = {
+  Music:     { bg: 'bg-indigo-500',  text: 'text-white' },
+  Arts:      { bg: 'bg-pink-500',    text: 'text-white' },
+  Theater:   { bg: 'bg-pink-600',    text: 'text-white' },
+  Community: { bg: 'bg-orange-500',  text: 'text-white' },
+  Family:    { bg: 'bg-orange-400',  text: 'text-white' },
+  Kids:      { bg: 'bg-amber-500',   text: 'text-white' },
+  Education: { bg: 'bg-teal-500',    text: 'text-white' },
+  Festival:  { bg: 'bg-yellow-500',  text: 'text-yellow-950' },
+  Holiday:   { bg: 'bg-red-500',     text: 'text-white' },
+};
+const defaultColor = { bg: 'bg-secondary', text: 'text-secondary-foreground' };
+
 interface SortableEventItemProps {
   id: string;
   event: CityEvent;
@@ -27,6 +40,9 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
   };
 
   const d = new Date(event.date);
+  const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+  const day = d.getDate();
+  const colors = genreColors[event.sub] || defaultColor;
 
   return (
     <div
@@ -50,14 +66,12 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
           <circle cx="10" cy="12" r="1.3" />
         </svg>
       </button>
-      <div className="w-5 h-5 rounded-full flex items-center justify-center bg-secondary/10 flex-shrink-0">
-        <div className="w-2.5 h-2.5 rounded-full bg-secondary" />
+      <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0 ${colors.bg} ${colors.text}`}>
+        <span className="text-[9px] font-bold leading-none tracking-wide">{month}</span>
+        <span className="text-[15px] font-extrabold leading-tight">{day}</span>
       </div>
       <div className="text-[13px] font-semibold flex-1 whitespace-nowrap overflow-hidden text-ellipsis text-foreground">
         {event.name}
-      </div>
-      <div className="mono text-[11px] text-muted-foreground flex-shrink-0">
-        {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
       </div>
       {onEventClick && (
         <button
