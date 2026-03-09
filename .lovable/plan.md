@@ -1,19 +1,27 @@
 
 
-## Plan: Fix Kids color + Coming Up missing dates
+## Plan: Replace Arrow Buttons with Three-Dot Menu
 
-### Issues identified
-
-1. **Events Tab**: Kids category uses `bg-emerald-200` — too light/invisible on white cards. User wants **blue**.
-2. **Coming Up (SortableEventItem)**: Some events show no date in the badge because `new Date(event.date)` returns `Invalid Date` — the month/day render as blank. Need a fallback.
+Option 2 (three-dot menu) is the cleaner choice — it keeps cards completely uncluttered during normal use and only reveals reorder options on tap.
 
 ### Changes
 
-#### `src/components/dashboard/EventsTab.tsx`
-- Change `kids` color from `bg-emerald-200 / text-emerald-800` → `bg-blue-200 / text-blue-800`
+#### `src/components/dashboard/DraggableWidget.tsx` — Rewrite
+- Remove `ChevronUp` / `ChevronDown` arrow buttons
+- Add a small `MoreVertical` (three-dot) icon button in the top-right corner (`absolute top-2 right-2`)
+- Button: 28x28px, `bg-accent/10 text-muted-foreground`, subtle and unobtrusive
+- On click, open a `DropdownMenu` (already available via `@radix-ui/react-dropdown-menu`) with two items:
+  - "Move Up" (shown only if `onMoveUp` is provided)
+  - "Move Down" (shown only if `onMoveDown` is provided)
+- Each item uses `ChevronUp` / `ChevronDown` as inline icons
+- Menu uses existing `DropdownMenuContent`, `DropdownMenuItem` components from `src/components/ui/dropdown-menu.tsx`
 
-#### `src/components/dashboard/widgets/SortableEventItem.tsx`
-- Change `Kids` color from `bg-amber-500` → `bg-blue-500` (match Events tab)
-- Add invalid-date guard: if date is invalid, show `"TBD"` or similar text instead of blank month/day
-- Ensure the date badge always renders with genre color even when date is missing
+#### `src/components/dashboard/HomeTab.tsx` — No changes
+- `moveWidget`, `onMoveUp`, `onMoveDown` props all stay exactly as they are
+
+#### Everything else — Untouched
+Layout, fonts, colors, spacing, card content, buttons — all unchanged.
+
+### Result
+Cards look clean by default. A single subtle dot-menu per card gives access to reorder without cluttering the UI.
 
