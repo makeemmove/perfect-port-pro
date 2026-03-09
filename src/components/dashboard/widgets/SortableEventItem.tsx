@@ -40,8 +40,9 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
   };
 
   const d = new Date(event.date);
-  const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-  const day = d.getDate();
+  const validDate = !isNaN(d.getTime());
+  const month = validDate ? d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase() : '';
+  const day = validDate ? d.getDate() : '—';
   const colors = genreColors[event.sub] || defaultColor;
 
   return (
