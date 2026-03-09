@@ -44,13 +44,15 @@ serve(async (req) => {
     const CURRENT_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=imperial`;
     const FORECAST_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=imperial&cnt=40`;
     const ALERTS_URL = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
+    const SUNRISESUNSET_URL = `https://api.sunrise-sunset.org/json?lat=${LAT}&lng=${LON}&formatted=0`;
 
-    const [currentRes, forecastRes, alertsRes] = await Promise.all([
+    const [currentRes, forecastRes, alertsRes, sunRes] = await Promise.all([
       fetch(CURRENT_URL),
       fetch(FORECAST_URL),
       fetch(ALERTS_URL, {
         headers: { "User-Agent": "FallRiverConnect/1.0 (contact@fallriverconnect.app)" },
       }),
+      fetch(SUNRISESUNSET_URL),
     ]);
 
     if (!currentRes.ok) {
