@@ -1,32 +1,27 @@
 
 
-## Plan: Fix Early badge color, reorder widgets, add genre-colored date boxes
+## Plan: Replace Arrow Buttons with Three-Dot Menu
 
-### 1. Fix "Early" status badge — make it green (not white/neutral)
+Option 2 (three-dot menu) is the cleaner choice — it keeps cards completely uncluttered during normal use and only reveals reorder options on tap.
 
-The uploaded screenshot shows the "5 min Early" badge appears with a white/neutral background. Looking at the `TopStatusBadge` code, the early check uses `delayMin && delayMin < 0` — but this condition may fail if `delayMin` is `0` or `undefined` while the `status` string contains "early". 
+### Changes
 
-**Fix:** Add a check for `status?.includes('early')` before the On Time fallback, and ensure the green styling (`bg-emerald-600 text-emerald-50`) is applied. Also fix the `StatusPill` in the popover/route view to match.
+#### `src/components/dashboard/DraggableWidget.tsx` — Rewrite
+- Remove `ChevronUp` / `ChevronDown` arrow buttons
+- Add a small `MoreVertical` (three-dot) icon button in the top-right corner (`absolute top-2 right-2`)
+- Button: 28x28px, `bg-accent/10 text-muted-foreground`, subtle and unobtrusive
+- On click, open a `DropdownMenu` (already available via `@radix-ui/react-dropdown-menu`) with two items:
+  - "Move Up" (shown only if `onMoveUp` is provided)
+  - "Move Down" (shown only if `onMoveDown` is provided)
+- Each item uses `ChevronUp` / `ChevronDown` as inline icons
+- Menu uses existing `DropdownMenuContent`, `DropdownMenuItem` components from `src/components/ui/dropdown-menu.tsx`
 
-### 2. Move News section below Coming Up
+#### `src/components/dashboard/HomeTab.tsx` — No changes
+- `moveWidget`, `onMoveUp`, `onMoveDown` props all stay exactly as they are
 
-In `HomeTab.tsx`, the default widget order is:
-```
-['news', 'stats', 'coming-up', 'weather', 'srta', 'mbta']
-```
+#### Everything else — Untouched
+Layout, fonts, colors, spacing, card content, buttons — all unchanged.
 
-**Change to:** `['stats', 'coming-up', 'news', 'weather', 'srta', 'mbta']` — placing news after coming-up. Also clear localStorage so existing users get the new default.
-
-### 3. Color-coded date boxes per genre on Coming Up events
-
-Currently `SortableEventItem` shows a generic secondary-colored circle. Replace this with a small square date badge (like the Events tab) colored by the event's `sub` category, using the existing `dateBadgeColors` map from `EventsTab.tsx`.
-
-**Changes in `SortableEventItem.tsx`:**
-- Import color mapping (or define inline) matching genre to bg/text colors
-- Replace the generic circle with a rounded square showing month/day, colored by `event.sub`
-
-### Files to modify
-- `src/components/dashboard/widgets/MbtaWidget.tsx` — fix TopStatusBadge early condition
-- `src/components/dashboard/HomeTab.tsx` — reorder DEFAULT_ORDER
-- `src/components/dashboard/widgets/SortableEventItem.tsx` — genre-colored date boxes
+### Result
+Cards look clean by default. A single subtle dot-menu per card gives access to reorder without cluttering the UI.
 
