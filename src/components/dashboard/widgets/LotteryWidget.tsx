@@ -22,10 +22,13 @@ interface LotteryWidgetProps {
 const GAME_CONFIG: Record<string, { accent: string; label: string }> = {
   'Powerball': { accent: '#dc2626', label: 'PB' },
   'Mega Millions': { accent: '#d97706', label: 'MB' },
-  'Mass Cash': { accent: '#2563eb', label: '' },
-  'Lucky for Life': { accent: '#16a34a', label: 'LB' },
+  'Mass Cash Midday': { accent: '#2563eb', label: '' },
+  'Mass Cash Evening': { accent: '#2563eb', label: '' },
+  'Millionaire for Life': { accent: '#16a34a', label: 'ML' },
+  'Megabucks': { accent: '#0ea5e9', label: '' },
   'Numbers Midday': { accent: '#7c3aed', label: '' },
   'Numbers Evening': { accent: '#7c3aed', label: '' },
+  'Keno': { accent: '#f97316', label: '' },
 };
 
 const TOP_GAMES = ['Powerball', 'Mega Millions'];
@@ -55,6 +58,28 @@ function NumberBall({ num, isSpecial, accent }: { num: number; isSpecial?: boole
 function LotteryCard({ result }: { result: LotteryResult }) {
   const config = GAME_CONFIG[result.game_name] || { accent: '#6b7280', label: '' };
 
+  const isNumbersMidday = result.game_name === 'Numbers Midday';
+  const isNumbersEvening = result.game_name === 'Numbers Evening';
+  const isMassCashMidday = result.game_name === 'Mass Cash Midday';
+  const isMassCashEvening = result.game_name === 'Mass Cash Evening';
+
+  let displayName = result.game_name;
+  let icon: string | null = null;
+
+  if (isNumbersMidday) {
+    displayName = 'The Numbers Game – Midday';
+    icon = '☀️';
+  } else if (isNumbersEvening) {
+    displayName = 'The Numbers Game – Evening';
+    icon = '🌙';
+  } else if (isMassCashMidday) {
+    displayName = 'Mass Cash – Midday';
+    icon = '☀️';
+  } else if (isMassCashEvening) {
+    displayName = 'Mass Cash – Evening';
+    icon = '🌙';
+  }
+
   return (
     <a
       href={result.official_url}
@@ -63,17 +88,24 @@ function LotteryCard({ result }: { result: LotteryResult }) {
       className="block rounded-2xl p-4 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
       style={{
         backgroundColor: '#ffffff',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06)',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 8px 20px rgba(0,0,0,0.03)',
       }}
     >
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-[15px] font-bold" style={{ color: '#111827' }}>
-            {result.game_name}
+          <h3 className="text-[15px] font-bold flex items-center gap-1.5" style={{ color: '#111827' }}>
+            {icon && <span aria-hidden="true">{icon}</span>}
+            <span>{displayName}</span>
           </h3>
           <p className="text-[11px] font-medium" style={{ color: '#9ca3af' }}>
             {formatDrawDate(result.draw_date)}
           </p>
+          {(isNumbersMidday || isNumbersEvening) && (
+            <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide" style={{ color: '#6b7280' }}>
+              {result.numbers.length === 3 ? '3-digit win' : '4-digit win'}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {result.jackpot && (
@@ -88,14 +120,32 @@ function LotteryCard({ result }: { result: LotteryResult }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 flex-wrap">
-        {(result.numbers as number[]).map((num, i) => (
-          <NumberBall key={`n-${i}`} num={num} accent={config.accent} />
-        ))}
-        {result.special_number && (result.special_number as number[]).filter(n => n != null && !isNaN(n)).map((num, i) => (
-          <NumberBall key={`s-${i}`} num={num} isSpecial accent={config.accent} />
-        ))}
-      </div>
+      {result.game_name === 'Keno' ? (
+        <div className="mt-1 grid grid-cols-5 gap-1.5">
+          {(result.numbers as number[]).slice(0, 20).map((num, i) => (
+            <div
+              key={`k-${i}`}
+              className="h-8 rounded-full flex items-center justify-center text-xs font-semibold"
+              style={{
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                border: '1px solid #e5e7eb',
+              }}
+            >
+              {num}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {(result.numbers as number[]).map((num, i) => (
+            <NumberBall key={`n-${i}`} num={num} accent={config.accent} />
+          ))}
+          {result.special_number && (result.special_number as number[]).filter(n => n != null && !isNaN(n)).map((num, i) => (
+            <NumberBall key={`s-${i}`} num={num} isSpecial accent={config.accent} />
+          ))}
+        </div>
+      )}
 
       {result.multiplier && (
         <div className="mt-2.5">
@@ -168,7 +218,17 @@ const LotteryWidget = ({ compact = false, onSeeAll }: LotteryWidgetProps) => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const gameOrder = ['Powerball', 'Mega Millions', 'Mass Cash', 'Lucky for Life', 'Megabucks', 'Numbers Midday', 'Numbers Evening', 'Keno'];
+  const gameOrder = [
+    'Powerball',
+    'Mega Millions',
+    'Mass Cash Midday',
+    'Mass Cash Evening',
+    'Millionaire for Life',
+    'Megabucks',
+    'Numbers Midday',
+    'Numbers Evening',
+    'Keno',
+  ];
   const sorted = [...results].sort((a, b) => {
     const ai = gameOrder.indexOf(a.game_name);
     const bi = gameOrder.indexOf(b.game_name);
