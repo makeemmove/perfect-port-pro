@@ -19,6 +19,7 @@ import ComingUpWidget from './widgets/ComingUpWidget';
 import NewsPreviewWidget from './widgets/NewsPreviewWidget';
 import QuickViewModal from './QuickViewModal';
 import LotteryWidget from './widgets/LotteryWidget';
+import ObituariesWidget from './widgets/ObituariesWidget';
 import { Settings, Check } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
