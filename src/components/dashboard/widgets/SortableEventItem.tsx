@@ -13,7 +13,7 @@ const genreColors: Record<string, { bg: string; text: string }> = {
   Festival:  { bg: 'bg-yellow-500',  text: 'text-yellow-950' },
   Holiday:   { bg: 'bg-red-500',     text: 'text-white' },
 };
-const defaultColor = { bg: 'bg-secondary', text: 'text-secondary-foreground' };
+const defaultColor = { bg: 'bg-blue-500', text: 'text-white' };
 
 interface SortableEventItemProps {
   id: string;
