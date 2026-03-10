@@ -122,9 +122,9 @@ const EventsTab = () => {
                              active:scale-[0.98] transition-all duration-300 ease-in-out text-left w-full group"
                 >
                   {/* Date badge */}
-                  <div className={`flex-shrink-0 w-[52px] h-[56px] rounded-xl flex flex-col items-center justify-center ${badge.bg}`}>
-                    <div className={`text-[9px] font-bold uppercase tracking-widest ${badge.text} opacity-70`}>{mo}</div>
-                    <div className={`text-xl font-semibold leading-none ${badge.text}`}>{dy}</div>
+                  <div className="flex-shrink-0 w-[52px] h-[56px] rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: badge.bg }}>
+                    <div className="text-[9px] font-bold uppercase tracking-widest opacity-70" style={{ color: badge.text }}>{mo}</div>
+                    <div className="text-xl font-semibold leading-none" style={{ color: badge.text }}>{dy}</div>
                   </div>
 
                   {/* Content */}
