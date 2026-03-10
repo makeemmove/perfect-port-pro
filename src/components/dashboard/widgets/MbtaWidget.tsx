@@ -26,25 +26,25 @@ interface MbtaWidgetProps {
 }
 
 function StatusPill({ status, delayMin }: { status: string; delayMin?: number }) {
-  let colorClasses = '';
+  let inlineStyle: React.CSSProperties = {};
   let label = status;
 
   if (status === 'CANCELLED') {
-    colorClasses = 'bg-destructive/15 text-destructive';
+    inlineStyle = { backgroundColor: '#fee2e2', color: '#dc2626' };
     label = 'CANCELLED';
   } else if (status === 'On Time') {
-    colorClasses = 'bg-foreground/10 text-foreground';
+    inlineStyle = { backgroundColor: 'hsl(var(--foreground) / 0.1)', color: 'hsl(var(--foreground))' };
   } else if (status.includes('late')) {
-    colorClasses = 'bg-destructive/15 text-destructive';
+    inlineStyle = { backgroundColor: '#fee2e2', color: '#dc2626' };
   } else if (status.includes('early')) {
-    colorClasses = 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400';
+    inlineStyle = { backgroundColor: '#dcfce7', color: '#16a34a' };
   } else {
-    colorClasses = 'bg-muted text-muted-foreground';
+    inlineStyle = { backgroundColor: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' };
     label = 'Scheduled';
   }
 
   return (
-    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full whitespace-nowrap ${colorClasses}`}>
+    <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full whitespace-nowrap" style={inlineStyle}>
       {label}
     </span>
   );
