@@ -22,7 +22,7 @@ import LotteryWidget from './widgets/LotteryWidget';
 import { Settings, Check } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
-const DEFAULT_ORDER = ['stats', 'coming-up', 'news', 'weather', 'srta', 'mbta'];
+const DEFAULT_ORDER = ['stats', 'coming-up', 'news', 'weather', 'lottery', 'srta', 'mbta'];
 const STORAGE_KEY = 'fr-widget-order-v2';
 
 function loadOrder(): string[] {
