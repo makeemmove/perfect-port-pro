@@ -16,15 +16,63 @@ interface LotteryResult {
   official_url: string;
 }
 
+// Fetch current jackpot estimates
+async function fetchJackpots(): Promise<{ powerball: string | null; megaMillions: string | null }> {
+  let powerball: string | null = null;
+  let megaMillions: string | null = null;
+
+  try {
+    // Try Powerball API
+    const pbRes = await fetch("https://www.powerball.com/api/v1/estimates/powerball?_format=json");
+    if (pbRes.ok) {
+      const pbData = await pbRes.json();
+      if (pbData?.data?.[0]?.field_prize_amount) {
+        powerball = pbData.data[0].field_prize_amount;
+      } else if (pbData?.data?.[0]?.field_prize_amount_text) {
+        powerball = pbData.data[0].field_prize_amount_text;
+      }
+    }
+  } catch (e) {
+    console.log("Powerball jackpot fetch failed, trying fallback:", e);
+  }
+
+  try {
+    // Try Mega Millions
+    const mmRes = await fetch("https://www.megamillions.com/cmspages/utilservice.asmx/GetLatestDrawData");
+    if (mmRes.ok) {
+      const mmText = await mmRes.text();
+      const jpMatch = mmText.match(/Jackpot["\s:>]*\$?([\d,]+\s*(Million|Billion)?)/i);
+      if (jpMatch) {
+        megaMillions = `$${jpMatch[1]}`;
+      }
+    }
+  } catch (e) {
+    console.log("Mega Millions jackpot fetch failed:", e);
+  }
+
+  // Fallback: try lottery APIs
+  if (!powerball || !megaMillions) {
+    try {
+      const res = await fetch("https://data.ny.gov/resource/d6yy-54nr.json?$order=draw_date%20DESC&$limit=1");
+      if (res.ok) {
+        const data = await res.json();
+        // NY data doesn't have jackpot but we tried
+      }
+    } catch { /* ignore */ }
+  }
+
+  return { powerball, megaMillions };
+}
+
 // Fetch Powerball from NY Open Data
-async function fetchPowerball(): Promise<LotteryResult[]> {
+async function fetchPowerball(jackpotAmount: string | null): Promise<LotteryResult[]> {
   try {
     const res = await fetch(
       "https://data.ny.gov/resource/d6yy-54nr.json?$order=draw_date%20DESC&$limit=3"
     );
     if (!res.ok) return [];
     const data = await res.json();
-    return data.map((d: any) => {
+    return data.map((d: any, i: number) => {
       const nums = d.winning_numbers.split(" ").map(Number);
       return {
         game_name: "Powerball",
@@ -32,7 +80,7 @@ async function fetchPowerball(): Promise<LotteryResult[]> {
         numbers: nums.slice(0, 5),
         special_number: [nums[5]],
         multiplier: d.multiplier ? `${d.multiplier}x` : null,
-        jackpot: null,
+        jackpot: i === 0 ? jackpotAmount : null, // only show jackpot on latest
         official_url: "https://www.masslottery.com/tools/past-results/powerball",
       };
     });
@@ -43,14 +91,14 @@ async function fetchPowerball(): Promise<LotteryResult[]> {
 }
 
 // Fetch Mega Millions from NY Open Data
-async function fetchMegaMillions(): Promise<LotteryResult[]> {
+async function fetchMegaMillions(jackpotAmount: string | null): Promise<LotteryResult[]> {
   try {
     const res = await fetch(
       "https://data.ny.gov/resource/5xaw-6ayf.json?$order=draw_date%20DESC&$limit=3"
     );
     if (!res.ok) return [];
     const data = await res.json();
-    return data.map((d: any) => {
+    return data.map((d: any, i: number) => {
       const nums = d.winning_numbers.split(" ").map(Number);
       const megaBall = d.mega_ball ? Number(d.mega_ball) : nums[5];
       return {
@@ -59,7 +107,7 @@ async function fetchMegaMillions(): Promise<LotteryResult[]> {
         numbers: nums.slice(0, 5),
         special_number: megaBall != null && !isNaN(megaBall) ? [megaBall] : null,
         multiplier: d.multiplier ? `${d.multiplier}x` : null,
-        jackpot: null,
+        jackpot: i === 0 ? jackpotAmount : null,
         official_url: "https://www.masslottery.com/tools/past-results/mega-millions",
       };
     });
@@ -69,7 +117,7 @@ async function fetchMegaMillions(): Promise<LotteryResult[]> {
   }
 }
 
-// Fetch MA-specific games from masslottery.com REST API
+// Fetch MA-specific games
 async function fetchMassGame(
   game: string,
   gameName: string,
@@ -82,10 +130,7 @@ async function fetchMassGame(
     const res = await fetch(
       `https://www.masslottery.com/rest/${game}/getDrawsByDateRange?startDate=${weekAgo}&endDate=${today}`
     );
-    if (!res.ok) {
-      console.error(`MA ${gameName} fetch failed: ${res.status}`);
-      return [];
-    }
+    if (!res.ok) return [];
     const data = await res.json();
     const draws = data.draws || data.results || [];
     if (!Array.isArray(draws) || draws.length === 0) return [];
@@ -95,21 +140,16 @@ async function fetchMassGame(
       let special: number[] | null = null;
       let multiplier: string | null = null;
 
-      // Mass Cash format
       if (d.numbers && Array.isArray(d.numbers)) {
         numbers = d.numbers.map(Number);
       } else if (d.winning_numbers) {
-        // Some formats have winning_numbers as string
         numbers = String(d.winning_numbers).split(/[\s,]+/).filter(Boolean).map(Number);
       } else if (d.num1 !== undefined) {
-        // Lucky for Life / numbered fields
         numbers = [d.num1, d.num2, d.num3, d.num4, d.num5].filter(n => n != null).map(Number);
         if (d.lucky_ball != null) special = [Number(d.lucky_ball)];
       }
 
-      if (d.bonus != null && !special) {
-        special = [Number(d.bonus)];
-      }
+      if (d.bonus != null && !special) special = [Number(d.bonus)];
       if (d.multiplier) multiplier = String(d.multiplier);
 
       const drawDate = d.draw_date || d.drawDate || d.date || today;
@@ -145,8 +185,6 @@ async function fetchNumbersGame(): Promise<LotteryResult[]> {
     if (!Array.isArray(draws)) return [];
 
     const results: LotteryResult[] = [];
-    
-    // Group by midday/evening
     for (const d of draws.slice(0, 6)) {
       const drawTime = d.draw_time || d.drawTime || '';
       const isEvening = String(drawTime).toLowerCase().includes('evening') || 
@@ -192,11 +230,14 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch all games in parallel
+    // Fetch jackpots first, then pass to game fetchers
+    const jackpots = await fetchJackpots();
+    console.log("Jackpots:", jackpots);
+
     const [powerball, megaMillions, massCash, luckyForLife, numbersGame] =
       await Promise.all([
-        fetchPowerball(),
-        fetchMegaMillions(),
+        fetchPowerball(jackpots.powerball),
+        fetchMegaMillions(jackpots.megaMillions),
         fetchMassGame("mass-cash", "Mass Cash", "mass-cash"),
         fetchMassGame("lucky-for-life", "Lucky for Life", "lucky-for-life"),
         fetchNumbersGame(),
@@ -212,7 +253,6 @@ Deno.serve(async (req) => {
 
     console.log(`Fetched ${allResults.length} lottery results`);
 
-    // Upsert into DB
     if (allResults.length > 0) {
       const { error } = await supabase
         .from("lottery_results")
@@ -230,12 +270,9 @@ Deno.serve(async (req) => {
           { onConflict: "game_name,draw_date" }
         );
 
-      if (error) {
-        console.error("Upsert error:", error);
-      }
+      if (error) console.error("Upsert error:", error);
     }
 
-    // Return latest results
     const { data: latest } = await supabase
       .from("lottery_results")
       .select("*")

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Heart, ExternalLink } from 'lucide-react';
+import { Heart, ExternalLink, ChevronDown } from 'lucide-react';
 
 interface Obituary {
   id: string;
@@ -12,6 +12,11 @@ interface Obituary {
   source: string;
   city: string;
   created_at: string;
+}
+
+interface ObituariesWidgetProps {
+  compact?: boolean;
+  onSeeAll?: () => void;
 }
 
 function formatDate(dateStr: string | null): string {
@@ -48,7 +53,7 @@ function ObituaryRow({ obit }: { obit: Obituary }) {
   );
 }
 
-const ObituariesWidget = () => {
+const ObituariesWidget = ({ compact = false, onSeeAll }: ObituariesWidgetProps) => {
   const [obituaries, setObituaries] = useState<Obituary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -65,7 +70,6 @@ const ObituariesWidget = () => {
       if (!error && data && data.length > 0) {
         setObituaries(data as Obituary[]);
       } else {
-        // Trigger edge function to populate
         try {
           await supabase.functions.invoke('fetch-obituaries');
           const { data: fresh } = await supabase
@@ -84,7 +88,6 @@ const ObituariesWidget = () => {
     load();
   }, []);
 
-  // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel('obituary-updates')
@@ -99,9 +102,10 @@ const ObituariesWidget = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  const displayObituaries = compact ? obituaries.slice(0, 3) : obituaries;
+
   return (
     <div className="glass-card p-6 py-[15px]">
-      {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#f3f4f6' }}>
           <Heart className="w-4 h-4" style={{ color: '#6b7280' }} />
@@ -122,18 +126,31 @@ const ObituariesWidget = () => {
           No recent obituaries found. This section updates every 2 hours.
         </div>
       ) : (
-        <div
-          className="rounded-2xl overflow-hidden"
-          style={{
-            border: '1px solid #e5e7eb',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04)',
-            backgroundColor: '#ffffff',
-          }}
-        >
-          {obituaries.map((obit, i) => (
-            <ObituaryRow key={obit.id} obit={obit} />
-          ))}
-        </div>
+        <>
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04)',
+              backgroundColor: '#ffffff',
+            }}
+          >
+            {displayObituaries.map((obit) => (
+              <ObituaryRow key={obit.id} obit={obit} />
+            ))}
+          </div>
+
+          {compact && obituaries.length > 3 && onSeeAll && (
+            <button
+              onClick={onSeeAll}
+              className="mt-3 w-full text-[12px] font-semibold flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all duration-200 hover:bg-muted/30"
+              style={{ color: '#6b7280' }}
+            >
+              See All ({obituaries.length})
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </>
       )}
 
       <div className="text-[10px] text-muted-foreground/50 mt-3 text-center">
