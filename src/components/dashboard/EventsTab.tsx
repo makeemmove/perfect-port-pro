@@ -17,15 +17,15 @@ const FILTERS = [
 ];
 
 const dateBadgeColors: Record<string, { bg: string; text: string }> = {
-  arts:      { bg: 'bg-pink-200',    text: 'text-pink-800' },
-  music:     { bg: 'bg-indigo-200',  text: 'text-indigo-800' },
-  kids:      { bg: 'bg-blue-500',    text: 'text-white' },
-  family:    { bg: 'bg-orange-200',  text: 'text-orange-800' },
-  festival:  { bg: 'bg-amber-200',   text: 'text-amber-800' },
-  holiday:   { bg: 'bg-red-200',     text: 'text-red-800' },
-  community: { bg: 'bg-orange-200',  text: 'text-orange-800' },
-  education: { bg: 'bg-teal-200',    text: 'text-teal-800' },
-  theater:   { bg: 'bg-purple-200',  text: 'text-purple-800' },
+  arts:      { bg: '#fbb6ce', text: '#831843' },
+  music:     { bg: '#c7d2fe', text: '#3730a3' },
+  kids:      { bg: '#3b82f6', text: '#ffffff' },
+  family:    { bg: '#fed7aa', text: '#9a3412' },
+  festival:  { bg: '#fde68a', text: '#92400e' },
+  holiday:   { bg: '#fecaca', text: '#991b1b' },
+  community: { bg: '#fed7aa', text: '#9a3412' },
+  education: { bg: '#99f6e4', text: '#115e59' },
+  theater:   { bg: '#e9d5ff', text: '#6b21a8' },
 };
 
 const tagStyles: Record<string, string> = {
