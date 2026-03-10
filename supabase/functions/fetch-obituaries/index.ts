@@ -15,7 +15,6 @@ interface ObituaryEntry {
   city: string;
 }
 
-// Multiple source URLs to try
 const SOURCES = [
   {
     url: "https://news.google.com/rss/search?q=%22Fall+River%22+obituary&hl=en-US&gl=US&ceid=US:en",
@@ -53,8 +52,7 @@ const EXCLUDED_CITIES = [
 ];
 
 function isFallRiver(text: string): boolean {
-  const lower = text.toLowerCase();
-  return lower.includes("fall river");
+  return text.toLowerCase().includes("fall river");
 }
 
 function isExcludedCity(text: string): boolean {
@@ -115,10 +113,7 @@ async function fetchRSS(url: string, sourceName: string): Promise<ObituaryEntry[
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; FRConnect/1.0)" },
     });
-    if (!res.ok) {
-      console.log(`${sourceName} returned ${res.status}`);
-      return [];
-    }
+    if (!res.ok) return [];
     const xml = await res.text();
 
     const itemRegex = /<item>([\s\S]*?)<\/item>/g;
@@ -136,14 +131,8 @@ async function fetchRSS(url: string, sourceName: string): Promise<ObituaryEntry[
       if (!title || !link) continue;
 
       const combined = `${title} ${desc}`;
-
-      // Must be an obituary
       if (!isObituary(title, desc)) continue;
-
-      // CRITICAL: Must mention Fall River
       if (!isFallRiver(combined)) continue;
-
-      // Exclude surrounding towns
       if (isExcludedCity(combined)) continue;
 
       const name = cleanName(title);
@@ -164,6 +153,100 @@ async function fetchRSS(url: string, sourceName: string): Promise<ObituaryEntry[
   return entries;
 }
 
+// Use AI to extract age and date from obituary page content
+async function enrichWithAI(entries: ObituaryEntry[]): Promise<ObituaryEntry[]> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  if (!LOVABLE_API_KEY) {
+    console.log("No LOVABLE_API_KEY, skipping AI enrichment");
+    return entries;
+  }
+
+  // Only enrich entries missing age or date, max 5 per run
+  const needsEnrichment = entries.filter(e => e.age === null || e.date_of_passing === null).slice(0, 5);
+  if (needsEnrichment.length === 0) return entries;
+
+  console.log(`Enriching ${needsEnrichment.length} obituaries with AI`);
+
+  for (const entry of needsEnrichment) {
+    try {
+      // Fetch the obituary page
+      const pageRes = await fetch(entry.obituary_url, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; FRConnect/1.0)" },
+        redirect: "follow",
+      });
+      if (!pageRes.ok) continue;
+
+      const html = await pageRes.text();
+      // Strip HTML tags, get first 3000 chars of text
+      const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 3000);
+
+      if (text.length < 50) continue;
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            {
+              role: "system",
+              content: "Extract the age and date of passing from this obituary text. Return ONLY a JSON object with 'age' (number or null) and 'date_of_passing' (YYYY-MM-DD string or null). No other text.",
+            },
+            { role: "user", content: text },
+          ],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "extract_obituary_details",
+                description: "Extract age and date of passing from obituary text",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    age: { type: ["number", "null"], description: "Age of the deceased" },
+                    date_of_passing: { type: ["string", "null"], description: "Date of passing in YYYY-MM-DD format" },
+                  },
+                  required: ["age", "date_of_passing"],
+                  additionalProperties: false,
+                },
+              },
+            },
+          ],
+          tool_choice: { type: "function", function: { name: "extract_obituary_details" } },
+        }),
+      });
+
+      if (!response.ok) {
+        console.log(`AI enrichment failed for ${entry.full_name}: ${response.status}`);
+        continue;
+      }
+
+      const aiData = await response.json();
+      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+      if (toolCall?.function?.arguments) {
+        const parsed = JSON.parse(toolCall.function.arguments);
+        if (entry.age === null && parsed.age && typeof parsed.age === "number" && parsed.age > 0 && parsed.age < 130) {
+          entry.age = parsed.age;
+        }
+        if (entry.date_of_passing === null && parsed.date_of_passing && typeof parsed.date_of_passing === "string") {
+          const d = new Date(parsed.date_of_passing);
+          if (!isNaN(d.getTime())) {
+            entry.date_of_passing = parsed.date_of_passing;
+          }
+        }
+        console.log(`Enriched ${entry.full_name}: age=${entry.age}, date=${entry.date_of_passing}`);
+      }
+    } catch (e) {
+      console.error(`AI enrichment error for ${entry.full_name}:`, e);
+    }
+  }
+
+  return entries;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -174,15 +257,13 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch from all sources in parallel
     const allSources = [...SOURCES, ...FUNERAL_HOME_SOURCES];
     const results = await Promise.all(
       allSources.map((s) => fetchRSS(s.url, s.name))
     );
 
-    // Deduplicate by URL
     const seen = new Set<string>();
-    const entries: ObituaryEntry[] = [];
+    let entries: ObituaryEntry[] = [];
     for (const batch of results) {
       for (const e of batch) {
         if (!seen.has(e.obituary_url)) {
@@ -193,6 +274,9 @@ Deno.serve(async (req) => {
     }
 
     console.log(`Found ${entries.length} Fall River obituaries`);
+
+    // Enrich with AI for missing age/date
+    entries = await enrichWithAI(entries);
 
     if (entries.length > 0) {
       const { error } = await supabase
@@ -212,7 +296,6 @@ Deno.serve(async (req) => {
       if (error) console.error("Upsert error:", error);
     }
 
-    // Return latest
     const { data: latest } = await supabase
       .from("local_obituaries")
       .select("*")
