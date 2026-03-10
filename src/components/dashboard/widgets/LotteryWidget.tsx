@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Trophy, ExternalLink, RefreshCw } from 'lucide-react';
+import { Trophy, ExternalLink, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface LotteryResult {
   id: string;
@@ -23,12 +23,16 @@ const GAME_CONFIG: Record<string, { accent: string; label: string }> = {
   'Numbers Evening': { accent: '#7c3aed', label: '' },
 };
 
+// Top games shown by default
+const TOP_GAMES = ['Powerball', 'Mega Millions'];
+
 function formatDrawDate(dateStr: string): string {
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 function NumberBall({ num, isSpecial, accent }: { num: number; isSpecial?: boolean; accent: string }) {
+  if (num == null || isNaN(num)) return null;
   return (
     <div
       className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-transform"
@@ -68,10 +72,17 @@ function LotteryCard({ result }: { result: LotteryResult }) {
             {formatDrawDate(result.draw_date)}
           </p>
         </div>
-        <ExternalLink
-          className="w-3.5 h-3.5 opacity-0 group-hover:opacity-60 transition-opacity"
-          style={{ color: '#9ca3af' }}
-        />
+        <div className="flex items-center gap-2">
+          {result.jackpot && (
+            <span className="text-[12px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${config.accent}15`, color: config.accent }}>
+              {result.jackpot}
+            </span>
+          )}
+          <ExternalLink
+            className="w-3.5 h-3.5 opacity-0 group-hover:opacity-60 transition-opacity"
+            style={{ color: '#9ca3af' }}
+          />
+        </div>
       </div>
 
       {/* Numbers */}
@@ -79,36 +90,37 @@ function LotteryCard({ result }: { result: LotteryResult }) {
         {(result.numbers as number[]).map((num, i) => (
           <NumberBall key={`n-${i}`} num={num} accent={config.accent} />
         ))}
-        {result.special_number && (result.special_number as number[]).map((num, i) => (
+        {result.special_number && (result.special_number as number[]).filter(n => n != null && !isNaN(n)).map((num, i) => (
           <NumberBall key={`s-${i}`} num={num} isSpecial accent={config.accent} />
         ))}
       </div>
 
-      {/* Footer */}
-      {(result.multiplier || result.jackpot) && (
-        <div className="flex items-center gap-3 mt-3">
-          {result.multiplier && (
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${config.accent}12`, color: config.accent }}>
-              {result.multiplier}
-            </span>
-          )}
-          {result.jackpot && (
-            <span className="text-[12px] font-semibold" style={{ color: config.accent }}>
-              {result.jackpot}
-            </span>
-          )}
+      {/* Multiplier */}
+      {result.multiplier && (
+        <div className="mt-2.5">
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${config.accent}12`, color: config.accent }}>
+            {result.multiplier}
+          </span>
         </div>
       )}
     </a>
   );
 }
 
+function getLatestByGame(data: any[]): LotteryResult[] {
+  const map = new Map<string, any>();
+  for (const r of data) {
+    if (!map.has(r.game_name)) map.set(r.game_name, r);
+  }
+  return Array.from(map.values()) as LotteryResult[];
+}
+
 const LotteryWidget = () => {
   const [results, setResults] = useState<LotteryResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
-  // Fetch initial data
   useEffect(() => {
     async function load() {
       setIsLoading(true);
@@ -118,32 +130,16 @@ const LotteryWidget = () => {
         .order('draw_date', { ascending: false });
 
       if (!error && data && data.length > 0) {
-        // Get latest result per game
-        const latestByGame = new Map<string, any>();
-        for (const r of data) {
-          if (!latestByGame.has(r.game_name)) {
-            latestByGame.set(r.game_name, r);
-          }
-        }
-        setResults(Array.from(latestByGame.values()) as LotteryResult[]);
+        setResults(getLatestByGame(data));
         setLastUpdated(new Date());
       } else {
-        // No data yet - trigger edge function
         try {
           await supabase.functions.invoke('fetch-lottery');
           const { data: fresh } = await supabase
             .from('lottery_results')
             .select('*')
             .order('draw_date', { ascending: false });
-          if (fresh) {
-            const latestByGame = new Map<string, any>();
-            for (const r of fresh) {
-              if (!latestByGame.has(r.game_name)) {
-                latestByGame.set(r.game_name, r);
-              }
-            }
-            setResults(Array.from(latestByGame.values()) as LotteryResult[]);
-          }
+          if (fresh) setResults(getLatestByGame(fresh));
         } catch (e) {
           console.error('Failed to fetch lottery:', e);
         }
@@ -153,46 +149,28 @@ const LotteryWidget = () => {
     load();
   }, []);
 
-  // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel('lottery-updates')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'lottery_results' },
-        (payload) => {
-          console.log('Lottery update:', payload);
-          // Refresh data on any change
-          supabase
-            .from('lottery_results')
-            .select('*')
-            .order('draw_date', { ascending: false })
-            .then(({ data }) => {
-              if (data) {
-                const latestByGame = new Map<string, any>();
-                for (const r of data) {
-                  if (!latestByGame.has(r.game_name)) {
-                    latestByGame.set(r.game_name, r);
-                  }
-                }
-                setResults(Array.from(latestByGame.values()) as LotteryResult[]);
-                setLastUpdated(new Date());
-              }
-            });
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'lottery_results' }, () => {
+        supabase.from('lottery_results').select('*').order('draw_date', { ascending: false })
+          .then(({ data }) => {
+            if (data) { setResults(getLatestByGame(data)); setLastUpdated(new Date()); }
+          });
+      })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // Sort games in desired order
   const gameOrder = ['Powerball', 'Mega Millions', 'Mass Cash', 'Lucky for Life', 'Numbers Midday', 'Numbers Evening'];
   const sorted = [...results].sort((a, b) => {
     const ai = gameOrder.indexOf(a.game_name);
     const bi = gameOrder.indexOf(b.game_name);
     return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
   });
+
+  const topResults = sorted.filter(r => TOP_GAMES.includes(r.game_name));
+  const otherResults = sorted.filter(r => !TOP_GAMES.includes(r.game_name));
 
   return (
     <div className="glass-card p-6 py-[15px]">
@@ -223,11 +201,36 @@ const LotteryWidget = () => {
           No lottery results available yet. Results will appear after the next draw.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {sorted.map((result) => (
-            <LotteryCard key={result.id} result={result} />
-          ))}
-        </div>
+        <>
+          {/* Top games (Powerball & Mega Millions) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {topResults.map((result) => (
+              <LotteryCard key={result.id} result={result} />
+            ))}
+          </div>
+
+          {/* See All toggle */}
+          {otherResults.length > 0 && (
+            <>
+              <button
+                onClick={() => setShowAll(!showAll)}
+                className="mt-3 w-full text-[12px] font-semibold flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all duration-200 hover:bg-muted/30"
+                style={{ color: '#d97706' }}
+              >
+                {showAll ? 'Show Less' : `See All Games (${otherResults.length} more)`}
+                {showAll ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+
+              {showAll && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2 animate-fade-in">
+                  {otherResults.map((result) => (
+                    <LotteryCard key={result.id} result={result} />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
 
       <div className="text-[10px] text-muted-foreground/50 mt-3 text-center">

@@ -56,6 +56,42 @@ export type Database = {
         }
         Relationships: []
       }
+      local_obituaries: {
+        Row: {
+          age: number | null
+          city: string | null
+          created_at: string | null
+          date_of_passing: string | null
+          full_name: string
+          id: string
+          obituary_url: string
+          source: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          age?: number | null
+          city?: string | null
+          created_at?: string | null
+          date_of_passing?: string | null
+          full_name: string
+          id?: string
+          obituary_url: string
+          source?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          age?: number | null
+          city?: string | null
+          created_at?: string | null
+          date_of_passing?: string | null
+          full_name?: string
+          id?: string
+          obituary_url?: string
+          source?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       lottery_results: {
         Row: {
           created_at: string | null
