@@ -23,26 +23,24 @@ import ObituariesWidget from './widgets/ObituariesWidget';
 import { Settings, Check } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
-const DEFAULT_ORDER = ['stats', 'coming-up', 'news', 'weather', 'srta', 'mbta', 'obituaries', 'lottery'];
-const STORAGE_KEY = 'fr-widget-order-v4';
+const DEFAULT_ORDER = ['stats', 'coming-up', 'news', 'weather', 'srta', 'mbta', 'lottery', 'obituaries'];
+const STORAGE_KEY = 'fr-widget-order-v5';
 
 function loadOrder(): string[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved) as string[];
-      // Re-validate against current default order
       if (DEFAULT_ORDER.every(id => parsed.includes(id)) && parsed.length === DEFAULT_ORDER.length) {
         return parsed;
       }
     }
   } catch { /* ignore */ }
-  // Clear stale order
   localStorage.removeItem(STORAGE_KEY);
   return DEFAULT_ORDER;
 }
 
-const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigate?: (tab: 'eats' | 'events') => void; newsArticles?: NewsArticle[]; onNewsClick?: () => void; weather?: WeatherData | null }) => {
+const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather, onCommunityClick }: { onNavigate?: (tab: 'eats' | 'events') => void; newsArticles?: NewsArticle[]; onNewsClick?: () => void; weather?: WeatherData | null; onCommunityClick?: () => void }) => {
   const isMobile = useIsMobile();
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
@@ -96,7 +94,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
     }).slice(0, 6);
   }, []);
 
-  // Disable scrolling while dragging
   useEffect(() => {
     if (activeId) {
       document.body.style.overflow = 'hidden';
@@ -105,8 +102,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
   }, [activeId]);
 
   const tick = useCallback(() => {
-    const n = new Date();
-
     const ns = nowSec();
 
     const predMap = new Map<string, { predictedTime: string | null; status: string; delayMinutes: number }>();
@@ -116,7 +111,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
       }
     }
 
-    // Determine top badge status directly from the first active real-time prediction
     const firstActivePred = mbtaPredictions.find(p => p.status !== 'CANCELLED');
     const liveStatus = firstActivePred?.status;
     const liveDelayMin = firstActivePred?.delayMinutes;
@@ -147,7 +141,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
       setTrainDepTime(tn.time);
       setTrainDir(tn.dir + ' · ' + selectedStation);
       setTrainAfter(ta ? 'Next after: ' + ta.time : 'No more trains today');
-      // Use direct API status for badge, falling back to matched prediction
       setNextTrainStatus(tn.status || liveStatus);
       setNextTrainDelayMin(tn.delayMin ?? liveDelayMin);
     } else {
@@ -191,7 +184,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
     return () => clearInterval(interval);
   }, [tick]);
 
-
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
     try { navigator.vibrate?.(40); } catch {}
@@ -232,7 +224,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
         remainingTrains={remainingTrains}
         nextTrainStatus={nextTrainStatus}
         nextTrainDelayMin={nextTrainDelayMin}
-        
       />
     ),
     stats: <StatsWidget eventsThisWeek={eventsThisWeek} restaurantCount={RESTAURANTS.length} onNavigate={onNavigate} />,
@@ -249,18 +240,16 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
     ),
     'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} onEventClick={setSelectedEvent} eventOrder={eventOrder} onReorderEvents={setEventOrder} />,
     news: <NewsPreviewWidget articles={newsArticles || []} onNewsClick={onNewsClick} />,
-    lottery: <LotteryWidget />,
-    obituaries: <ObituariesWidget />,
+    lottery: <LotteryWidget compact onSeeAll={onCommunityClick} />,
+    obituaries: <ObituariesWidget compact onSeeAll={onCommunityClick} />,
   };
 
   return (
     <div className="space-y-3 relative">
-      {/* Edit mode overlay */}
       {editMode && (
         <div className="fixed inset-0 edit-overlay z-10 pointer-events-none" />
       )}
 
-      {/* Header */}
       <div className="text-center -mt-4 -mb-12 pb-0 relative z-20">
         <div className="flex items-center justify-center gap-3">
           <button
@@ -283,7 +272,6 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
         )}
       </div>
 
-      {/* Widgets */}
       <div className="relative z-20">
         <DndContext
           sensors={sensors}

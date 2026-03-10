@@ -14,6 +14,11 @@ interface LotteryResult {
   official_url: string;
 }
 
+interface LotteryWidgetProps {
+  compact?: boolean;
+  onSeeAll?: () => void;
+}
+
 const GAME_CONFIG: Record<string, { accent: string; label: string }> = {
   'Powerball': { accent: '#dc2626', label: 'PB' },
   'Mega Millions': { accent: '#d97706', label: 'MB' },
@@ -23,7 +28,6 @@ const GAME_CONFIG: Record<string, { accent: string; label: string }> = {
   'Numbers Evening': { accent: '#7c3aed', label: '' },
 };
 
-// Top games shown by default
 const TOP_GAMES = ['Powerball', 'Mega Millions'];
 
 function formatDrawDate(dateStr: string): string {
@@ -62,7 +66,6 @@ function LotteryCard({ result }: { result: LotteryResult }) {
         boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06)',
       }}
     >
-      {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div>
           <h3 className="text-[15px] font-bold" style={{ color: '#111827' }}>
@@ -85,7 +88,6 @@ function LotteryCard({ result }: { result: LotteryResult }) {
         </div>
       </div>
 
-      {/* Numbers */}
       <div className="flex items-center gap-1.5 flex-wrap">
         {(result.numbers as number[]).map((num, i) => (
           <NumberBall key={`n-${i}`} num={num} accent={config.accent} />
@@ -95,7 +97,6 @@ function LotteryCard({ result }: { result: LotteryResult }) {
         ))}
       </div>
 
-      {/* Multiplier */}
       {result.multiplier && (
         <div className="mt-2.5">
           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${config.accent}12`, color: config.accent }}>
@@ -115,7 +116,7 @@ function getLatestByGame(data: any[]): LotteryResult[] {
   return Array.from(map.values()) as LotteryResult[];
 }
 
-const LotteryWidget = () => {
+const LotteryWidget = ({ compact = false, onSeeAll }: LotteryWidgetProps) => {
   const [results, setResults] = useState<LotteryResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -172,9 +173,11 @@ const LotteryWidget = () => {
   const topResults = sorted.filter(r => TOP_GAMES.includes(r.game_name));
   const otherResults = sorted.filter(r => !TOP_GAMES.includes(r.game_name));
 
+  // In compact mode, only show top games + See All button
+  const displayResults = compact ? topResults : sorted;
+
   return (
     <div className="glass-card p-6 py-[15px]">
-      {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#fef3c7' }}>
           <Trophy className="w-4 h-4" style={{ color: '#d97706' }} />
@@ -192,7 +195,7 @@ const LotteryWidget = () => {
 
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {[1, 2, 3, 4].map(i => (
+          {[1, 2].map(i => (
             <Skeleton key={i} className="h-28 w-full rounded-2xl" />
           ))}
         </div>
@@ -200,16 +203,32 @@ const LotteryWidget = () => {
         <div className="text-center py-8 text-[13px] text-muted-foreground">
           No lottery results available yet. Results will appear after the next draw.
         </div>
+      ) : compact ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {topResults.map((result) => (
+              <LotteryCard key={result.id} result={result} />
+            ))}
+          </div>
+          {onSeeAll && (
+            <button
+              onClick={onSeeAll}
+              className="mt-3 w-full text-[12px] font-semibold flex items-center justify-center gap-1.5 py-2 rounded-xl transition-all duration-200 hover:bg-muted/30"
+              style={{ color: '#d97706' }}
+            >
+              See All Games
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </>
       ) : (
         <>
-          {/* Top games (Powerball & Mega Millions) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {topResults.map((result) => (
               <LotteryCard key={result.id} result={result} />
             ))}
           </div>
 
-          {/* See All toggle */}
           {otherResults.length > 0 && (
             <>
               <button
