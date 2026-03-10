@@ -26,25 +26,25 @@ interface MbtaWidgetProps {
 }
 
 function StatusPill({ status, delayMin }: { status: string; delayMin?: number }) {
-  let colorClasses = '';
+  let inlineStyle: React.CSSProperties = {};
   let label = status;
 
   if (status === 'CANCELLED') {
-    colorClasses = 'bg-destructive/15 text-destructive';
+    inlineStyle = { backgroundColor: '#fee2e2', color: '#dc2626' };
     label = 'CANCELLED';
   } else if (status === 'On Time') {
-    colorClasses = 'bg-foreground/10 text-foreground';
+    inlineStyle = { backgroundColor: 'hsl(var(--foreground) / 0.1)', color: 'hsl(var(--foreground))' };
   } else if (status.includes('late')) {
-    colorClasses = 'bg-destructive/15 text-destructive';
+    inlineStyle = { backgroundColor: '#fee2e2', color: '#dc2626' };
   } else if (status.includes('early')) {
-    colorClasses = 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400';
+    inlineStyle = { backgroundColor: '#dcfce7', color: '#16a34a' };
   } else {
-    colorClasses = 'bg-muted text-muted-foreground';
+    inlineStyle = { backgroundColor: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))' };
     label = 'Scheduled';
   }
 
   return (
-    <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full whitespace-nowrap ${colorClasses}`}>
+    <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full whitespace-nowrap" style={inlineStyle}>
       {label}
     </span>
   );
@@ -53,15 +53,15 @@ function StatusPill({ status, delayMin }: { status: string; delayMin?: number })
 function TopStatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
   const base = "text-[13px] font-bold px-3.5 py-1.5 rounded-full shadow-sm";
   if (status === 'CANCELLED') {
-    return <span className={`${base} uppercase text-destructive-foreground bg-destructive`}>CANCELLED</span>;
+    return <span className={`${base} uppercase`} style={{ backgroundColor: '#dc2626', color: '#ffffff' }}>CANCELLED</span>;
   }
   if (delayMin !== undefined && delayMin > 0) {
-    return <span className={`${base} text-destructive-foreground bg-destructive`}>{delayMin} min Late</span>;
+    return <span className={`${base}`} style={{ backgroundColor: '#dc2626', color: '#ffffff' }}>{delayMin} min Late</span>;
   }
   if ((delayMin !== undefined && delayMin < 0) || status?.toLowerCase().includes('early')) {
-    return <span className={`${base} text-emerald-50 bg-emerald-600`}>{delayMin ? Math.abs(delayMin) : ''} min Early</span>;
+    return <span className={`${base}`} style={{ backgroundColor: '#16a34a', color: '#ffffff' }}>{delayMin ? Math.abs(delayMin) : ''} min Early</span>;
   }
-  return <span className={`${base} text-foreground bg-foreground/10 border border-foreground/20`}>On Time</span>;
+  return <span className={`${base} text-foreground`} style={{ backgroundColor: 'hsl(var(--foreground) / 0.1)', border: '1px solid hsl(var(--foreground) / 0.2)' }}>On Time</span>;
 }
 
 // Group predictions by trip to show route-level stop list
@@ -231,13 +231,14 @@ const MbtaWidget = ({
                     >
                       {/* Timeline dot */}
                       <div className="flex flex-col items-center flex-shrink-0 w-3">
-                        <div className={`w-2 h-2 rounded-full ${
-                          stop.status === 'On Time' ? 'bg-emerald-500' :
-                          stop.status.includes('late') ? 'bg-destructive' :
-                          stop.status.includes('early') ? 'bg-blue-500' :
-                          stop.status === 'CANCELLED' ? 'bg-destructive' :
-                          'bg-muted-foreground/40'
-                        }`} />
+                        <div className="w-2 h-2 rounded-full" style={{
+                          backgroundColor:
+                            stop.status === 'On Time' ? '#22c55e' :
+                            stop.status.includes('late') ? '#dc2626' :
+                            stop.status.includes('early') ? '#16a34a' :
+                            stop.status === 'CANCELLED' ? '#dc2626' :
+                            '#9ca3af'
+                        }} />
                         {i < stops.length - 1 && (
                           <div className="w-px h-5 bg-border/50 mt-0.5" />
                         )}

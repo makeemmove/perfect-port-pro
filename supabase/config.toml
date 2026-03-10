@@ -2,3 +2,6 @@ project_id = "qjyvkqvxzdbclytcdfdj"
 
 [functions.fetch-news]
 verify_jwt = false
+
+[functions.fetch-lottery]
+verify_jwt = false

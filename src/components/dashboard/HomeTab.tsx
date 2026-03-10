@@ -18,11 +18,12 @@ import StatsWidget from './widgets/StatsWidget';
 import ComingUpWidget from './widgets/ComingUpWidget';
 import NewsPreviewWidget from './widgets/NewsPreviewWidget';
 import QuickViewModal from './QuickViewModal';
+import LotteryWidget from './widgets/LotteryWidget';
 import { Settings, Check } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
-const DEFAULT_ORDER = ['stats', 'coming-up', 'news', 'weather', 'srta', 'mbta'];
-const STORAGE_KEY = 'fr-widget-order-v2';
+const DEFAULT_ORDER = ['stats', 'coming-up', 'news', 'weather', 'lottery', 'srta', 'mbta'];
+const STORAGE_KEY = 'fr-widget-order-v3';
 
 function loadOrder(): string[] {
   try {
@@ -247,6 +248,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
     ),
     'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} onEventClick={setSelectedEvent} eventOrder={eventOrder} onReorderEvents={setEventOrder} />,
     news: <NewsPreviewWidget articles={newsArticles || []} onNewsClick={onNewsClick} />,
+    lottery: <LotteryWidget />,
   };
 
   return (
