@@ -53,15 +53,15 @@ function StatusPill({ status, delayMin }: { status: string; delayMin?: number })
 function TopStatusBadge({ status, delayMin }: { status?: string; delayMin?: number }) {
   const base = "text-[13px] font-bold px-3.5 py-1.5 rounded-full shadow-sm";
   if (status === 'CANCELLED') {
-    return <span className={`${base} uppercase text-destructive-foreground bg-destructive`}>CANCELLED</span>;
+    return <span className={`${base} uppercase`} style={{ backgroundColor: '#dc2626', color: '#ffffff' }}>CANCELLED</span>;
   }
   if (delayMin !== undefined && delayMin > 0) {
-    return <span className={`${base} text-destructive-foreground bg-destructive`}>{delayMin} min Late</span>;
+    return <span className={`${base}`} style={{ backgroundColor: '#dc2626', color: '#ffffff' }}>{delayMin} min Late</span>;
   }
   if ((delayMin !== undefined && delayMin < 0) || status?.toLowerCase().includes('early')) {
-    return <span className={`${base} text-emerald-50 bg-emerald-600`}>{delayMin ? Math.abs(delayMin) : ''} min Early</span>;
+    return <span className={`${base}`} style={{ backgroundColor: '#16a34a', color: '#ffffff' }}>{delayMin ? Math.abs(delayMin) : ''} min Early</span>;
   }
-  return <span className={`${base} text-foreground bg-foreground/10 border border-foreground/20`}>On Time</span>;
+  return <span className={`${base} text-foreground`} style={{ backgroundColor: 'hsl(var(--foreground) / 0.1)', border: '1px solid hsl(var(--foreground) / 0.2)' }}>On Time</span>;
 }
 
 // Group predictions by trip to show route-level stop list
