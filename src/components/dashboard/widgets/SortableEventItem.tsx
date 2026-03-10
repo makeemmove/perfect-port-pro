@@ -3,17 +3,17 @@ import { CSS } from '@dnd-kit/utilities';
 import type { CityEvent } from '@/data/events';
 
 const genreColors: Record<string, { bg: string; text: string }> = {
-  Music:     { bg: 'bg-indigo-500',  text: 'text-white' },
-  Arts:      { bg: 'bg-pink-500',    text: 'text-white' },
-  Theater:   { bg: 'bg-pink-600',    text: 'text-white' },
-  Community: { bg: 'bg-orange-500',  text: 'text-white' },
-  Family:    { bg: 'bg-orange-400',  text: 'text-white' },
-  Kids:      { bg: 'bg-blue-500',    text: 'text-white' },
-  Education: { bg: 'bg-teal-500',    text: 'text-white' },
-  Festival:  { bg: 'bg-yellow-500',  text: 'text-yellow-950' },
-  Holiday:   { bg: 'bg-red-500',     text: 'text-white' },
+  Music:     { bg: '#6366f1', text: '#ffffff' },
+  Arts:      { bg: '#ec4899', text: '#ffffff' },
+  Theater:   { bg: '#db2777', text: '#ffffff' },
+  Community: { bg: '#f97316', text: '#ffffff' },
+  Family:    { bg: '#fb923c', text: '#ffffff' },
+  Kids:      { bg: '#3b82f6', text: '#ffffff' },
+  Education: { bg: '#14b8a6', text: '#ffffff' },
+  Festival:  { bg: '#eab308', text: '#422006' },
+  Holiday:   { bg: '#ef4444', text: '#ffffff' },
 };
-const defaultColor = { bg: 'bg-blue-500', text: 'text-white' };
+const defaultColor = { bg: '#3b82f6', text: '#ffffff' };
 
 interface SortableEventItemProps {
   id: string;
