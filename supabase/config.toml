@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.fetch-lottery]
 verify_jwt = false
+
+[functions.fetch-obituaries]
+verify_jwt = false

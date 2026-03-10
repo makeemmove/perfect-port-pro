@@ -250,6 +250,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather }: { onNavigat
     'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} onEventClick={setSelectedEvent} eventOrder={eventOrder} onReorderEvents={setEventOrder} />,
     news: <NewsPreviewWidget articles={newsArticles || []} onNewsClick={onNewsClick} />,
     lottery: <LotteryWidget />,
+    obituaries: <ObituariesWidget />,
   };
 
   return (
