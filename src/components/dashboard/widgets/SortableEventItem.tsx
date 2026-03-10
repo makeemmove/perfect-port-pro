@@ -67,7 +67,7 @@ const SortableEventItem = ({ id, event, onEventClick }: SortableEventItemProps) 
           <circle cx="10" cy="12" r="1.3" />
         </svg>
       </button>
-      <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0 ${colors.bg} ${colors.text}`}>
+      <div className="w-10 h-10 rounded-lg flex flex-col items-center justify-center flex-shrink-0" style={{ backgroundColor: colors.bg, color: colors.text }}>
         <span className="text-[9px] font-bold leading-none tracking-wide">{month}</span>
         <span className="text-[15px] font-extrabold leading-tight">{day}</span>
       </div>
