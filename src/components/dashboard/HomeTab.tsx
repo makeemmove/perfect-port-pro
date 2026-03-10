@@ -23,7 +23,7 @@ import { Settings, Check } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 const DEFAULT_ORDER = ['stats', 'coming-up', 'news', 'weather', 'lottery', 'srta', 'mbta'];
-const STORAGE_KEY = 'fr-widget-order-v2';
+const STORAGE_KEY = 'fr-widget-order-v3';
 
 function loadOrder(): string[] {
   try {
