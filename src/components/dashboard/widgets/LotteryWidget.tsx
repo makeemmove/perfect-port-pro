@@ -39,11 +39,11 @@ function NumberBall({ num, isSpecial, accent }: { num: number; isSpecial?: boole
   if (num == null || isNaN(num)) return null;
   return (
     <div
-      className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-transform"
+      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-transform"
       style={{
         backgroundColor: isSpecial ? accent : '#ffffff',
         color: isSpecial ? '#ffffff' : '#1f2937',
-        border: isSpecial ? 'none' : '1.5px solid #e5e7eb',
+        border: '1px solid #e5e7eb',
         boxShadow: isSpecial ? `0 2px 8px ${accent}40` : '0 1px 3px rgba(0,0,0,0.06)',
       }}
     >
@@ -104,6 +104,11 @@ function LotteryCard({ result }: { result: LotteryResult }) {
           </span>
         </div>
       )}
+
+      <div className="mt-3 text-[11px] font-medium flex items-center justify-between text-gray-400">
+        <span>Drawn by the Massachusetts Lottery</span>
+        <span className="underline">View official results</span>
+      </div>
     </a>
   );
 }
@@ -163,7 +168,7 @@ const LotteryWidget = ({ compact = false, onSeeAll }: LotteryWidgetProps) => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const gameOrder = ['Powerball', 'Mega Millions', 'Mass Cash', 'Lucky for Life', 'Numbers Midday', 'Numbers Evening'];
+  const gameOrder = ['Powerball', 'Mega Millions', 'Mass Cash', 'Lucky for Life', 'Megabucks', 'Numbers Midday', 'Numbers Evening', 'Keno'];
   const sorted = [...results].sort((a, b) => {
     const ai = gameOrder.indexOf(a.game_name);
     const bi = gameOrder.indexOf(b.game_name);

@@ -154,7 +154,15 @@ const ObituariesWidget = ({ compact = false, onSeeAll }: ObituariesWidgetProps) 
       )}
 
       <div className="text-[10px] text-muted-foreground/50 mt-3 text-center">
-        Updates every 2 hours · Fall River, MA only
+        Updates every 2 hours · Fall River, MA only ·{' '}
+        <a
+          href="https://www.legacy.com/us/obituaries/local/massachusetts/fall-river"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
+          View official listings
+        </a>
       </div>
     </div>
   );
