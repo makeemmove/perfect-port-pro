@@ -52,12 +52,13 @@ async function fetchMegaMillions(): Promise<LotteryResult[]> {
     const data = await res.json();
     return data.map((d: any) => {
       const nums = d.winning_numbers.split(" ").map(Number);
+      const megaBall = d.mega_ball ? Number(d.mega_ball) : nums[5];
       return {
         game_name: "Mega Millions",
         draw_date: d.draw_date,
         numbers: nums.slice(0, 5),
-        special_number: [nums[5]],
-        multiplier: d.mega_ball ? null : null,
+        special_number: megaBall != null && !isNaN(megaBall) ? [megaBall] : null,
+        multiplier: d.multiplier ? `${d.multiplier}x` : null,
         jackpot: null,
         official_url: "https://www.masslottery.com/tools/past-results/mega-millions",
       };
