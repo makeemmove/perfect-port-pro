@@ -95,9 +95,9 @@ function cleanName(title: string): string {
   return title
     .replace(/<[^>]+>/g, "")
     .replace(/\s*obituary\s*/gi, "")
-    .replace(/\s*-\s*legacy\.com.*/i, "")
+    .replace(/\s*-\s*(Fall River|Legacy|Dignity Memorial|Herald News|East Bay RI|heraldnews).*$/i, "")
     .replace(/\s*\|.*$/, "")
-    .replace(/\s*-\s*Herald News.*$/i, "")
+    .replace(/\(\d{4}\)/g, "")
     .replace(/,\s*\d{1,3}\s*,?/g, "")
     .replace(/\s+/g, " ")
     .trim();
