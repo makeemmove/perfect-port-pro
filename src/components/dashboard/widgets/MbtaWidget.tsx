@@ -231,13 +231,14 @@ const MbtaWidget = ({
                     >
                       {/* Timeline dot */}
                       <div className="flex flex-col items-center flex-shrink-0 w-3">
-                        <div className={`w-2 h-2 rounded-full ${
-                          stop.status === 'On Time' ? 'bg-emerald-500' :
-                          stop.status.includes('late') ? 'bg-destructive' :
-                          stop.status.includes('early') ? 'bg-blue-500' :
-                          stop.status === 'CANCELLED' ? 'bg-destructive' :
-                          'bg-muted-foreground/40'
-                        }`} />
+                        <div className="w-2 h-2 rounded-full" style={{
+                          backgroundColor:
+                            stop.status === 'On Time' ? '#22c55e' :
+                            stop.status.includes('late') ? '#dc2626' :
+                            stop.status.includes('early') ? '#16a34a' :
+                            stop.status === 'CANCELLED' ? '#dc2626' :
+                            '#9ca3af'
+                        }} />
                         {i < stops.length - 1 && (
                           <div className="w-px h-5 bg-border/50 mt-0.5" />
                         )}
