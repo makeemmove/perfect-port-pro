@@ -58,7 +58,7 @@ const leftBarColors: Record<string, string> = {
   'Juice/Healthy': '#16a34a',
 };
 
-const EatsTab = () => {
+const EatsTab = ({ onBackToHome }: { onBackToHome?: () => void }) => {
   const [activeCat, setActiveCat] = useState('All');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
 
@@ -68,6 +68,14 @@ const EatsTab = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
+          {onBackToHome && (
+            <button
+              onClick={onBackToHome}
+              className="text-[11px] font-semibold text-muted-foreground hover:text-foreground mb-1"
+            >
+              ← Back to Home
+            </button>
+          )}
           <h1 className="text-2xl font-extrabold text-foreground">Eats</h1>
           <div className="text-xs text-muted-foreground">Restaurants &amp; Cafés</div>
         </div>

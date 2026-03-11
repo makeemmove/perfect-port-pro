@@ -19,15 +19,24 @@ interface NewsTabProps {
   isLoading: boolean;
   lastFetched: string | null;
   onRefresh: () => void;
+  onBackToHome?: () => void;
 }
 
-const NewsTab = ({ articles, isLoading, lastFetched, onRefresh }: NewsTabProps) => {
+const NewsTab = ({ articles, isLoading, lastFetched, onRefresh, onBackToHome }: NewsTabProps) => {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
+          {onBackToHome && (
+            <button
+              onClick={onBackToHome}
+              className="text-[11px] font-semibold text-muted-foreground hover:text-foreground mb-1"
+            >
+              ← Back to Home
+            </button>
+          )}
           <h1 className="text-2xl font-extrabold text-foreground">News</h1>
           <div className="text-[10px] tracking-widest uppercase text-muted-foreground font-medium">
             {lastFetched ? `Updated ${new Date(lastFetched).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` : 'Loading...'}

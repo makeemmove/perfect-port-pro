@@ -1,6 +1,6 @@
 interface BottomNavProps {
-  activeTab: 'home' | 'eats' | 'events' | 'news' | 'community';
-  onTabChange: (tab: 'home' | 'eats' | 'events' | 'news' | 'community') => void;
+  activeTab: 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries';
+  onTabChange: (tab: 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries') => void;
 }
 
 const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
@@ -51,14 +51,28 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
       ),
     },
     {
-      id: 'community' as const,
-      label: 'Community',
+      id: 'lottery' as const,
+      label: 'Lottery',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5" strokeWidth={2}>
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M7 9l2 2 4-4" />
+          <circle cx="17" cy="15" r="1" />
+          <circle cx="13" cy="15" r="1" />
+          <circle cx="9" cy="15" r="1" />
+        </svg>
+      ),
+    },
+    {
+      id: 'obituaries' as const,
+      label: 'Obituaries',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5" strokeWidth={2}>
+          <rect x="5" y="3" width="14" height="18" rx="2" />
+          <path d="M9 7h6" />
+          <path d="M9 11h4" />
+          <path d="M9 15h3" />
+          <path d="M8 21c0-1.5 1-3 4-3s4 1.5 4 3" />
         </svg>
       ),
     },

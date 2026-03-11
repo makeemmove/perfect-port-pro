@@ -19,11 +19,10 @@ import ComingUpWidget from './widgets/ComingUpWidget';
 import NewsPreviewWidget from './widgets/NewsPreviewWidget';
 import QuickViewModal from './QuickViewModal';
 import LotteryWidget from './widgets/LotteryWidget';
-import ObituariesWidget from './widgets/ObituariesWidget';
 import { Settings, Check } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
-const DEFAULT_ORDER = ['stats', 'coming-up', 'news', 'weather', 'srta', 'mbta', 'lottery', 'obituaries'];
+const DEFAULT_ORDER = ['stats', 'coming-up', 'news', 'srta', 'mbta', 'weather', 'lottery'];
 const STORAGE_KEY = 'fr-widget-order-v5';
 
 function loadOrder(): string[] {
@@ -40,7 +39,23 @@ function loadOrder(): string[] {
   return DEFAULT_ORDER;
 }
 
-const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather, onCommunityClick }: { onNavigate?: (tab: 'eats' | 'events') => void; newsArticles?: NewsArticle[]; onNewsClick?: () => void; weather?: WeatherData | null; onCommunityClick?: () => void }) => {
+const HomeTab = ({
+  onNavigate,
+  newsArticles,
+  onNewsClick,
+  weather,
+  onLotteryClick,
+  activeTab,
+  onTabChange,
+}: {
+  onNavigate?: (tab: 'eats' | 'events') => void;
+  newsArticles?: NewsArticle[];
+  onNewsClick?: () => void;
+  weather?: WeatherData | null;
+  onLotteryClick?: () => void;
+  activeTab?: 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries';
+  onTabChange?: (tab: 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries') => void;
+}) => {
   const isMobile = useIsMobile();
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
@@ -240,8 +255,7 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather, onCommunityCl
     ),
     'coming-up': <ComingUpWidget upcomingEvents={upcomingEvents} onEventClick={setSelectedEvent} eventOrder={eventOrder} onReorderEvents={setEventOrder} />,
     news: <NewsPreviewWidget articles={newsArticles || []} onNewsClick={onNewsClick} />,
-    lottery: <LotteryWidget compact onSeeAll={onCommunityClick} />,
-    obituaries: <ObituariesWidget compact onSeeAll={onCommunityClick} />,
+    lottery: <LotteryWidget compact onSeeAll={onLotteryClick} />,
   };
 
   return (
@@ -252,17 +266,47 @@ const HomeTab = ({ onNavigate, newsArticles, onNewsClick, weather, onCommunityCl
 
       <div className="text-center -mt-4 -mb-12 pb-0 relative z-20">
         <div className="flex items-center justify-center gap-3">
-          <button
-            onClick={editMode ? handleSave : () => setEditMode(true)}
-            className={`absolute left-0 top-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-              editMode
-                ? 'bg-primary text-primary-foreground shadow-lg scale-110'
-                : 'text-primary hover:text-primary/80'
-            }`}
-            aria-label={editMode ? 'Save layout' : 'Edit layout'}
-          >
-            {editMode ? <Check size={18} strokeWidth={3} /> : <Settings size={16} />}
-          </button>
+          {isMobile ? (
+            <div className="absolute left-0 top-8 flex items-center gap-0">
+              {onTabChange && (
+                <select
+                  value={activeTab || 'home'}
+                  onChange={(e) => onTabChange(e.target.value as typeof activeTab)}
+                  className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-semibold shadow-sm"
+                >
+                  <option value="home">Home</option>
+                  <option value="eats">Eats</option>
+                  <option value="events">Events</option>
+                  <option value="news">News</option>
+                  <option value="lottery">Lottery</option>
+                  <option value="obituaries">Obituaries</option>
+                </select>
+              )}
+              <button
+                onClick={editMode ? handleSave : () => setEditMode(true)}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  editMode
+                    ? 'bg-primary text-primary-foreground shadow-lg scale-110'
+                    : 'text-primary hover:text-primary/80 bg-white/80 border border-gray-200'
+                }`}
+                aria-label={editMode ? 'Save layout' : 'Edit layout'}
+              >
+                {editMode ? <Check size={18} strokeWidth={3} /> : <Settings size={16} />}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={editMode ? handleSave : () => setEditMode(true)}
+              className={`absolute left-0 top-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                editMode
+                  ? 'bg-primary text-primary-foreground shadow-lg scale-110'
+                  : 'text-primary hover:text-primary/80'
+              }`}
+              aria-label={editMode ? 'Save layout' : 'Edit layout'}
+            >
+              {editMode ? <Check size={18} strokeWidth={3} /> : <Settings size={16} />}
+            </button>
+          )}
           <img src={logo} alt="Fall River Connect" className="h-64 w-auto" />
         </div>
         {editMode && (
