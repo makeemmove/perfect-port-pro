@@ -17,6 +17,27 @@ export interface NewsArticle {
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
+/** Normalize for comparison: lowercase, single spaces, trimmed */
+function normalizeTitle(title: string): string {
+  return (title || '').toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+/**
+ * Dedupe by "story": same first 5 words = same story (catches "Mayor Coogan... for Future"
+ * vs "...for Fall River" and other minor rewrites). Never show duplicate articles.
+ */
+function dedupeArticlesByTitle(articles: NewsArticle[]): NewsArticle[] {
+  const seenKeys = new Set<string>();
+  return articles.filter((a) => {
+    const norm = normalizeTitle(a.title);
+    const words = norm.split(/\s+/).filter(Boolean);
+    const keyFirstWords = words.slice(0, 5).join(' ');
+    if (seenKeys.has(keyFirstWords)) return false;
+    seenKeys.add(keyFirstWords);
+    return true;
+  });
+}
+
 export function useNews() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +55,8 @@ export function useNews() {
 
       if (error) throw error;
       if (data) {
-        setArticles(data as NewsArticle[]);
+        const list = data as NewsArticle[];
+        setArticles(dedupeArticlesByTitle(list));
         setLastFetched(new Date().toISOString());
       }
     } catch (e) {
@@ -42,7 +64,7 @@ export function useNews() {
       try {
         const { data, error } = await supabase.functions.invoke('fetch-news');
         if (!error && data?.articles) {
-          setArticles(data.articles);
+          setArticles(dedupeArticlesByTitle(data.articles));
           setLastFetched(data.fetchedAt || new Date().toISOString());
         }
       } catch { /* ignore */ }
@@ -71,7 +93,7 @@ export function useNews() {
       );
       const result = await res.json();
       if (result?.articles) {
-        setArticles(result.articles);
+        setArticles(dedupeArticlesByTitle(result.articles));
         setLastFetched(result.fetchedAt || new Date().toISOString());
       }
     } catch (e) {

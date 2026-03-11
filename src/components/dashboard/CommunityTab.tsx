@@ -42,11 +42,6 @@ const GAME_SCHEDULE = [
     drawTime: '9:00 PM',
   },
   {
-    game: 'Millionaire for Life',
-    drawDays: 'Daily',
-    drawTime: '8:15 PM',
-  },
-  {
     game: 'Megabucks',
     drawDays: 'Mon, Wed, Sat',
     drawTime: '7:59 PM',
@@ -349,7 +344,6 @@ const LotteryTab = ({ onBackToHome }: { onBackToHome?: () => void }) => {
         <p className="text-[12px]" style={{ color: '#9ca3af' }}>Latest lottery results for Fall River</p>
       </div>
       <LotteryScheduleCard />
-      <MegabucksCard />
       <LotteryWidget showHistory />
       <KenoCard />
     </div>

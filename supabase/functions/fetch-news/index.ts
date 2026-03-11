@@ -226,10 +226,11 @@ serve(async (req) => {
 
     let allRaw = [...reporterArticles, ...heraldArticles, ...googleArticles];
 
-    // Deduplicate by similar titles
+    // Deduplicate by same story (first 5 words of title so "Mayor Coogan... for Future" vs "...for Fall River" merge)
     const seen = new Set<string>();
     allRaw = allRaw.filter((a) => {
-      const key = a.title.toLowerCase().slice(0, 40);
+      const norm = a.title.toLowerCase().trim().replace(/\s+/g, " ");
+      const key = norm.split(/\s+/).filter(Boolean).slice(0, 5).join(" ");
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
@@ -286,18 +287,27 @@ serve(async (req) => {
       }
     }
 
-    // 4. Return latest 15 articles from DB
-    const { data: articles, error: fetchError } = await supabase
+    // 4. Return latest 15 articles from DB (dedupe by first 5 words of title so same story never appears twice)
+    const { data: rawArticles, error: fetchError } = await supabase
       .from("articles")
       .select("*")
       .eq("status", "published")
       .order("published_at", { ascending: false })
-      .limit(15);
+      .limit(20);
 
     if (fetchError) throw fetchError;
 
+    const seenTitleKeys = new Set<string>();
+    const articles = (rawArticles || []).filter((a: any) => {
+      const norm = (a.title || "").toLowerCase().trim().replace(/\s+/g, " ");
+      const key = norm.split(/\s+/).filter(Boolean).slice(0, 5).join(" ");
+      if (seenTitleKeys.has(key)) return false;
+      seenTitleKeys.add(key);
+      return true;
+    }).slice(0, 15);
+
     return new Response(
-      JSON.stringify({ articles: articles || [], fetchedAt: new Date().toISOString() }),
+      JSON.stringify({ articles, fetchedAt: new Date().toISOString() }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
