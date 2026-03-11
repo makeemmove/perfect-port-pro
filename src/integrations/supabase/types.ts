@@ -59,86 +59,35 @@ export type Database = {
       local_obituaries: {
         Row: {
           age: number | null
-          article_bio: string | null
-          birth_date: string | null
           city: string | null
           created_at: string | null
           date_of_passing: string | null
           full_name: string
           id: string
           obituary_url: string
-          picture_url: string | null
           source: string | null
           updated_at: string | null
         }
         Insert: {
           age?: number | null
-          article_bio?: string | null
-          birth_date?: string | null
           city?: string | null
           created_at?: string | null
           date_of_passing?: string | null
           full_name: string
           id?: string
           obituary_url: string
-          picture_url?: string | null
           source?: string | null
           updated_at?: string | null
         }
         Update: {
           age?: number | null
-          article_bio?: string | null
-          birth_date?: string | null
           city?: string | null
           created_at?: string | null
           date_of_passing?: string | null
           full_name?: string
           id?: string
           obituary_url?: string
-          picture_url?: string | null
           source?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      tribute_submissions: {
-        Row: {
-          id: string
-          full_name: string
-          birth_date: string | null
-          passing_date: string | null
-          picture_url: string | null
-          article_bio: string | null
-          submitter_name: string | null
-          status: string
-          city: string
-          created_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id?: string
-          full_name: string
-          birth_date?: string | null
-          passing_date?: string | null
-          picture_url?: string | null
-          article_bio?: string | null
-          submitter_name?: string | null
-          status?: string
-          city?: string
-          created_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          full_name?: string
-          birth_date?: string | null
-          passing_date?: string | null
-          picture_url?: string | null
-          article_bio?: string | null
-          submitter_name?: string | null
-          status?: string
-          city?: string
-          created_at?: string | null
           updated_at?: string | null
         }
         Relationships: []
