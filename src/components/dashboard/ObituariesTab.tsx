@@ -190,7 +190,7 @@ const ObituariesTab = ({ onBackToHome }: { onBackToHome?: () => void }) => {
 
     if (!error && data) {
       const list = data as unknown as Obituary[];
-      const { data: tributes } = await supabase
+      const { data: tributes } = await (supabase as any)
         .from('tribute_submissions')
         .select('*')
         .eq('city', 'Fall River')
