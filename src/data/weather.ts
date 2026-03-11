@@ -31,16 +31,16 @@ const LOCATION_ID = "fall_river";
 export async function fetchWeather(): Promise<WeatherData | null> {
   try {
     const [currentRes, forecastRes] = await Promise.all([
-      supabase.from("weather_current").select("*").eq("id", LOCATION_ID).maybeSingle(),
-      supabase.from("weather_forecast").select("forecast_date, day_name, high, low, icon").eq("location_id", LOCATION_ID).order("forecast_date", { ascending: true }),
+      (supabase as any).from("weather_current").select("*").eq("id", LOCATION_ID).maybeSingle(),
+      (supabase as any).from("weather_forecast").select("forecast_date, day_name, high, low, icon").eq("location_id", LOCATION_ID).order("forecast_date", { ascending: true }),
     ]);
 
-    const current = currentRes.data;
-    const forecastRows = forecastRes.data ?? [];
+    const current = currentRes.data as any;
+    const forecastRows = (forecastRes.data ?? []) as any[];
 
     if (current && forecastRows.length > 0) {
       const alerts = (current.alerts ?? []) as WeatherAlert[];
-      const daily = forecastRows.map((r) => ({
+      const daily = forecastRows.map((r: any) => ({
         day: r.day_name,
         high: r.high,
         low: r.low,

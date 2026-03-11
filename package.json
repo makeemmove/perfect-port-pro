@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "lottery-numbers": "node scripts/pull-mass-lottery-numbers.mjs",
+    "lottery-cards-update": "node scripts/update-lottery-cards-from-masslottery.mjs",
+    "lottery-cards-update:db": "node -r dotenv/config scripts/update-lottery-cards-from-masslottery.mjs --db",
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",

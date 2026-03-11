@@ -27,34 +27,44 @@ const GAME_CONFIG: Record<string, { accent: string; label: string }> = {
   'Mega Millions': { accent: '#d97706', label: 'MB' },
   'Mass Cash Midday': { accent: '#2563eb', label: '' },
   'Mass Cash Evening': { accent: '#2563eb', label: '' },
-  'Millionaire for Life': { accent: '#16a34a', label: 'ML' },
   'Megabucks': { accent: '#0ea5e9', label: '' },
   'Numbers Midday': { accent: '#7c3aed', label: '' },
   'Numbers Evening': { accent: '#7c3aed', label: '' },
   'Keno': { accent: '#f97316', label: '' },
 };
 
-const TOP_GAMES = ['Powerball'];
+const TOP_GAMES = ['Powerball', 'Mega Millions', 'Keno'];
 
 const DISPLAY_GAMES = [
   'Powerball',
   'Mega Millions',
   'Mass Cash Midday',
   'Mass Cash Evening',
-  'Millionaire for Life',
   'Megabucks',
   'Numbers Midday',
   'Numbers Evening',
   'Keno',
 ];
 
+function parseLocalDate(dateStr: string): Date | null {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split('T')[0].split('-').map(Number);
+  if (!y || !m || !d) {
+    const fallback = new Date(dateStr);
+    return isNaN(fallback.getTime()) ? null : fallback;
+  }
+  return new Date(y, m - 1, d);
+}
+
 function formatDrawDate(dateStr: string): string {
-  const d = new Date(dateStr);
+  const d = parseLocalDate(dateStr);
+  if (!d) return '';
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 function isDrawToday(dateStr: string): boolean {
-  const d = new Date(dateStr);
+  const d = parseLocalDate(dateStr);
+  if (!d) return false;
   const today = new Date();
   return d.getFullYear() === today.getFullYear() &&
     d.getMonth() === today.getMonth() &&
@@ -83,6 +93,14 @@ function toNumberArray(value: unknown): number[] {
     return [value];
   }
   return [];
+}
+
+interface KenoDraw {
+  id: string;
+  drawNumber: number;
+  draw_date: string;
+  numbers: number[];
+  bonus: number | null;
 }
 
 function NumberBall({ num, isSpecial, accent }: { num: number; isSpecial?: boolean; accent: string }) {
@@ -129,11 +147,14 @@ function LotteryCard({ result, isFromToday }: { result: LotteryResult; isFromTod
   }
 
   // If no draw today, we show the latest draw (already chosen as todayLatest || overallLatest).
-  const dateLabel = isPlaceholder
-    ? 'Awaiting this week\'s draw'
-    : isFromToday
-      ? `Today · ${formatDrawDate(result.draw_date)}`
-      : `Last draw · ${formatDrawDate(result.draw_date)}`;
+  const dateLabel =
+    result.game_name === 'Keno'
+      ? `Draw #${result.id}`
+      : isPlaceholder
+        ? 'Awaiting this week\'s draw'
+        : isFromToday
+          ? `Today · ${formatDrawDate(result.draw_date)}`
+          : `Last draw · ${formatDrawDate(result.draw_date)}`;
 
   return (
     <a
@@ -164,7 +185,10 @@ function LotteryCard({ result, isFromToday }: { result: LotteryResult; isFromTod
         </div>
         <div className="flex items-center gap-2">
           {result.jackpot && (
-            <span className="text-[12px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${config.accent}15`, color: config.accent }}>
+            <span
+              className="inline-flex items-center justify-center text-[12px] font-bold px-2.5 py-1 rounded-full leading-none"
+              style={{ backgroundColor: `${config.accent}15`, color: config.accent }}
+            >
               {result.jackpot}
             </span>
           )}
@@ -176,32 +200,55 @@ function LotteryCard({ result, isFromToday }: { result: LotteryResult; isFromTod
       </div>
 
       {result.game_name === 'Keno' ? (
-        <div className="mt-1 grid grid-cols-5 gap-1.5">
-          {toNumberArray(result.numbers).slice(0, 20).map((num, i) => (
-            <div
-              key={`k-${i}`}
-              className="h-8 rounded-full flex items-center justify-center text-xs font-semibold"
-              style={{
-                backgroundColor: '#ffffff',
-                color: '#111827',
-                border: '1px solid #e5e7eb',
-              }}
-            >
-              {num}
+        <div className="mt-1">
+          <div className="grid grid-cols-5 gap-1.5 mb-2">
+            {toNumberArray(result.numbers).slice(0, 20).map((num, i) => (
+              <div
+                key={`k-${i}`}
+                className="h-8 rounded-full flex items-center justify-center text-xs font-semibold"
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#111827',
+                  border: '1px solid #e5e7eb',
+                }}
+              >
+                {num}
+              </div>
+            ))}
+          </div>
+          {result.multiplier && (
+            <div className="flex items-center gap-2">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold"
+                style={{
+                  backgroundColor: '#ef4444',
+                  color: '#ffffff',
+                  boxShadow: '0 2px 8px rgba(239,68,68,0.4)',
+                }}
+              >
+                {result.multiplier}
+              </div>
+              <span className="text-[10px] font-medium text-gray-500">
+                Bonus multiplier
+              </span>
             </div>
-          ))}
+          )}
         </div>
       ) : isPlaceholder ? (
         <div className="mt-1 text-[11px] text-gray-400">
           Numbers will appear here after this week&apos;s draw is posted.
         </div>
       ) : (
+        /* Powerball-style layout: main numbers as white balls, then optional special ball */
         <div className="flex items-center gap-1.5 flex-wrap">
-          {/* Main numbers (white balls) - same style as Powerball */}
-          {toNumberArray(result.numbers).map((num, i) => (
+          {/* Main numbers (white balls) - same style as Powerball; Mass Cash = 5 balls, Powerball/Mega = 5 then special */}
+          {(isMassCashMidday || isMassCashEvening
+            ? toNumberArray(result.numbers)
+            : toNumberArray(result.numbers).slice(0, 5)
+          ).map((num, i) => (
             <NumberBall key={`n-${i}`} num={num} accent={config.accent} />
           ))}
-          {/* Special/Power/Mega ball - visually separated like Powerball */}
+          {/* Special/Power/Mega ball - visually separated like Powerball (Mass Cash has none) */}
           {result.special_number && toNumberArray(result.special_number).length > 0 && (
             <>
               <span className="w-1 shrink-0" aria-hidden="true" />
@@ -213,9 +260,12 @@ function LotteryCard({ result, isFromToday }: { result: LotteryResult; isFromTod
         </div>
       )}
 
-      {result.multiplier && (
+      {result.multiplier && result.game_name !== 'Keno' && (
         <div className="mt-2.5">
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${config.accent}12`, color: config.accent }}>
+          <span
+            className="inline-flex items-center justify-center text-[11px] font-bold px-2.5 py-1 rounded-full leading-none"
+            style={{ backgroundColor: `${config.accent}12`, color: config.accent }}
+          >
             {result.multiplier}
           </span>
         </div>
@@ -243,12 +293,98 @@ const LotteryWidget = ({ compact = false, onSeeAll, showHistory = false }: Lotte
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [showAll, setShowAll] = useState(false);
   const hasTriggeredFetchForPlaceholders = useRef(false);
+  const [kenoDraws, setKenoDraws] = useState<KenoDraw[]>([]);
+  const [selectedKenoIndex, setSelectedKenoIndex] = useState(0);
 
   // High-precision polling around draw times to ping the scraper / sheet.
   useEffect(() => {
     const stop = startLotteryPolling();
     return () => {
       stop();
+    };
+  }, []);
+
+  // Direct Keno polling from Mass Lottery API (every 30 seconds, latest draws today).
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadKeno() {
+      try {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+
+        const url = `https://www.masslottery.com/rest/keno/getDrawsByDateRange?startDate=${dateStr}&endDate=${dateStr}`;
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) return;
+
+        const json = await res.json();
+        const rawDraws: any[] = Array.isArray(json) ? json : Array.isArray(json?.draws) ? json.draws : [];
+
+        const parsed: KenoDraw[] = rawDraws
+          .map((d, index) => {
+            const drawDate: string =
+              typeof d.drawDate === 'string'
+                ? d.drawDate
+                : typeof d.drawTime === 'string'
+                  ? d.drawTime
+                  : new Date().toISOString();
+
+            const numsSource =
+              d.numbers ??
+              d.winningNumbers ??
+              d.winning_numbers ??
+              d.winning_numbers_display ??
+              '';
+
+            const nums = toNumberArray(numsSource);
+
+            const bonus: number | null =
+              typeof d.bonus === 'number'
+                ? d.bonus
+                : Number.isFinite(Number(d.bonus))
+                  ? Number(d.bonus)
+                  : null;
+
+            const drawNumber: number =
+              typeof d.drawNumber === 'number'
+                ? d.drawNumber
+                : typeof d.id === 'number'
+                  ? d.id
+                  : Number(d.drawNumber ?? d.id ?? index);
+
+            return {
+              id: String(drawNumber),
+              drawNumber,
+              draw_date: drawDate,
+              numbers: nums,
+              bonus,
+            };
+          })
+          .filter((d) => d.numbers.length > 0);
+
+        // Sort so index 0 is always the latest draw (highest drawNumber).
+        parsed.sort((a, b) => b.drawNumber - a.drawNumber);
+
+        if (parsed.length > 0) {
+          setKenoDraws(parsed);
+          setSelectedKenoIndex(0);
+          setLastUpdated(new Date());
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch Keno draws from Mass Lottery', error);
+      }
+    }
+
+    loadKeno();
+    const id = setInterval(loadKeno, 30_000);
+
+    return () => {
+      controller.abort();
+      clearInterval(id);
     };
   }, []);
 
@@ -322,7 +458,6 @@ const LotteryWidget = ({ compact = false, onSeeAll, showHistory = false }: Lotte
     'Mega Millions',
     'Mass Cash Midday',
     'Mass Cash Evening',
-    'Millionaire for Life',
     'Megabucks',
     'Numbers Midday',
     'Numbers Evening',
@@ -334,8 +469,8 @@ const LotteryWidget = ({ compact = false, onSeeAll, showHistory = false }: Lotte
 
   // Today's draws only (for "has it happened today?").
   const todayResults = results.filter((r) => {
-    const d = new Date(r.draw_date);
-    return !isNaN(d.getTime()) && d >= startOfToday;
+    const d = parseLocalDate(r.draw_date);
+    return d !== null && d >= startOfToday;
   });
 
   // Build per-game: latest overall (any time), and latest from today if any.
@@ -362,8 +497,8 @@ const LotteryWidget = ({ compact = false, onSeeAll, showHistory = false }: Lotte
     const gj = bi === -1 ? 99 : bi;
     if (gi !== gj) return gi - gj;
 
-    const da = new Date(a.draw_date).getTime();
-    const db = new Date(b.draw_date).getTime();
+    const da = parseLocalDate(a.draw_date)?.getTime() ?? 0;
+    const db = parseLocalDate(b.draw_date)?.getTime() ?? 0;
     return db - da;
     });
     return copy;
@@ -406,12 +541,53 @@ const LotteryWidget = ({ compact = false, onSeeAll, showHistory = false }: Lotte
           No lottery results available yet. Results will appear after the next draw.
         </div>
       ) : compact ? (
-        // Home tab snapshot: just the top jackpot games.
+        // Home tab snapshot: just the top jackpot games, always including a live Keno card when available.
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {topResults.map((result) => (
-              <LotteryCard key={result.id} result={result} isFromToday={!result.placeholder && isDrawToday(result.draw_date)} />
-            ))}
+            {(() => {
+              const compactResults: LotteryResult[] = [...topResults];
+
+              // If Keno isn't present in DB results but we have live draws, synthesize a Keno card.
+              const hasKenoInTop = compactResults.some((r) => r.game_name === 'Keno');
+              if (!hasKenoInTop && kenoDraws.length > 0) {
+                const latestKeno = kenoDraws[0];
+                compactResults.push({
+                  id: latestKeno.id,
+                  game_name: 'Keno',
+                  draw_date: latestKeno.draw_date,
+                  numbers: latestKeno.numbers,
+                  special_number: null,
+                  multiplier: latestKeno.bonus ? `${latestKeno.bonus}X` : null,
+                  jackpot: null,
+                  official_url: 'https://www.masslottery.com/tools/past-results/keno',
+                  placeholder: false,
+                });
+              }
+
+              return compactResults.map((result) => {
+                const isKeno = result.game_name === 'Keno';
+                const kenoOverride =
+                  isKeno && kenoDraws.length > 0
+                    ? {
+                        ...result,
+                        // Always show the newest Keno draw in compact mode (index 0).
+                        id: kenoDraws[0]?.id ?? result.id,
+                        draw_date: kenoDraws[0]?.draw_date ?? result.draw_date,
+                        numbers: kenoDraws[0]?.numbers ?? result.numbers,
+                        multiplier: kenoDraws[0]?.bonus
+                          ? `${kenoDraws[0]?.bonus}X`
+                          : null,
+                      }
+                    : result;
+                return (
+                  <LotteryCard
+                    key={kenoOverride.id}
+                    result={kenoOverride}
+                    isFromToday={!kenoOverride.placeholder && isDrawToday(kenoOverride.draw_date)}
+                  />
+                );
+              });
+            })()}
           </div>
           {onSeeAll && (
             <button
@@ -431,7 +607,7 @@ const LotteryWidget = ({ compact = false, onSeeAll, showHistory = false }: Lotte
             const todayLatest = latestTodayByGame.get(gameName);
             const overallLatest = latestOverallByGame.get(gameName);
             const existing = todayLatest || overallLatest;
-            const result: LotteryResult =
+            const baseResult: LotteryResult =
               existing ?? {
                 id: `placeholder-${gameName}`,
                 game_name: gameName,
@@ -443,8 +619,46 @@ const LotteryWidget = ({ compact = false, onSeeAll, showHistory = false }: Lotte
                 official_url: 'https://www.masslottery.com/',
                 placeholder: true,
               };
-            const isFromToday = !result.placeholder && todayLatest?.game_name === gameName;
-            return <LotteryCard key={result.id} result={result} isFromToday={isFromToday} />;
+
+            const isKeno = baseResult.game_name === 'Keno';
+            const finalResult: LotteryResult =
+              isKeno && kenoDraws.length > 0
+                ? {
+                    ...baseResult,
+                    id: kenoDraws[selectedKenoIndex]?.id ?? baseResult.id,
+                    draw_date: kenoDraws[selectedKenoIndex]?.draw_date ?? baseResult.draw_date,
+                    numbers: kenoDraws[selectedKenoIndex]?.numbers ?? baseResult.numbers,
+                    multiplier: kenoDraws[selectedKenoIndex]?.bonus
+                      ? `${kenoDraws[selectedKenoIndex]?.bonus}X`
+                      : null,
+                  }
+                : baseResult;
+            const isFromToday = !finalResult.placeholder && todayLatest?.game_name === gameName;
+
+            return (
+              <div key={finalResult.id} className="flex flex-col gap-1">
+                {isKeno && kenoDraws.length > 0 && (
+                  <div className="flex items-center justify-between text-[11px] text-gray-500 mb-1">
+                    <span>Last Keno draws</span>
+                    <select
+                      className="ml-2 px-2 py-1 rounded-md border border-gray-200 bg-white text-[11px]"
+                      value={selectedKenoIndex}
+                      onChange={(e) => setSelectedKenoIndex(Number(e.target.value))}
+                    >
+                      {kenoDraws.slice(1, 6).map((draw, index) => {
+                        const idx = index + 1; // skip current (index 0)
+                        return (
+                          <option key={draw.id} value={idx}>
+                          Draw #{draw.id}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
+                <LotteryCard result={finalResult} isFromToday={isFromToday} />
+              </div>
+            );
           })}
         </div>
       ) : (

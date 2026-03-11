@@ -39,6 +39,8 @@ function loadOrder(): string[] {
   return DEFAULT_ORDER;
 }
 
+type TabId = 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries' | 'city-services';
+
 const HomeTab = ({
   onNavigate,
   newsArticles,
@@ -53,8 +55,8 @@ const HomeTab = ({
   onNewsClick?: () => void;
   weather?: WeatherData | null;
   onLotteryClick?: () => void;
-  activeTab?: 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries';
-  onTabChange?: (tab: 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries') => void;
+  activeTab?: TabId;
+  onTabChange?: (tab: TabId) => void;
 }) => {
   const isMobile = useIsMobile();
   const [widgetOrder, setWidgetOrder] = useState(loadOrder);
@@ -271,7 +273,7 @@ const HomeTab = ({
               {onTabChange && (
                 <select
                   value={activeTab || 'home'}
-                  onChange={(e) => onTabChange(e.target.value as typeof activeTab)}
+                  onChange={(e) => onTabChange(e.target.value as TabId)}
                   className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-semibold shadow-sm"
                 >
                   <option value="home">Home</option>
@@ -280,6 +282,7 @@ const HomeTab = ({
                   <option value="news">News</option>
                   <option value="lottery">Lottery</option>
                   <option value="obituaries">Obituaries</option>
+                  <option value="city-services">City Services</option>
                 </select>
               )}
               <button

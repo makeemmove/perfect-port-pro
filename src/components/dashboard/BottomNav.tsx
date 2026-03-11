@@ -1,6 +1,8 @@
+type BottomTabId = 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries' | 'city-services';
+
 interface BottomNavProps {
-  activeTab: 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries';
-  onTabChange: (tab: 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries') => void;
+  activeTab: BottomTabId;
+  onTabChange: (tab: BottomTabId) => void;
 }
 
 const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
@@ -73,6 +75,17 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
           <path d="M9 11h4" />
           <path d="M9 15h3" />
           <path d="M8 21c0-1.5 1-3 4-3s4 1.5 4 3" />
+        </svg>
+      ),
+    },
+    {
+      id: 'city-services' as const,
+      label: 'City Services',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5" strokeWidth={2}>
+          <rect x="3" y="8" width="7" height="13" rx="1" />
+          <rect x="14" y="3" width="7" height="18" rx="1" />
+          <path d="M5 13h3M16 8h3M16 12h3M16 16h3" />
         </svg>
       ),
     },
