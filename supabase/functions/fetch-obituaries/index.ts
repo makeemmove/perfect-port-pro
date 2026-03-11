@@ -13,6 +13,9 @@ interface ObituaryEntry {
   obituary_url: string;
   source: string;
   city: string;
+  birth_date?: string | null;
+  article_bio?: string | null;
+  picture_url?: string | null;
 }
 
 const SOURCES = [
@@ -153,6 +156,133 @@ async function fetchRSS(url: string, sourceName: string): Promise<ObituaryEntry[
   return entries;
 }
 
+function extractMetaContent(html: string, key: string): string | null {
+  const re = new RegExp(`<meta[^>]+property=["']${key}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i');
+  const m = html.match(re);
+  return m?.[1]?.trim() || null;
+}
+
+function extractNameFromLD(ld: any): string | null {
+  const tryObj = (o: any): string | null => {
+    if (!o || typeof o !== 'object') return null;
+    if (typeof o.name === 'string' && o.name.trim().length > 2) return o.name.trim();
+    return null;
+  };
+  if (Array.isArray(ld)) {
+    for (const it of ld) {
+      const n = extractNameFromLD(it);
+      if (n) return n;
+    }
+  }
+  const direct = tryObj(ld);
+  if (direct) return direct;
+  const graph = (ld as any)['@graph'];
+  if (Array.isArray(graph)) {
+    for (const it of graph) {
+      const n = tryObj(it);
+      if (n) return n;
+    }
+  }
+  return null;
+}
+
+function extractDatesFromLD(ld: any): { birth: string | null; death: string | null } {
+  const out = { birth: null as string | null, death: null as string | null };
+  const scan = (o: any) => {
+    if (!o || typeof o !== 'object') return;
+    const b = o.birthDate;
+    const d = o.deathDate;
+    if (!out.birth && typeof b === 'string') out.birth = b;
+    if (!out.death && typeof d === 'string') out.death = d;
+    const graph = o['@graph'];
+    if (Array.isArray(graph)) {
+      for (const it of graph) scan(it);
+    }
+  };
+  if (Array.isArray(ld)) {
+    for (const it of ld) scan(it);
+  } else {
+    scan(ld);
+  }
+  return out;
+}
+
+function extractJsonLd(html: string): any[] {
+  const blocks: any[] = [];
+  const re = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null) {
+    const raw = (m[1] || '').trim();
+    if (!raw) continue;
+    try {
+      blocks.push(JSON.parse(raw));
+    } catch {
+      // Some sites embed invalid JSON-LD; ignore.
+    }
+  }
+  return blocks;
+}
+
+function toIsoDateMaybe(s: string | null): string | null {
+  if (!s) return null;
+  // Prefer YYYY-MM-DD
+  const m = s.match(/\d{4}-\d{2}-\d{2}/);
+  if (m) return m[0];
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+  return null;
+}
+
+function cleanSnippet(text: string): string {
+  return text
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function enrichFromPage(entry: ObituaryEntry): Promise<ObituaryEntry> {
+  try {
+    const pageRes = await fetch(entry.obituary_url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; FRConnect/1.0)" },
+      redirect: "follow",
+    });
+    if (!pageRes.ok) return entry;
+
+    const html = await pageRes.text();
+
+    // Best-effort bio from OG description / meta description
+    const ogDesc = extractMetaContent(html, 'og:description');
+    const metaDesc = (() => {
+      const m = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["'][^>]*>/i);
+      return m?.[1]?.trim() || null;
+    })();
+    const snippet = cleanSnippet(ogDesc || metaDesc || '');
+    if (snippet && snippet.length > 20) {
+      entry.article_bio = snippet.slice(0, 600);
+    }
+
+    // Photo: og:image is standard on Legacy.com and many funeral home pages
+    const ogImage = extractMetaContent(html, 'og:image');
+    if (ogImage && ogImage.startsWith('http')) {
+      entry.picture_url = ogImage;
+    }
+
+    // Birth/death dates from JSON-LD if present
+    const lds = extractJsonLd(html);
+    for (const ld of lds) {
+      const dates = extractDatesFromLD(ld);
+      const birthIso = toIsoDateMaybe(dates.birth);
+      const deathIso = toIsoDateMaybe(dates.death);
+      if (!entry.birth_date && birthIso) entry.birth_date = birthIso;
+      if (!entry.date_of_passing && deathIso) entry.date_of_passing = deathIso;
+      if (entry.birth_date && entry.date_of_passing) break;
+    }
+  } catch (e) {
+    console.error(`Enrichment failed for ${entry.full_name}:`, e);
+  }
+  return entry;
+}
+
 // Use AI to extract age and date from obituary page content
 async function enrichWithAI(entries: ObituaryEntry[]): Promise<ObituaryEntry[]> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -275,17 +405,43 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${entries.length} Fall River obituaries`);
 
-    // Enrich with AI for missing age/date
-    entries = await enrichWithAI(entries);
+    // Current week (Sunday–Saturday) in local time for "this week" filter
+    const now = new Date();
+    const day = now.getDay();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - day);
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const weekStartIso = weekStart.toISOString().slice(0, 10);
+    const weekEndIso = weekEnd.toISOString().slice(0, 10);
 
-    if (entries.length > 0) {
+    // Only keep entries with date_of_passing in the current week
+    const entriesThisWeek = entries.filter((e) => {
+      if (!e.date_of_passing) return false;
+      return e.date_of_passing >= weekStartIso && e.date_of_passing <= weekEndIso;
+    });
+    console.log(`Keeping ${entriesThisWeek.length} obituaries for this week (${weekStartIso}–${weekEndIso})`);
+
+    // Best-effort enrichment for newest entries (keep small to avoid timeouts)
+    const newest = entriesThisWeek.slice(0, 10);
+    const enrichedNewest = await Promise.all(newest.map(enrichFromPage));
+    const enrichedEntries = [...enrichedNewest, ...entriesThisWeek.slice(10)];
+
+    // Enrich with AI for missing age/date
+    const toUpsert = await enrichWithAI(enrichedEntries);
+
+    if (toUpsert.length > 0) {
       const { error } = await supabase
         .from("local_obituaries")
         .upsert(
-          entries.map((e) => ({
+          toUpsert.map((e) => ({
             full_name: e.full_name,
             age: e.age,
             date_of_passing: e.date_of_passing,
+            birth_date: e.birth_date ?? null,
+            article_bio: e.article_bio ?? null,
+            picture_url: e.picture_url ?? null,
             obituary_url: e.obituary_url,
             source: e.source,
             city: e.city,
@@ -296,15 +452,38 @@ Deno.serve(async (req) => {
       if (error) console.error("Upsert error:", error);
     }
 
+    // Remove everyone except obituaries for this week: delete all not in [weekStartIso, weekEndIso]
+    const { error: deleteBefore } = await supabase
+      .from("local_obituaries")
+      .delete()
+      .eq("city", "Fall River")
+      .lt("date_of_passing", weekStartIso);
+    if (deleteBefore) console.error("Delete before week error:", deleteBefore);
+
+    const { error: deleteAfter } = await supabase
+      .from("local_obituaries")
+      .delete()
+      .eq("city", "Fall River")
+      .gt("date_of_passing", weekEndIso);
+    if (deleteAfter) console.error("Delete after week error:", deleteAfter);
+
+    const { error: deleteNoDate } = await supabase
+      .from("local_obituaries")
+      .delete()
+      .eq("city", "Fall River")
+      .is("date_of_passing", null);
+    if (deleteNoDate) console.error("Delete no-date error:", deleteNoDate);
+
     const { data: latest } = await supabase
       .from("local_obituaries")
       .select("*")
       .eq("city", "Fall River")
+      .order("date_of_passing", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(20);
+      .limit(100);
 
     return new Response(
-      JSON.stringify({ obituaries: latest || [], fetched: entries.length }),
+      JSON.stringify({ obituaries: latest || [], fetched: entriesThisWeek.length }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

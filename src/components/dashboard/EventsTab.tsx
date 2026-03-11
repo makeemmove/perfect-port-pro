@@ -53,7 +53,7 @@ function groupByMonth(events: CityEvent[]): { month: string; events: CityEvent[]
   }));
 }
 
-const EventsTab = () => {
+const EventsTab = ({ onBackToHome }: { onBackToHome?: () => void }) => {
   const [activeSub, setActiveSub] = useState('All');
   const [selectedEvent, setSelectedEvent] = useState<CityEvent | null>(null);
   const filtered = activeSub === 'All'
@@ -67,6 +67,14 @@ const EventsTab = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
+          {onBackToHome && (
+            <button
+              onClick={onBackToHome}
+              className="text-[11px] font-semibold text-muted-foreground hover:text-foreground mb-1"
+            >
+              ← Back to Home
+            </button>
+          )}
           <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Events</h1>
           <div className="text-xs text-muted-foreground mt-0.5">Fall River 2026 · {filtered.length} upcoming</div>
         </div>

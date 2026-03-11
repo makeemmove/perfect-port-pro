@@ -8,6 +8,7 @@ interface Obituary {
   full_name: string;
   age: number | null;
   date_of_passing: string | null;
+  birth_date?: string | null;
   obituary_url: string;
   source: string;
   city: string;
@@ -25,7 +26,32 @@ function formatDate(dateStr: string | null): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function getYear(dateStr: string | null | undefined): string | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return String(d.getFullYear());
+}
+
+function getLifeDates(obit: Obituary): string | null {
+  const birthYear = getYear(obit.birth_date);
+  const passingYear = getYear(obit.date_of_passing);
+
+  if (birthYear && passingYear) return `${birthYear} – ${passingYear}`;
+  if (!birthYear && passingYear) return `† ${passingYear}`;
+  if (birthYear && !passingYear) return `${birthYear} –`;
+
+  // Fallback: if we at least have a date_of_passing string, show a formatted date
+  if (obit.date_of_passing) {
+    const full = formatDate(obit.date_of_passing);
+    if (full) return `† ${full}`;
+  }
+
+  return null;
+}
+
 function ObituaryRow({ obit }: { obit: Obituary }) {
+  const lifeDates = getLifeDates(obit);
   return (
     <a
       href={obit.obituary_url}
@@ -35,9 +61,16 @@ function ObituaryRow({ obit }: { obit: Obituary }) {
       style={{ borderBottom: '1px solid #f3f4f6' }}
     >
       <div className="min-w-0 flex-1">
-        <h4 className="text-[14px] font-semibold truncate" style={{ color: '#111827' }}>
-          {obit.full_name}
-        </h4>
+        <div className="flex items-baseline justify-between gap-3">
+          <h4 className="text-[14px] font-semibold truncate" style={{ color: '#111827' }}>
+            {obit.full_name}
+          </h4>
+          {lifeDates && (
+            <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: '#9ca3af' }}>
+              {lifeDates}
+            </span>
+          )}
+        </div>
         <p className="text-[11px] mt-0.5" style={{ color: '#9ca3af' }}>
           {obit.age && `Age ${obit.age}`}
           {obit.age && obit.date_of_passing && ' · '}
@@ -60,10 +93,22 @@ const ObituariesWidget = ({ compact = false, onSeeAll }: ObituariesWidgetProps) 
   useEffect(() => {
     async function load() {
       setIsLoading(true);
+      const now = new Date();
+      const day = now.getDay();
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - day);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      const weekStartIso = weekStart.toISOString().slice(0, 10);
+      const weekEndIso = weekEnd.toISOString().slice(0, 10);
+
       const { data, error } = await supabase
         .from('local_obituaries')
         .select('*')
         .eq('city', 'Fall River')
+        .gte('date_of_passing', weekStartIso)
+        .lte('date_of_passing', weekEndIso)
+        .order('date_of_passing', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -76,6 +121,9 @@ const ObituariesWidget = ({ compact = false, onSeeAll }: ObituariesWidgetProps) 
             .from('local_obituaries')
             .select('*')
             .eq('city', 'Fall River')
+            .gte('date_of_passing', weekStartIso)
+            .lte('date_of_passing', weekEndIso)
+            .order('date_of_passing', { ascending: false })
             .order('created_at', { ascending: false })
             .limit(10);
           if (fresh) setObituaries(fresh as Obituary[]);
@@ -92,8 +140,20 @@ const ObituariesWidget = ({ compact = false, onSeeAll }: ObituariesWidgetProps) 
     const channel = supabase
       .channel('obituary-updates')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'local_obituaries' }, () => {
+        const now = new Date();
+        const day = now.getDay();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - day);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        const weekStartIso = weekStart.toISOString().slice(0, 10);
+        const weekEndIso = weekEnd.toISOString().slice(0, 10);
         supabase.from('local_obituaries').select('*').eq('city', 'Fall River')
-          .order('created_at', { ascending: false }).limit(10)
+          .gte('date_of_passing', weekStartIso)
+          .lte('date_of_passing', weekEndIso)
+          .order('date_of_passing', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(10)
           .then(({ data }) => {
             if (data) setObituaries(data as Obituary[]);
           });
@@ -123,7 +183,7 @@ const ObituariesWidget = ({ compact = false, onSeeAll }: ObituariesWidgetProps) 
         </div>
       ) : obituaries.length === 0 ? (
         <div className="text-center py-8 text-[13px] text-muted-foreground">
-          No recent obituaries found. This section updates every 2 hours.
+          No recent obituaries found. This section updates daily.
         </div>
       ) : (
         <>
@@ -154,7 +214,15 @@ const ObituariesWidget = ({ compact = false, onSeeAll }: ObituariesWidgetProps) 
       )}
 
       <div className="text-[10px] text-muted-foreground/50 mt-3 text-center">
-        Updates every 2 hours · Fall River, MA only
+        Updates daily · Fall River, MA only ·{' '}
+        <a
+          href="https://www.legacy.com/us/obituaries/local/massachusetts/fall-river"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
+          View official listings
+        </a>
       </div>
     </div>
   );
