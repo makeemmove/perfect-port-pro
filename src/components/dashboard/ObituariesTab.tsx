@@ -296,7 +296,7 @@ const ObituariesTab = ({ onBackToHome }: { onBackToHome?: () => void }) => {
         const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(path);
         pictureUrl = urlData.publicUrl;
       }
-      const { error } = await supabase.from('tribute_submissions').insert({
+      const { error } = await (supabase as any).from('tribute_submissions').insert({
         full_name: name,
         birth_date: birthDate || null,
         passing_date: passingDate || null,
