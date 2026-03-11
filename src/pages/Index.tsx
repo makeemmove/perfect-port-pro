@@ -7,12 +7,15 @@ import EventsTab from '@/components/dashboard/EventsTab';
 import NewsTab from '@/components/dashboard/NewsTab';
 import LotteryTab from '@/components/dashboard/CommunityTab';
 import ObituariesTab from '@/components/dashboard/ObituariesTab';
+import CityServicesTab from '@/components/dashboard/CityServicesTab';
 import { useNews } from '@/hooks/useNews';
 import { fetchWeather, WeatherData } from '@/data/weather';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+type TabId = 'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries' | 'city-services';
+
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<'home' | 'eats' | 'events' | 'news' | 'lottery' | 'obituaries'>('home');
+  const [activeTab, setActiveTab] = useState<TabId>('home');
   const { articles, isLoading, lastFetched, refetch } = useNews();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const isMobile = useIsMobile();
@@ -27,7 +30,7 @@ const Index = () => {
     <div className="flex flex-col h-[100dvh]">
       <Ticker weather={weather} />
       <div className="flex-1 overflow-hidden relative">
-        {(['home', 'eats', 'events', 'news', 'lottery', 'obituaries'] as const).map(tab => (
+        {(['home', 'eats', 'events', 'news', 'lottery', 'obituaries', 'city-services'] as const).map(tab => (
           <div
             key={tab}
             className={`absolute inset-0 overflow-y-auto ${activeTab === tab ? 'block' : 'hidden'}`}
@@ -58,6 +61,7 @@ const Index = () => {
               )}
               {tab === 'lottery' && <LotteryTab onBackToHome={() => setActiveTab('home')} />}
               {tab === 'obituaries' && <ObituariesTab onBackToHome={() => setActiveTab('home')} />}
+              {tab === 'city-services' && <CityServicesTab onBackToHome={() => setActiveTab('home')} />}
             </div>
           </div>
         ))}
